@@ -124,10 +124,14 @@
             }
 
             var interactionId = msg.request.data.interactionId;
+            var scenarioIdInt = msg.request.data.scenarioId;
             if ((msg.request.data.state === ContactCanvas.Commons.interactionStates.Alerting || msg.request.data.state === ContactCanvas.Commons.interactionStates.Connected) &&
-                !interactions[pluginId].hasOwnProperty(interactionId)) {
+                !interactions[pluginId].hasOwnProperty(interactionId)
+                && !interactions[pluginId].hasOwnProperty(scenarioIdInt)
+            ) {
 
                 interactions[pluginId][interactionId] = true;
+                interactions[pluginId][scenarioIdInt] = true;
                 if (screenpopControlOn && msg.request.data.hasOwnProperty("details")) {
                     var details = ContactCanvas.Commons.RecordItem.fromJSON(msg.request.data.details);
                     if (details != null) {
