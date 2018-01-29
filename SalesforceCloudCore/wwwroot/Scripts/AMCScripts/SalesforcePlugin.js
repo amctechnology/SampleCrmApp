@@ -37,7 +37,7 @@
 
     var maxRecordsDefault = 50;
 
-    var interactions = {};
+    var scenarioInteractionMappings = {};
 
     var searchLayout = null;
     var screenpopControlOn = true;
@@ -119,19 +119,21 @@
     function onInteraction(msg) {
         try {
             var pluginId = msg.request.metadata.pluginId;
-            if (!interactions.hasOwnProperty(pluginId)) {
-                interactions[pluginId] = {};
-            }
 
             var interactionId = msg.request.data.interactionId;
             var scenarioIdInt = msg.request.data.scenarioId;
-            if ((msg.request.data.state === ContactCanvas.Commons.interactionStates.Alerting || msg.request.data.state === ContactCanvas.Commons.interactionStates.Connected) &&
-                !interactions[pluginId].hasOwnProperty(interactionId)
-                && !interactions[pluginId].hasOwnProperty(scenarioIdInt)
-            ) {
+            var isNewScenarioId = false;
 
-                interactions[pluginId][interactionId] = true;
-                interactions[pluginId][scenarioIdInt] = true;
+            if (!scenarioInteractionMappings.hasOwnProperty(scenarioIdInt)) {
+                scenarioInteractionMappings[scenarioIdInt] = {};
+                isNewScenarioId = true;
+            }
+            scenarioInteractionMappings[scenarioIdInt][interactionId] = true;
+
+            if ((msg.request.data.state === ContactCanvas.Commons.interactionStates.Alerting || msg.request.data.state === ContactCanvas.Commons.interactionStates.Connected)
+               && Object.keys(scenarioInteractionMappings).length < 2
+               && isNewScenarioId
+            ) {
                 if (screenpopControlOn && msg.request.data.hasOwnProperty("details")) {
                     var details = ContactCanvas.Commons.RecordItem.fromJSON(msg.request.data.details);
                     if (details != null) {
@@ -197,7 +199,11 @@
                     }
                 }
             } else if (msg.request.data.state === ContactCanvas.Commons.interactionStates.Disconnected) {
-                delete interactions[pluginId][interactionId];
+                delete scenarioInteractionMappings[scenarioIdInt][interactionId]
+                if (Object.keys(scenarioInteractionMappings[scenarioIdInt]).length == 0) {
+                    delete scenarioInteractionMappings[scenarioIdInt];
+
+                }
             }
             msg.response = {
                 data: {
