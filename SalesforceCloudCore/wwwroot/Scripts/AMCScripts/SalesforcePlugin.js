@@ -124,18 +124,14 @@
             var scenarioIdInt = msg.request.data.scenarioId;
             var isNewScenarioId = false;
 
-            if (!scenarioInteractionMappings.hasOwnProperty(pluginId)) {
-                scenarioInteractionMappings[pluginId] = {};
-            }
-
-            if (!scenarioInteractionMappings[pluginId].hasOwnProperty(scenarioIdInt)) {
-                scenarioInteractionMappings[pluginId][scenarioIdInt] = {};
+            if (!scenarioInteractionMappings.hasOwnProperty(scenarioIdInt)) {
+                scenarioInteractionMappings[scenarioIdInt] = {};
                 isNewScenarioId = true;
             }
-            scenarioInteractionMappings[pluginId][scenarioIdInt][interactionId] = true;
+            scenarioInteractionMappings[scenarioIdInt][interactionId] = true;
 
             if ((msg.request.data.state === ContactCanvas.Commons.interactionStates.Alerting || msg.request.data.state === ContactCanvas.Commons.interactionStates.Connected)
-                && Object.keys(scenarioInteractionMappings[pluginId]).length < 2
+                && Object.keys(scenarioInteractionMappings).length < 2
                && isNewScenarioId
             ) {
                 if (screenpopControlOn && msg.request.data.hasOwnProperty("details")) {
@@ -203,9 +199,9 @@
                     }
                 }
             } else if (msg.request.data.state === ContactCanvas.Commons.interactionStates.Disconnected) {
-                delete scenarioInteractionMappings[pluginId][scenarioIdInt][interactionId]
-                if (Object.keys(scenarioInteractionMappings[pluginId][scenarioIdInt]).length == 0) {
-                    delete scenarioInteractionMappings[pluginId][scenarioIdInt];
+                delete scenarioInteractionMappings[scenarioIdInt][interactionId]
+                if (Object.keys(scenarioInteractionMappings[scenarioIdInt]).length == 0) {
+                    delete scenarioInteractionMappings[scenarioIdInt];
 
                 }
             }
