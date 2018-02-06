@@ -464,12 +464,14 @@
 
     function cadSearch(channel, direction, cadValue, objectFields, objectType, maxRecords) {
         return new Promise((resolve, reject) => {
+            var requestId = getSequenceID();
             var request = {
                 operation: salesforceBridgeAPIMethodNames.CAD_SEARCH,
                 interactionDirection: direction,
                 cadValue: cadValue,
                 objectFields: objectFields,
                 maxRecords: maxRecords,
+                requestId: requestId
             };
             if (direction == ContactCanvasApplicationAPI.InteractionDirectionTypes.Inbound) {
                 request.interactionDirection = "Inbound";
