@@ -1,4 +1,6 @@
 ﻿(function (AMCSalesforcePlugin) {
+
+    var Config = {};
     var userID = '';
     var lstTranscript = {};
     var previousStatus = '';
@@ -109,7 +111,9 @@
         // });
         ContactCanvasApplicationAPI.registerOnInteraction(onInteraction);
 
-        ContactCanvasApplicationAPI.initializeComplete();
+        ContactCanvasApplicationAPI.initializeComplete().then((config) => {
+            maxRecordsDefault = parseInt(config.variables.maxRecordsDefault);
+        });
     });
 
     function getSequenceID() { return sequenceId++; }
