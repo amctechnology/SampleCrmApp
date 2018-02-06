@@ -1,4 +1,6 @@
 ﻿(function (AMCSalesforcePlugin) {
+
+    var Config = {};
     var userID = '';
     var lstTranscript = {};
     var previousStatus = '';
@@ -108,7 +110,10 @@
         });
         ContactCanvas.Application.registerOnInteraction(ContactCanvas.Commons.getSequenceID(), onInteraction);
 
-        ContactCanvas.Application.initializationComplete(ContactCanvas.Commons.getSequenceID(), {}, null);
+        ContactCanvas.Application.initializationComplete(ContactCanvas.Commons.getSequenceID(), {}, function (data) {
+            Config = data.response.data.config;
+            maxRecordsDefault = parseInt(Config.variables.maxRecordsDefault);
+        });
     });
 
     function LoadScriptComplete(msg)
