@@ -119,24 +119,20 @@
         getUserInfo();
     }
 
-    function onInteraction(pluginId, interaction) {
+    function onInteraction(interaction) {
         try {
             var interactionId = interaction.interactionId;
             var scenarioIdInt = interaction.scenarioId;
             var isNewScenarioId = false;
 
-            if (!scenarioInteractionMappings.hasOwnProperty(pluginId)) {
-                scenarioInteractionMappings[pluginId] = {};
-            }
-
-            if (!scenarioInteractionMappings[pluginId].hasOwnProperty(scenarioIdInt)) {
-                scenarioInteractionMappings[pluginId][scenarioIdInt] = {};
+            if (!scenarioInteractionMappings.hasOwnProperty(scenarioIdInt)) {
+                scenarioInteractionMappings[scenarioIdInt] = {};
                 isNewScenarioId = true;
             }
-            scenarioInteractionMappings[pluginId][scenarioIdInt][interactionId] = true;
+            scenarioInteractionMappings[scenarioIdInt][interactionId] = true;
 
             if ((interaction.state === ContactCanvasApplicationAPI.InteractionStates.Alerting || interaction.state === ContactCanvasApplicationAPI.InteractionStates.Connected)
-                && Object.keys(scenarioInteractionMappings[pluginId]).length < 2
+                && Object.keys(scenarioInteractionMappings).length < 2
                && isNewScenarioId
             ) {
                 if (screenpopControlOn && interaction.hasOwnProperty("details")) {
@@ -201,9 +197,9 @@
                     }
                 }
             } else if (interaction.state === ContactCanvasApplicationAPI.InteractionStates.Disconnected) {
-                delete scenarioInteractionMappings[pluginId][scenarioIdInt][interactionId]
-                if (Object.keys(scenarioInteractionMappings[pluginId][scenarioIdInt]).length == 0) {
-                    delete scenarioInteractionMappings[pluginId][scenarioIdInt];
+                delete scenarioInteractionMappings[scenarioIdInt][interactionId]
+                if (Object.keys(scenarioInteractionMappings[scenarioIdInt]).length == 0) {
+                    delete scenarioInteractionMappings[scenarioIdInt];
                 }
             }
         }
