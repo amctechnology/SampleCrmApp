@@ -1,4 +1,6 @@
 ﻿(function (AMCSalesforcePlugin) {
+
+    var Config = {};
     var userID = '';
     var lstTranscript = {};
     var previousStatus = '';
@@ -63,65 +65,68 @@
         USER_INFO: "SalesforceBridgeUSER_INFO",
     };
 
+    var requests = {};// requestId -> callback
+    var sequenceId = 0;
+
     $(document).ready(function () {
         if (window.addEventListener) {
             window.addEventListener("message", listener, false);
         } else {
             window.attachEvent("onmessage", listener);
         }
-        ContactCanvas.Application.loadScript(ContactCanvas.Commons.getSequenceID(), {
-            urls: [
+        ContactCanvasApplicationAPI.loadBridgeScripts([
                 "https://c.na1.visual.force.com/support/api/36.0/interaction.js",
                 "https://na15.salesforce.com/support/console/35.0/integration.js",
                 "https://gs0.lightning.force.com/support/api/38.0/lightning/opencti_min.js",
                 location.origin + "/Scripts/AMCScripts/SalesforceBridgeAPI.js",
-            ]
-        }, LoadScriptComplete);
+            ]).then(LoadScriptComplete);
         var data = {};
         data.pluginIconPath = window.location.origin + window.location.pathname + "/Images/salesforce.png";
-        ContactCanvas.Application.registerScreenPop(ContactCanvas.Commons.getSequenceID(), screenPop);
-        ContactCanvas.Application.registerGlobalSearch(ContactCanvas.Commons.getSequenceID(), search);
-        ContactCanvas.Application.registerGlobalSearchAndScreenpop(ContactCanvas.Commons.getSequenceID(), searchAndScreenpop);
-        ContactCanvas.Application.registerSearch(ContactCanvas.Commons.getSequenceID(), cadSearch);
-        ContactCanvas.Application.registerEnableClickToDial(ContactCanvas.Commons.getSequenceID(), enableClickToDial);
-        ContactCanvas.Application.registerDisableClickToDial(ContactCanvas.Commons.getSequenceID(), disableClickToDial);
-        //ContactCanvas.Application.registerClickToDial(clickToDial);
-        ContactCanvas.Application.registerSetSoftPhoneHeight(ContactCanvas.Commons.getSequenceID(), setSoftPhoneHeight);
-        ContactCanvas.Application.registerSetSoftPhoneWidth(ContactCanvas.Commons.getSequenceID(), setSoftPhoneWidth);
-        ContactCanvas.Application.registerGetSearchLayout(ContactCanvas.Commons.getSequenceID(), getSoftPhoneLayout);
-        ContactCanvas.Application.registerGetApplicationSettings(ContactCanvas.Commons.getSequenceID(), getApplicationSettings);
-        ContactCanvas.Application.registerGetPageInfo(ContactCanvas.Commons.getSequenceID(), getPageInfo);
-        ContactCanvas.Application.registerSaveActivity(ContactCanvas.Commons.getSequenceID(), saveActivity);
-        ContactCanvas.Application.registerIsToolbarVisible(ContactCanvas.Commons.getSequenceID(), isVisible);
-        ContactCanvas.Application.registerSetToolbarVisible(ContactCanvas.Commons.getSequenceID(), setVisible);
-        ContactCanvas.Application.addPluginImage(ContactCanvas.Commons.getSequenceID(), data, null);
+        ContactCanvasApplicationAPI.registerScreenpop(screenPop);
+        ContactCanvasApplicationAPI.registerGlobalSearch(search);
+        ContactCanvasApplicationAPI.registerGlobalSearchAndScreenpop(searchAndScreenpop);
+        ContactCanvasApplicationAPI.registerSearch(cadSearch);
+        ContactCanvasApplicationAPI.registerEnableClickToDial(enableClickToDial);
+        ContactCanvasApplicationAPI.registerSetSoftphoneHeight(setSoftPhoneHeight);
+        ContactCanvasApplicationAPI.registerSetSoftphoneWidth(setSoftPhoneWidth);
+        ContactCanvasApplicationAPI.registerGetSearchLayout(getSoftPhoneLayout);
+        // ContactCanvasApplicationAPI.registerGetApplicationSettings(getApplicationSettings);
+        ContactCanvasApplicationAPI.registerGetPageInfo(getPageInfo);
+        ContactCanvasApplicationAPI.registerSaveActivity(saveActivity);
+        ContactCanvasApplicationAPI.registerIsToolbarVisible(isVisible);
+        // ContactCanvas.Application.registerSetToolbarVisible(ContactCanvas.Commons.getSequenceID(), setVisible);
+        // ContactCanvas.Application.addPluginImage(ContactCanvas.Commons.getSequenceID(), data, null);
 
-        ContactCanvas.Application.registerScreenpopControlChanged(ContactCanvas.Commons.getSequenceID(), function (msg) {
-            if (typeof msg.request.data.screenpopControlOn == 'boolean') {
-                screenpopControlOn = msg.request.data.screenpopControlOn;
+        ContactCanvasApplicationAPI.registerScreenpopControlChanged(function (screenPopEnabled) {
+            if (typeof screenPopEnabled == 'boolean') {
+                screenpopControlOn = screenPopEnabled;
+                return Promise.resolve();
             }
+            return Promise.reject('Invalid parameters!');
         });
-        ContactCanvas.Application.isScreenpopControlOn(ContactCanvas.Commons.getSequenceID(), function (msg) {
-            if (typeof msg.response.data.screenpopControlOn == 'boolean') {
-                screenpopControlOn = msg.response.data.screenpopControlOn;
-            }
-        });
-        ContactCanvas.Application.registerOnInteraction(ContactCanvas.Commons.getSequenceID(), onInteraction);
+        // ContactCanvas.Application.isScreenpopControlOn(function (msg) {
+        //     if (typeof msg.response.data.screenpopControlOn == 'boolean') {
+        //         screenpopControlOn = msg.response.data.screenpopControlOn;
+        //     }
+        // });
+        ContactCanvasApplicationAPI.registerOnInteraction(onInteraction);
 
-        ContactCanvas.Application.initializationComplete(ContactCanvas.Commons.getSequenceID(), {}, null);
+        ContactCanvasApplicationAPI.initializeComplete().then((config) => {
+            maxRecordsDefault = parseInt(config.variables.maxRecordsDefault);
+        });
     });
 
-    function LoadScriptComplete(msg)
+    function getSequenceID() { return sequenceId++; }
+
+    function LoadScriptComplete()
     {
         getUserInfo();
     }
 
-    function onInteraction(msg) {
+    function onInteraction(interaction) {
         try {
-            var pluginId = msg.request.metadata.pluginId;
-
-            var interactionId = msg.request.data.interactionId;
-            var scenarioIdInt = msg.request.data.scenarioId;
+            var interactionId = interaction.interactionId;
+            var scenarioIdInt = interaction.scenarioId;
             var isNewScenarioId = false;
 
             if (!scenarioInteractionMappings.hasOwnProperty(scenarioIdInt)) {
@@ -130,12 +135,12 @@
             }
             scenarioInteractionMappings[scenarioIdInt][interactionId] = true;
 
-            if ((msg.request.data.state === ContactCanvas.Commons.interactionStates.Alerting || msg.request.data.state === ContactCanvas.Commons.interactionStates.Connected)
+            if ((interaction.state === ContactCanvasApplicationAPI.InteractionStates.Alerting || interaction.state === ContactCanvasApplicationAPI.InteractionStates.Connected)
                 && Object.keys(scenarioInteractionMappings).length < 2
                && isNewScenarioId
             ) {
-                if (screenpopControlOn && msg.request.data.hasOwnProperty("details")) {
-                    var details = ContactCanvas.Commons.RecordItem.fromJSON(msg.request.data.details);
+                if (screenpopControlOn && interaction.hasOwnProperty("details")) {
+                    var details = ContactCanvasApplicationAPI.RecordItem.fromJSON(interaction.details);
                     if (details != null) {
                         if (details.getMetadata().hasOwnProperty("Id") && details.getMetadata().Id && details.getMetadata().hasOwnProperty("Type") && details.getMetadata().Type) {
                             var request = {
@@ -143,7 +148,6 @@
                                 message: "screenPop",
                                 objectId: details.getMetadata().Id,
                                 objectType: details.getMetadata().Type,
-                                //interactionDirection: msg.request.data.interactionDirection || 'Inbound',
                                 interactionDirection: 'Inbound',
                             }
                             window.parent.postMessage(JSON.stringify(request), "*");
@@ -152,8 +156,7 @@
                             var request = {
                                 operation: salesforceBridgeAPIMethodNames.SEARCH_AND_SCREEN_POP,
                                 screenpop: screenpopControlOn,
-                                queryString: JSON.parse(details.getPhone() || details.getOtherPhone() || details.getHomePhone() || details.getMobile()).value,
-                                //interactionDirection: msg.request.data.interactionDirection || 'Inbound',
+                                queryString: (details.getPhone() || details.getOtherPhone() || details.getHomePhone() || details.getMobile()).Value,
                                 interactionDirection: 'Inbound',
                             };
                             window.parent.postMessage(JSON.stringify(request), "*");
@@ -163,31 +166,30 @@
                             var filterKey = "";
 
                             if (details.getAccountName()) {
-                                var field = JSON.parse(details.getAccountName());
-                                cadValue = field.value;
-                                filterKey = field.fieldName;
+                                var field = details.getAccountName();
+                                cadValue = field.Value;
+                                filterKey = field.DevName;
                             } else if (details.getEmail()) {
-                                var field = JSON.parse(details.getEmail());
-                                cadValue = field.value;
-                                filterKey = field.fieldName;
+                                var field = details.getEmail();
+                                cadValue = field.Value;
+                                filterKey = field.DevName;
                             } else if (details.getLastName()) {
-                                var field = JSON.parse(details.getLastName());
-                                cadValue = field.value;
-                                filterKey = field.fieldName;
+                                var field = details.getLastName();
+                                cadValue = field.Value;
+                                filterKey = field.DevName;
                             } else {
-                                for (var key in details.entity) {
-                                    var field = JSON.parse(details.entity[key]);
-                                    cadValue = field.value;
-                                    filterKey = field.fieldName;
+                                for (var key in details.fields) {
+                                    var field = details.fields[key];
+                                    cadValue = field.Value;
+                                    filterKey = field.DevName;
                                     break;
                                 }
                             }
 
+
                             if (cadValue && filterKey) {
-                                var data = msg.request.data;
                                 var request = {
                                     operation: salesforceBridgeAPIMethodNames.CAD_SEARCH_AND_SCREEN_POP,
-                                    //interactionDirection: msg.request.data.interactionDirection || 'Inbound',
                                     interactionDirection: 'Inbound',
                                     cadValue: cadValue,
                                     objectType: details.getMetadata().Type,
@@ -198,41 +200,43 @@
                         }
                     }
                 }
-            } else if (msg.request.data.state === ContactCanvas.Commons.interactionStates.Disconnected) {
+            } else if (interaction.state === ContactCanvasApplicationAPI.InteractionStates.Disconnected) {
                 delete scenarioInteractionMappings[scenarioIdInt][interactionId]
                 if (Object.keys(scenarioInteractionMappings[scenarioIdInt]).length == 0) {
                     delete scenarioInteractionMappings[scenarioIdInt];
-
                 }
             }
-            msg.response = {
-                data: {
-                    success: true,
-                }
-            };
-            ContactCanvas.Application.onInteractionResponse(ContactCanvas.Commons.getSequenceID(), msg);
         }
         catch (e) {
-            msg.response = {
-                data: {
-                    success: false,
-                    errors: ["Error executing request!"],
-                }
-            };
-            ContactCanvas.Application.onInteractionResponse(ContactCanvas.Commons.getSequenceID(), msg);
+            return Promise.reject('Error=' + e.toString());
         }
+        return Promise.resolve();
     }    
 
-    function enableClickToDial(msg) {
-        try {
-            var request = {
-                operation: salesforceBridgeAPIMethodNames.ENB_CLICK_TO_DIAL,
-                msg: msg
+    function enableClickToDial(enabled) {
+        return new Promise((resolve, reject) => {
+            var requestId = getSequenceID();
+            var request = { requestId: requestId };
+            if(enabled) request['operation'] = salesforceBridgeAPIMethodNames.ENB_CLICK_TO_DIAL;
+            else request['operation'] = salesforceBridgeAPIMethodNames.DSB_CLICK_TO_DIAL;
+
+            var timeout = setTimeout(() => {
+                delete requests[requestId];
+                reject('Timeout: Never received a response from salesforce!')
+            }, 30 * 1000);
+            requests[requestId] = (response) => {
+                clearTimeout(timeout);
+                delete requests[requestId];
+                if(response.data.success){
+                    resolve();
+                }
+                else{
+                    reject('Error returned from salesforce! error=' + JSON.stringify(response.errors));
+                }
             };
+
             window.parent.postMessage(JSON.stringify(request), "*");
-        } catch (err) {
-            console.log("Error in search. Exception Details : " + err.message);
-        }
+        });
     }
 
     function getUserInfo() {
@@ -246,85 +250,151 @@
         }
     }
 
-    function disableClickToDial(msg) {
-        try {
-            var request = {
-                operation: salesforceBridgeAPIMethodNames.DSB_CLICK_TO_DIAL,
-                msg: msg
-            };
-            window.parent.postMessage(JSON.stringify(request), "*");
-        } catch (err) {
-            console.log("Error in search. Exception Details : " + err.message);
-        }
-    }
-
-    function setSoftPhoneHeight(msg) {
-        try {
+    function setSoftPhoneHeight(height) {
+        return new Promise((resolve, reject) => {
+            var requestId = getSequenceID();
             var request = {
                 operation: salesforceBridgeAPIMethodNames.SET_SP_HT,
-                height: msg.request.data.height,
-                msg: msg
+                height: height,
+                requestId: requestId
             };
+
+            var timeout = setTimeout(() => {
+                delete requests[requestId];
+                reject('Timeout: Never received a response from salesforce!')
+            }, 30 * 1000);
+            requests[requestId] = (response) => {
+                clearTimeout(timeout);
+                delete requests[requestId];
+                if(response.success){
+                    resolve();
+                }
+                else{
+                    reject('Error returned from salesforce! error=' + JSON.stringify(response.errors));
+                }
+            };
+
             window.parent.postMessage(JSON.stringify(request), "*");
-        } catch (err) {
-            console.log("Error in search. Exception Details : " + err.message);
-        }
+        });
     }
 
-    function setSoftPhoneWidth(msg) {
-        try {
+    function setSoftPhoneWidth(width) {
+        return new Promise((resolve, reject) => {
+            var requestId = getSequenceID();
             var request = {
                 operation: salesforceBridgeAPIMethodNames.SET_SP_WTH,
-                width: msg.request.data.width,
-                msg: msg
+                width: width,
+                requestId: requestId
             };
+
+            var timeout = setTimeout(() => {
+                delete requests[requestId];
+                reject('Timeout: Never received a response from salesforce!')
+            }, 30 * 1000);
+            requests[requestId] = (response) => {
+                clearTimeout(timeout);
+                delete requests[requestId];
+                if(response.success){
+                    resolve();
+                }
+                else{
+                    reject('Error returned from salesforce! error=' + JSON.stringify(response.errors));
+                }
+            };
+
             window.parent.postMessage(JSON.stringify(request), "*");
-        } catch (err) {
-            console.log("Error in search. Exception Details : " + err.message);
-        }
+        });
     }
 
-    function getSoftPhoneLayout(msg) {
-        try {
+    function getSoftPhoneLayout() {
+        return new Promise((resolve, reject) => {
             if (searchLayout) {
-                msg.response = {
-                    data: searchLayout.getAllLayouts()
-                }
-                ContactCanvas.Application.getSearchLayoutResponse(getResponseId(), msg);
+                resolve(searchLayout);
             } else {
+                var requestId = getSequenceID();
                 var request = {
                     operation: salesforceBridgeAPIMethodNames.GET_SP_LAYOUT,
-                    msg: msg
+                    requestId: requestId
                 };
+
+                var timeout = setTimeout(() => {
+                    delete requests[requestId];
+                    reject('Timeout: Never received a response from salesforce!')
+                }, 30 * 1000);
+                requests[requestId] = (response) => {
+                    clearTimeout(timeout);
+                    delete requests[requestId];
+                    var data = response.data;
+                    if (data.returnValue) {
+                        searchLayout = createLayouts(data.returnValue);
+                        resolve(searchLayout);
+                    } else if (!data.errors) {
+                        reject('Error returned from salesforce! error=' + JSON.stringify(response.errors));
+                    } else {
+                        resolve();
+                    }
+                };
+
                 window.parent.postMessage(JSON.stringify(request), "*");
             }
-        } catch (err) {
-            console.log("Error in search. Exception Details : " + err.message);
-        }
+        });
     }
 
-    function getApplicationSettings(msg) {
-        try {
-            var request = {
-                operation: salesforceBridgeAPIMethodNames.GET_CALL_CENTER_SETTINGS,
-                msg: msg
-            };
-            window.parent.postMessage(JSON.stringify(request), "*");
-        } catch (err) {
-            console.log("Error in search. Exception Details : " + err.message);
-        }
+    function getApplicationSettings() {
+        return new Promise((resolve, reject) => {
+            if (searchLayout) {
+                resolve(searchLayout);
+            } else {
+                var requestId = getSequenceID();
+                var request = {
+                    operation: salesforceBridgeAPIMethodNames.GET_CALL_CENTER_SETTINGS,
+                    requestId: requestId
+                };
+
+                var timeout = setTimeout(() => {
+                    delete requests[requestId];
+                    reject('Timeout: Never received a response from salesforce!')
+                }, 30 * 1000);
+                requests[requestId] = (response) => {
+                    clearTimeout(timeout);
+                    delete requests[requestId];
+                    if (response.data.returnValue) {
+                        var result = ContactCanvasApplicationAPI.ApplicationSettings(response.data.returnValue["/internalNameLabel"], response.data.returnValue["/displayNameLabel"], response.data.returnValue["/reqGeneralInfo/reqAdapterUrl"], response.data.returnValue["/reqGeneralInfo/reqStandbyUrl"], response.data.returnValue["/reqGeneralInfo/reqSoftphoneHeight"], response.data.returnValue["/reqGeneralInfo/reqSoftphoneWidth"], response.data.returnValue["/reqGeneralInfo/reqTimeout"]);
+                        resolve(result);
+                    } else {
+                        reject('Salesforce did not return valid application settings!');
+                    }
+                };
+
+                window.parent.postMessage(JSON.stringify(request), "*");
+            }
+        });
     }
 
-    function getPageInfo(msg) {
-        try {
+    function getPageInfo() {
+        return new Promise((resolve, reject) => {
+            var requestId = getSequenceID();
             var request = {
                 operation: salesforceBridgeAPIMethodNames.GET_PAGE_INFO,
-                msg: msg
+                requestId: requestId
             };
+
+            var timeout = setTimeout(() => {
+                delete requests[requestId];
+                reject('Timeout: Never received a response from salesforce!')
+            }, 30 * 1000);
+            requests[requestId] = (response) => {
+                var records = new ContactCanvasApplicationAPI.SearchRecords();
+                var data = response.data.records;
+                Object.keys(data).forEach(function (k) {
+                    var infoItem = new ContactCanvasApplicationAPI.RecordItem(data[k].Id, data[k].attributes.type, data[k].Name);
+                    records.addSearchRecord(infoItem);
+                });
+                resolve(records);
+            };
+
             window.parent.postMessage(JSON.stringify(request), "*");
-        } catch (err) {
-            console.log("Error in search. Exception Details : " + err.message);
-        }
+        });
     }
 
     function clickToDial(msg) {
@@ -353,251 +423,322 @@
         }
     }
 
-    //function search(operation, objectId, objectType, cadString, queryString, interactionType, interactionDirection, cadValue, filterKey, objectFields, msg, maxRecords, searchFieldType) {
-    function search(msg) {
-        try {
-            var data = msg.request.data;
+    function search(channel, direction, cad, query, maxRecords) {
+        return new Promise((resolve, reject) => {
+            var requestId = getSequenceID();
             var request = {
                 operation: salesforceBridgeAPIMethodNames.SEARCH,
-                objectId: data.objectId,
-                objectType: data.objectType,
-                cadString: data.cadString,
-                queryString: data.queryString,
-                interactionDirection: data.interactionDirection,
-                interactionType: data.interactionType,
-                cadValue: data.cadValue,
-                filterKey: data.filterKey,
-                objectFields: data.objectFields,
-                maxRecords: data.maxRecords,
-                msg: msg,
+                cadString: cad,
+                queryString: query,
+                interactionDirection: direction,
+                interactionType: channel,
+                maxRecords: maxRecords,
+                requestId: requestId,
             };
-            if (data.interactionDirection == ContactCanvas.Commons.InteractionDirectionTypes.Inbound) {
+            if (direction == ContactCanvasApplicationAPI.InteractionDirectionTypes.Inbound) {
                 request.interactionDirection = "Inbound";
-            } else if (data.interactionDirection == ContactCanvas.Commons.InteractionDirectionTypes.Outbound) {
+            } else if (direction == ContactCanvasApplicationAPI.InteractionDirectionTypes.Outbound) {
                 request.interactionDirection = "Outbound";
-            } else if (data.interactionDirection == ContactCanvas.Commons.InteractionDirectionTypes.Internal) {
+            } else if (direction == ContactCanvasApplicationAPI.InteractionDirectionTypes.Internal) {
                 request.interactionDirection = "Internal";
             } else {
                 request.interactionDirection = "Inbound";
             }
+
+            var timeout = setTimeout(() => {
+                delete requests[requestId];
+                reject('Timeout: Never received a response from salesforce!')
+            }, 30 * 1000);
+            requests[requestId] = (response) => {
+                clearTimeout(timeout);
+                delete requests[requestId];
+                if(response.success){
+                    var data = JSON.parse(response.data.result);
+                    var records = formatSearchResults(data);
+                    resolve(records);      
+                }
+                else{
+                    reject('Error returned from salesforce! error=' + JSON.stringify(response.errors));
+                }
+            }; 
+
             window.parent.postMessage(JSON.stringify(request), "*");
-        } catch (err) {
-            console.log("Error in search. Exception Details : " + err.message);
-        }
+        });
     }
 
-    function cadSearch(msg) {
-        try {
-            var data = msg.request.data;
+    function cadSearch(channel, direction, cadValue, objectFields, objectType, maxRecords) {
+        return new Promise((resolve, reject) => {
+            var requestId = getSequenceID();
             var request = {
                 operation: salesforceBridgeAPIMethodNames.CAD_SEARCH,
-                objectId: data.objectId,
-                objectType: data.objectType,
-                cadString: data.cadString,
-                queryString: data.queryString,
-                interactionDirection: data.interactionDirection,
-                cadValue: data.cadValue,
-                filterKey: data.filterKey,
-                objectFields: data.objectFields,
-                maxRecords: data.maxRecords,
-                msg: msg,
+                interactionDirection: direction,
+                cadValue: cadValue,
+                objectFields: objectFields,
+                maxRecords: maxRecords,
+                requestId: requestId
             };
-            if (data.interactionDirection == ContactCanvas.Commons.InteractionDirectionTypes.Inbound) {
+            if (direction == ContactCanvasApplicationAPI.InteractionDirectionTypes.Inbound) {
                 request.interactionDirection = "Inbound";
-            } else if (data.interactionDirection == ContactCanvas.Commons.InteractionDirectionTypes.Outbound) {
+            } else if (direction == ContactCanvasApplicationAPI.InteractionDirectionTypes.Outbound) {
                 request.interactionDirection = "Outbound";
-            } else if (data.interactionDirection == ContactCanvas.Commons.InteractionDirectionTypes.Internal) {
+            } else if (direction == ContactCanvasApplicationAPI.InteractionDirectionTypes.Internal) {
                 request.interactionDirection = "Internal";
             } else {
                 request.interactionDirection = "Inbound";
             }
+
+            var timeout = setTimeout(() => {
+                delete requests[requestId];
+                reject('Timeout: Never received a response from salesforce!')
+            }, 30 * 1000);
+            requests[requestId] = (response) => {
+                clearTimeout(timeout);
+                delete requests[requestId];
+                if(response.success){
+                    var data = JSON.parse(response.data.result);
+                    var records = formatSearchResults(data);
+                    resolve(records);      
+                }
+                else{
+                    reject('Error returned from salesforce! error=' + JSON.stringify(response.errors));
+                }
+            }; 
+
             window.parent.postMessage(JSON.stringify(request), "*");
-        } catch (err) {
-            console.log("Error in cadSearch. Exception Details : " + err.message);
-        }
+        });
     }
 
-    //function searchAndScreenpop(operation, objectId, objectType, cadString, queryString, interactionType, interactionDirection, cadValue, filterKey, objectFields, msg, maxRecords, searchFieldType) {
-    function searchAndScreenpop(msg) {
-        try {
-            var data = msg.request.data;
+    function searchAndScreenpop(channel, direction, cad, query, maxRecords) {
+        return new Promise((resolve, reject) => {
             var request = {
                 operation: salesforceBridgeAPIMethodNames.SEARCH_AND_SCREEN_POP,
-                screenpop: screenpopControlOn,
-                objectId: data.objectId,
-                objectType: data.objectType,
-                cadString: data.cadString,
-                queryString: data.queryString,
-                interactionDirection: data.interactionDirection,
-                interactionType: data.interactionType,
-                cadValue: data.cadValue,
-                filterKey: data.filterKey,
-                objectFields: data.objectFields,
-                maxRecords: data.maxRecords,
-                msg: msg,
+                cadString: cad,
+                queryString: query,
+                interactionDirection: direction,
+                interactionType: channel,
+                maxRecords: maxRecords,
+                requestId: requestId,
             };
-            if (data.interactionDirection == ContactCanvas.Commons.InteractionDirectionTypes.Inbound) {
+            if (direction == ContactCanvasApplicationAPI.InteractionDirectionTypes.Inbound) {
                 request.interactionDirection = "Inbound";
-            } else if (data.interactionDirection == ContactCanvas.Commons.InteractionDirectionTypes.Outbound) {
+            } else if (direction == ContactCanvasApplicationAPI.InteractionDirectionTypes.Outbound) {
                 request.interactionDirection = "Outbound";
-            } else if (data.interactionDirection == ContactCanvas.Commons.InteractionDirectionTypes.Internal) {
+            } else if (direction == ContactCanvasApplicationAPI.InteractionDirectionTypes.Internal) {
                 request.interactionDirection = "Internal";
             } else {
                 request.interactionDirection = "Inbound";
             }
-            window.parent.postMessage(JSON.stringify(request), "*");
 
-        } catch (err) {
-            console.log("Error in searchAndScreenpop. Exception Details : " + err.message);
-        }
+            var timeout = setTimeout(() => {
+                delete requests[requestId];
+                reject('Timeout: Never received a response from salesforce!')
+            }, 30 * 1000);
+            requests[requestId] = (response) => {
+                clearTimeout(timeout);
+                delete requests[requestId];
+                if(response.success){
+                    var data = JSON.parse(response.data.result);
+                    var records = formatSearchResults(data);
+                    resolve(records);      
+                }
+                else{
+                    reject('Error returned from salesforce! error=' + JSON.stringify(response.errors));
+                }
+            }; 
+
+            window.parent.postMessage(JSON.stringify(request), "*");
+        });
     }
 
 
-    //  function screenPop(popType, objectId, objectType, cadString, filterKey, cadValue, queryString, interactionType, interactionDirection, callMode, msg, maxRecords, searchFieldType) {
-    function screenPop(msg) {
-
-        try {
+    function screenPop(channel, direction, objectId, objectType) {
+        return new Promise((resolve, reject ) => {
             console.log("Start : screenPop");
-            var data = msg.request.data;
-
             if (screenpopControlOn) {
+                var requestId = getSequenceID();
                 var request = {
                     operation: salesforceBridgeAPIMethodNames.SCREEN_POP,
-                    type: data.popType,
                     message: "screenPop",
-                    objectId: data.objectId,
-                    objectType: data.objectType,
-                    cadString: data.cadString,
-                    filterKey: data.filterKey,
-                    cadValue: data.cadValue,
-                    queryString: data.queryString,
-                    interactionDirection: data.interactionDirection,
-                    callMode: data.callMode,
-                    msg: msg,
-                }
-                if (data.interactionDirection == ContactCanvas.Commons.InteractionDirectionTypes.Inbound) {
+                    objectId: objectId,
+                    objectType: objectType,
+                    interactionDirection: direction,
+                    requestId: requestId,
+                };
+                if (direction == ContactCanvasApplicationAPI.InteractionDirectionTypes.Inbound) {
                     request.interactionDirection = "Inbound";
-                } else if (data.interactionDirection == ContactCanvas.Commons.InteractionDirectionTypes.Outbound) {
+                } else if (direction == ContactCanvasApplicationAPI.InteractionDirectionTypes.Outbound) {
                     request.interactionDirection = "Outbound";
-                } else if (data.interactionDirection == ContactCanvas.Commons.InteractionDirectionTypes.Internal) {
+                } else if (direction == ContactCanvasApplicationAPI.InteractionDirectionTypes.Internal) {
                     request.interactionDirection = "Internal";
                 } else {
                     request.interactionDirection = "Inbound";
                 }
+                
+                var timeout = setTimeout(() => {
+                    delete requests[requestId];
+                    reject('Timeout: Never received a response from salesforce!')
+                }, 30 * 1000);
+                requests[requestId] = (response) => {
+                    clearTimeout(timeout);
+                    delete requests[requestId];
+                    if(response.success){
+                        resolve();                        
+                    }
+                    else{
+                        reject('Error returned from salesforce! error=' + JSON.stringify(response.errors));
+                    }
+                };       
                 window.parent.postMessage(JSON.stringify(request), "*");
             } else {
-                msg.response = { success: true };
-                ContactCanvas.Application.screenPopResponse(getResponseId(), msg);
+                resolve();
             }
             console.log("End : screenPop");
-        } catch (err) {
-            console.log("Error in screenPop. Exception details: " + err.message);
-        }
+        });
     }
 
-    function saveActivity(msg) {
-        var params = {};
-        var objectType = "";
-        // var activity = msg.request.data.activity;
-        var activity = new ContactCanvas.Commons.ActivityLayout.fromJSON(msg.request.data.activity);
-        if (activity.getType() == ContactCanvas.Commons.ActivityTypes.Appointment) {
-            objectType = "Event";
-            params.Type = "Meeting";
+    function saveActivity(activity) {
+        return new Promise((resolve, reject) => {
+            var params = {};
+            var objectType = "";
+            if (activity.type == ContactCanvasApplicationAPI.ActivityType.Appointment) {
+                objectType = "Event";
+                params.Type = "Meeting";
 
-            if (activity.getStart()) {
-                params.Start = activity.getStart();
-            }
-            if (activity.getEnd()) {
-                params.End = activity.getEnd();
-            }
-            if (activity.getLocation()) {
-                params.Location = activity.getLocation();
-            }
-            if (activity.getPrivate()) {
-                params.Location = activity.getPrivate();
-            }
-        } else {
-            objectType = "Task";
-            if (activity.getType() == ContactCanvas.Commons.ActivityTypes.PhoneCall) {
-                params.Type = "Call";
-            } else if (activity.getType() == ContactCanvas.Commons.ActivityTypes.Email) {
-                params.Type = "Email";
-            } else if (activity.getType() == ContactCanvas.Commons.ActivityTypes.Task) {
-                params.Type = "Other";
-            } else { //default
-                params.Type = "Other";
-            }
+                if (activity.start) {
+                    params.Start = activity.start;
+                }
+                if (activity.end) {
+                    params.End = activity.end;
+                }
+                if (activity.location) {
+                    params.Location = activity.location;
+                }
+                if (activity.private) {
+                    params.Private = private;
+                }
+            } else {
+                objectType = "Task";
+                if (activity.type == ContactCanvasApplicationAPI.ActivityType.PhoneCall) {
+                    params.Type = "Call";
+                } else if (activity.type == ContactCanvasApplicationAPI.ActivityType.Email) {
+                    params.Type = "Email";
+                } else if (activity.type == ContactCanvasApplicationAPI.ActivityType.Task) {
+                    params.Type = "Other";
+                } else { //default
+                    params.Type = "Other";
+                }
 
-            if (activity.getCallDurationInMinutes() && !isNaN(activity.getCallDurationInMinutes())) {
-                params.CallDurationInSeconds = 60 * activity.getCallDurationInMinutes();
-            }
-            if (activity.getCallResult()) {
-                params.CallDisposition = activity.getCallResult();
-            }
-            if (activity.getInteractionDirection()) {
-                if (activity.getInteractionDirection() === ContactCanvas.Commons.InteractionDirectionTypes.Inbound) {
-                    params.CallType = "Inbound";
-                } else if (activity.getInteractionDirection() === ContactCanvas.Commons.InteractionDirectionTypes.Outbound) {
-                    params.CallType = "Outbound";
-                } else if (activity.getInteractionDirection() === ContactCanvas.Commons.InteractionDirectionTypes.Internal) {
-                    params.CallType = "Internal";
+                if (activity.callDurationInMinutes && !isNaN(activity.callDurationInMinutes)) {
+                    params.CallDurationInSeconds = 60 * activity.callDurationInMinutes;
+                }
+                if (activity.callResult) {
+                    params.CallDisposition = activity.callResult;
+                }
+                if (activity.interactionDirection) {
+                    if (activity.interactionDirection === ContactCanvasApplicationAPI.InteractionDirectionTypes.Inbound) {
+                        params.CallType = "Inbound";
+                    } else if (activity.interactionDirection === ContactCanvasApplicationAPI.InteractionDirectionTypes.Outbound) {
+                        params.CallType = "Outbound";
+                    } else if (activity.interactionDirection === ContactCanvasApplicationAPI.InteractionDirectionTypes.Internal) {
+                        params.CallType = "Internal";
+                    }
+                }
+                if (activity.dueDate) {
+                    params.ActivityDate = activity.dueDate;
+                }
+                if (activity.priority) {
+                    if (activity.priority === ContactCanvasApplicationAPI.ActivityPriority.High) {
+                        params.Priority = "High";
+                    } else if (activity.priority === ContactCanvasApplicationAPI.ActivityPriority.Normal) {
+                        params.Priority = "Normal";
+                    } else if (activity.priority === ContactCanvasApplicationAPI.ActivityPriority.Low) {
+                        params.Priority = "Low";
+                    }
+                }
+                if (activity.status) {
+                    if (activity.status === ContactCanvasApplicationAPI.ActivityStatus.Open) {
+                        params.Status = "Not Started";
+                    } else if (activity.status === ContactCanvasApplicationAPI.ActivityStatus.Close) {
+                        params.Status = "Completed";
+                    }
                 }
             }
-            if (activity.getDueDate()) {
-                params.ActivityDate = activity.getDueDate();
-            }
-            if (activity.getPriority()) {
-                if (activity.getPriority() === ContactCanvas.Commons.ActivityPriority.High) {
-                    params.Priority = "High";
-                } else if (activity.getPriority() === ContactCanvas.Commons.ActivityPriority.Normal) {
-                    params.Priority = "Normal";
-                } else if (activity.getPriority() === ContactCanvas.Commons.ActivityPriority.Low) {
-                    params.Priority = "Low";
-                }
-            }
-            if (activity.getStatus()) {
-                if (activity.getStatus() === ContactCanvas.Commons.ActivityStatus.Open) {
-                    params.Status = "Not Started";
-                } else if (activity.getStatus() === ContactCanvas.Commons.ActivityStatus.Close) {
-                    params.Status = "Completed";
-                }
-            }
-        }
 
-        if (activity.getId()) {
-            params.Id = activity.getId();
-        }
-        if (activity.getDescription()) {
-            params.Description = activity.getDescription();
-        }
-        if (activity.getSubject()) {
-            params.Subject = activity.getSubject();
-        }
-        if (activity.getPhoneNumber()) {
-            params.Phone = activity.getPhoneNumber();
-        }
-        if (activity.getEmail()) {
-            params.Email = activity.getEmail();
-        }
-        if (activity.getRelatedTo() && activity.getRelatedTo().Id) {
-            params.WhatId = activity.getRelatedTo().Id;
-        }
+            if (activity.id) {
+                params.Id = activity.id;
+            }
+            if (activity.description) {
+                params.Description = activity.description;
+            }
+            if (activity.subject) {
+                params.Subject = activity.subject;
+            }
+            if (activity.phoneNumber) {
+                params.Phone = activity.phoneNumber;
+            }
+            if (activity.email) {
+                params.Email = activity.email;
+            }
+            if (activity.relatedTo && activity.relatedTo.Id) {
+                params.WhatId = activity.relatedTo.Id;
+            }
 
-        var request = {
-            operation: salesforceBridgeAPIMethodNames.SAVE_ACTIVITY,
-            objectType: objectType,
-            params: params,
-            msg: msg,
-        }
-        window.parent.postMessage(JSON.stringify(request), "*");
+            var requestId = getSequenceID();
+            var request = {
+                operation: salesforceBridgeAPIMethodNames.SAVE_ACTIVITY,
+                objectType: objectType,
+                params: params,
+                requestId: requestId
+            }
+
+            var timeout = setTimeout(() => {
+                delete requests[requestId];
+                reject('Timeout: Never received a response from salesforce!')
+            }, 30 * 1000);
+            requests[requestId] = (response) => {
+                clearTimeout(timeout);
+                delete requests[requestId];
+                if(response.data && response.data.entity && response.data.entity.Id){
+                    resolve(response.data.entity.Id);                        
+                }
+                else if(response.errors){
+                    reject('Error returned from salesforce! error=' + JSON.stringify(response.errors));
+                }
+                else {
+                    reject('Invalid response from salesforce!');
+                }
+            };    
+
+            window.parent.postMessage(JSON.stringify(request), "*");
+        });
+        
     }
 
-    function isVisible(msg) {
-        var request = {
-            operation: salesforceBridgeAPIMethodNames.IS_VISIBLE,
-            msg: msg,
-        }
-        window.parent.postMessage(JSON.stringify(request), "*");
+    function isVisible() {
+        return new Promise((resolve, reject) => {
+            var requestId = getSequenceID();
+            var request = {
+                operation: salesforceBridgeAPIMethodNames.IS_VISIBLE,
+                requestId: requestId,
+            }
+    
+            var timeout = setTimeout(() => {
+                delete requests[requestId];
+                reject('Timeout: Never received a response from salesforce!')
+            }, 30 * 1000);
+            requests[requestId] = (response) => {
+                clearTimeout(timeout);
+                delete requests[requestId];
+                if(response.data.success){
+                    resolve(response.data.visible);                        
+                }
+                else{
+                    reject('Error returned from salesforce! error=' + JSON.stringify(response.data.errors));
+                }
+            };  
+    
+            window.parent.postMessage(JSON.stringify(request), "*");
+        });
     }
 
     function setVisible(msg) {
@@ -616,142 +757,34 @@
 
             var parseData = JSON.parse(options);
 
-            if (parseData != undefined) {
-                if (parseData.operation === salesforceBridgeAPIMethodNames.SCREEN_POP) {
-                    ContactCanvas.Application.screenPopResponse(getResponseId(), parseData.response);
-                } else if (parseData.operation === salesforceBridgeAPIMethodNames.SEARCH) {
-                    var data = JSON.parse(parseData.response.response.data.result);
-                    var records = formatSearchResults(data);
-                    var msg = parseData.response;
+            if(parseData.requestId in requests){
+                requests[parseData.requestId](parseData.response.response);
+                return;
+            }
+            else if (parseData.operation === salesforceBridgeAPIMethodNames.CLICK_TO_DIAL_EVENT) {
+                var records = new ContactCanvasApplicationAPI.SearchRecords();
+                var data = parseData.response;
+                if (data.records && data.records.length > 0) {
+                    data = data.records;
+                    var infoItem = new ContactCanvasApplicationAPI.RecordItem(data[0].Id, data[0].attributes.type, data[0].attributes.type);
+                    for (var key in data[0]) {
+                        infoItem.setField(key, key, key, data[0][key]);
+                    }
+                    records.addSearchRecord(infoItem);
+                    ContactCanvasApplicationAPI.clickToDial(parseData.response.number, records);
+                }
+            }
+            else if (parseData.operation === salesforceBridgeAPIMethodNames.ON_FOCUS_EVENT) {
+                var records = new ContactCanvasApplicationAPI.SearchRecords();
+                var data = parseData.response;
 
-                    var maxrecords = msg.request.data.maxRecords;
-                    parseData.response.response = {
-                        data: records.toJSON(maxrecords || maxRecordsDefault)
-                    };
-                    ContactCanvas.Application.globalSearchResponse(getResponseId(), parseData.response);
-                } else if (parseData.operation === salesforceBridgeAPIMethodNames.SEARCH_AND_SCREEN_POP) {
-                    var data = JSON.parse(parseData.response.response.data.result);
-                    var records = formatSearchResults(data);
-                    var msg = parseData.response;
-                    var maxrecords = msg.request.data.maxRecords;
-                    parseData.response.response = {
-                        data: records.toJSON(maxrecords || maxRecordsDefault)
-                    };
-                    ContactCanvas.Application.globalSearchAndScreenpopResponse(getResponseId(), parseData.response);
-                } else if (parseData.operation === salesforceBridgeAPIMethodNames.CAD_SEARCH) {
-                    var records = new ContactCanvas.Commons.SearchRecords();
-                    var data = JSON.parse(parseData.response.response.data.result);
-                    for (i = 0; i < data.length; i++) {
-                        var infoItem = new ContactCanvas.Commons.RecordItem(data[i].Id, data[i].attributes.type, data[i].displayName);
-                        infoItem.setField("url", "url", "url", data[i].attributes.url);
-                        infoItem.setEmail("Email", "Email", data[i].Email);
-                        records.addSearchRecord(infoItem);
+                if (data.length > 0) {
+                    var infoItem = new ContactCanvasApplicationAPI.RecordItem(data[0].Id, data[0].attributes.type, data[0].attributes.type);
+                    for (var key in data[0]) {
+                        infoItem.setField(key, key, key, data[0][key]);
                     }
-                    var msg = parseData.response;
-                    var maxrecords = msg.request.data.maxRecords;
-                    parseData.response.response = {
-                        data: records.toJSON(maxrecords || maxRecordsDefault)
-                    };
-                    ContactCanvas.Application.searchResponse(getResponseId(), parseData.response);
-                } else if (parseData.operation === salesforceBridgeAPIMethodNames.ENB_CLICK_TO_DIAL) {
-                    ContactCanvas.Application.enableClickToDialResponse(getResponseId(), parseData.response);
-                } else if (parseData.operation === salesforceBridgeAPIMethodNames.DSB_CLICK_TO_DIAL) {
-                    ContactCanvas.Application.disableClickToDialResponse(getResponseId(), parseData.response);
-                } else if (parseData.operation === salesforceBridgeAPIMethodNames.SET_SP_HT) {
-                    ContactCanvas.Application.setSoftphoneHeightResponse(getResponseId(), parseData.response);
-                } else if (parseData.operation === salesforceBridgeAPIMethodNames.SET_SP_WTH) {
-                    ContactCanvas.Application.setSoftphoneWidthResponse(getResponseId(), parseData.response);
-                } else if (parseData.operation === salesforceBridgeAPIMethodNames.GET_SP_LAYOUT) {
-                    var data = parseData.response.response.data;
-                    if (data.returnValue) {
-                        searchLayout = createLayouts(data.returnValue);
-                        parseData.response.response.data = searchLayout.getAllLayouts();
-                        ContactCanvas.Application.getSearchLayoutResponse(getResponseId(), parseData.response);
-                    } else if (!data.errors) {
-                        parseData.response.response.data.errors = ["Failed to get SearchLayout!"];
-                        ContactCanvas.Application.getSearchLayoutResponse(getResponseId(), parseData.response);
-                    } else {
-                        ContactCanvas.Application.getSearchLayoutResponse(getResponseId(), parseData.response);
-                    }
-                } else if (parseData.operation === salesforceBridgeAPIMethodNames.CLICK_TO_DIAL_EVENT) {
-                    //var msg = {
-                    //    response: { data: parseData.response },
-                    //    request: {}
-                    //};
-                    var records = new ContactCanvas.Commons.SearchRecords();
-                    var data = parseData.response;
-                    if (data.records && data.records.length > 0) {
-                        data = data.records;
-                        var infoItem = new ContactCanvas.Commons.RecordItem(data[0].Id, data[0].attributes.type, data[0].attributes.type);
-                        //infoItem.setFullName("objectName", "Full Name", data[0].Name);
-                        //infoItem.setPhone("url", "url", data[0].attributes.url);
-                        for (var key in data[0]) {
-                            infoItem.setField(key, key, key, data[0][key]);
-                        }
-                        records.addSearchRecord(infoItem);
-                        var tmp = {
-                            number: parseData.response.number,
-                            records: records.toJSON()
-                        };
-                        parseData.response.response = {};
-                        parseData.response.response.data = tmp;
-                        ContactCanvas.Application.ClickToDialEvent(getResponseId(), parseData.response);
-                    }
-                } else if (parseData.operation === salesforceBridgeAPIMethodNames.ON_FOCUS_EVENT) {
-
-                    var records = new ContactCanvas.Commons.SearchRecords();
-                    var data = parseData.response;
-
-                    if (data.length > 0) {
-                        var infoItem = new ContactCanvas.Commons.RecordItem(data[0].Id, data[0].attributes.type, data[0].attributes.type);
-                        //infoItem.setFullName("objectName", "Full Name", data[0].Name);
-                        //infoItem.setPhone("url", "url", data[0].attributes.url);
-                        for (var key in data[0]) {
-                            infoItem.setField(key, key, key, data[0][key]);
-                        }
-                        records.addSearchRecord(infoItem);
-                        parseData.response.response = {};
-                        var tmp = {
-                            records: records.toJSON()
-                        };
-                        parseData.response.response.data = tmp;
-                        ContactCanvas.Application.OnFocusEvent(getResponseId(), parseData.response);
-                    }
-                } else if (parseData.operation === salesforceBridgeAPIMethodNames.GET_CALL_CENTER_SETTINGS) {
-                    var result = parseData.response;
-                    if (result.response.data.returnValue) {
-                        result.response.data = ContactCanvas.Application.ApplicationSettings(result.response.data.returnValue["/internalNameLabel"], result.response.data.returnValue["/displayNameLabel"], result.response.data.returnValue["/reqGeneralInfo/reqAdapterUrl"], result.response.data.returnValue["/reqGeneralInfo/reqStandbyUrl"], result.response.data.returnValue["/reqGeneralInfo/reqSoftphoneHeight"], result.response.data.returnValue["/reqGeneralInfo/reqSoftphoneWidth"], result.response.data.returnValue["/reqGeneralInfo/reqTimeout"]);
-                    } else {
-                        result.response.data = "";
-                    }
-
-                    ContactCanvas.Application.getApplicationSettingsResponse(getResponseId(), result);
-                } else if (parseData.operation === salesforceBridgeAPIMethodNames.GET_PAGE_INFO) {
-                    var records = new ContactCanvas.Commons.SearchRecords();
-                    var data = parseData.response.response.data.records;
-                    Object.keys(data).forEach(function (k) {
-                        var infoItem = new ContactCanvas.Commons.RecordItem(data[k].Id, data[k].attributes.type, data[k].Name);
-                        //infoItem.setFullName("Name","Full Name",data[k].Name);
-                        records.addSearchRecord(infoItem);
-                    });
-                    //parseData.response.response = {};
-                    parseData.response.response.data = records.toJSON();
-                    ContactCanvas.Application.getPageInfoResponse(getResponseId(), parseData.response);
-                } else if (parseData.operation === salesforceBridgeAPIMethodNames.SAVE_ACTIVITY) {
-                    ContactCanvas.Application.saveActivityResponse(getResponseId(), parseData.response);
-                } else if (parseData.operation === salesforceBridgeAPIMethodNames.IS_VISIBLE) {
-                    ContactCanvas.Application.isToolbarVisibleResponse(getResponseId(), parseData.response);
-                } else if (parseData.operation === salesforceBridgeAPIMethodNames.SET_VISIBLE) {
-                    ContactCanvas.Application.setToolbarVisibleResponse(getResponseId(), parseData.response);
-                } else if (parseData.operation === salesforceBridgeAPIMethodNames.USER_INFO) {
-                    parseData.msg = {};
-                    parseData.msg.response = {
-                        data: {
-                            success: true,
-                            userinfo: parseData.response.response.data.userinfo,
-                        }
-                    };
-                    ContactCanvas.Application.sendUserInfo(ContactCanvas.Commons.getSequenceID(), parseData.msg);
+                    records.addSearchRecord(infoItem);
+                    ContactCanvasApplicationAPI.onFocus(records);
                 }
             }
         } catch (err) {
@@ -760,9 +793,9 @@
     }
    
     function formatSearchResults(data) {
-        var records = new ContactCanvas.Commons.SearchRecords();
+        var records = new ContactCanvasApplicationAPI.SearchRecords();
         Object.keys(data).forEach(function (k) {
-            var record = new ContactCanvas.Commons.RecordItem(k, data[k].object, data[k].displayName);
+            var record = new ContactCanvasApplicationAPI.RecordItem(k, data[k].object, data[k].displayName);
             for (var fieldName in data[k]) {
                 if (data[k].object === "Account" && fieldName === "Name") {
                     record.setAccountName(fieldName, formatDisplayName(fieldName), data[k][fieldName]);
@@ -788,9 +821,6 @@
                     record.setField(fieldName, fieldName, formatDisplayName(fieldName), data[k][fieldName]);
                 }
             }
-
-            //record.setFullName("Name", "Name", data[k].Name);
-
             records.addSearchRecord(record);
         });
         return records;
@@ -799,14 +829,8 @@
         return name.replace(/([A-Z]+)/g, ' $1').trim();
     }
 
-    // var responseId = 0;
-    // function getResponseId() { return "SalesforceResponse" + responseId++ }
-    function getResponseId() {
-        return ContactCanvas.Commons.getSequenceID()
-    }
-
     function createLayouts(data) {
-        var layouts = new ContactCanvas.Commons.SearchLayouts();
+        var layouts = new ContactCanvasApplicationAPI.SearchLayouts();
         var inboundEntities = [];
         for (var key in data.Inbound.objects) {
             var fields = [];
@@ -817,13 +841,12 @@
                 });
             }
 
-            inboundEntities.push(new ContactCanvas.Commons.SearchLayoutEntity(key, key, fields, null, null, null));
+            inboundEntities.push(new ContactCanvasApplicationAPI.SearchLayoutForEntity(key, key, fields));
         }
-        var aLayout = new ContactCanvas.Commons.SearchLayoutItem(false, inboundEntities);
+        var aLayout = new ContactCanvasApplicationAPI.SearchLayout(false, inboundEntities);
         if (data.Inbound.screenPopSettings.NoMatch == 'undefined') {
             data.Inbound.screenPopSettings.NoMatch = {};
             data.Inbound.screenPopSettings.NoMatch.screenPopType = "DoNotPop";
-
         }
         if (data.Inbound.screenPopSettings.MultipleMatches == 'undefined') {
             data.Inbound.screenPopSettings.MultipleMatches = {};
@@ -835,29 +858,29 @@
         }
         //No Match
         if (data.Inbound.screenPopSettings.NoMatch.screenPopType == "PopToEntity") {
-            aLayout.setNoMatch(ContactCanvas.Commons.NoMatchPopTypes.PopToNewEntity, data.Inbound.screenPopSettings.NoMatch.screenPopData);
+            aLayout.setNoMatch(ContactCanvasApplicationAPI.NoMatchPopTypes.PopToNewEntity, data.Inbound.screenPopSettings.NoMatch.screenPopData);
         } else if (data.Inbound.screenPopSettings.NoMatch.screenPopType == "PopToVisaulForcePage") {
 
         } else {
-            aLayout.setNoMatch(ContactCanvas.Commons.NoMatchPopTypes.NoPop);
+            aLayout.setNoMatch(ContactCanvasApplicationAPI.NoMatchPopTypes.NoPop);
         }
 
         //SingleMatch
         if (data.Inbound.screenPopSettings.SingleMatch.screenPopType == "PopToEntity") {
-            aLayout.setSingleMatch(ContactCanvas.Commons.SingleMatchPopTypes.PopToDetails, data.Inbound.screenPopSettings.SingleMatch.screenPopData);
+            aLayout.setSingleMatch(ContactCanvasApplicationAPI.SingleMatchPopTypes.PopToDetails, data.Inbound.screenPopSettings.SingleMatch.screenPopData);
         } else if (data.Inbound.screenPopSettings.SingleMatch.screenPopType == "PopToVisaulForcePage") {
 
         } else {
-            aLayout.setSingleMatch(ContactCanvas.Commons.SingleMatchPopTypes.NoPop);
+            aLayout.setSingleMatch(ContactCanvasApplicationAPI.SingleMatchPopTypes.NoPop);
         }
 
         //MultiMatch
         if (data.Inbound.screenPopSettings.MultipleMatches.screenPopType == "PopToSearch") {
-            aLayout.setMultiMatch(ContactCanvas.Commons.MultiMatchPopTypes.PopToSearch);
+            aLayout.setMultiMatch(ContactCanvasApplicationAPI.MultiMatchPopTypes.PopToSearch);
         } else if (data.Inbound.screenPopSettings.MultipleMatches.screenPopType == "PopToVisaulForcePage") {
 
         } else {
-            aLayout.setMultiMatch(ContactCanvas.Commons.MultiMatchPopTypes.NoPop);
+            aLayout.setMultiMatch(ContactCanvasApplicationAPI.MultiMatchPopTypes.NoPop);
         }
 
         //Open New Window
@@ -867,7 +890,7 @@
             aLayout.setOpenInNewWindow(true);
         }
 
-        layouts.setLayout(ContactCanvas.Commons.ChannelTypes.Telephony, aLayout);
+        layouts.setLayout([ContactCanvasApplicationAPI.ChannelTypes.Telephony], aLayout);
         return layouts;
     }
 }(window.AMCSalesforcePlugin = window.AMCSalesforcePlugin || {}));
