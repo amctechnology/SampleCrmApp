@@ -227,7 +227,7 @@
             requests[requestId] = (response) => {
                 clearTimeout(timeout);
                 delete requests[requestId];
-                if(response.success){
+                if(response.data.success){
                     resolve();
                 }
                 else{
