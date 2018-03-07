@@ -111,7 +111,7 @@
         // });
         ContactCanvasApplicationAPI.registerOnInteraction(onInteraction);
 
-        ContactCanvasApplicationAPI.initializeComplete().then((config) => {
+        ContactCanvasApplicationAPI.initializeComplete().then(function(config) {
             maxRecordsDefault = parseInt(config.variables.maxRecordsDefault);
         });
     });
@@ -214,17 +214,17 @@
     }    
 
     function enableClickToDial(enabled) {
-        return new Promise((resolve, reject) => {
+        return new Promise(function(resolve, reject) {
             var requestId = getSequenceID();
             var request = { requestId: requestId };
             if(enabled) request['operation'] = salesforceBridgeAPIMethodNames.ENB_CLICK_TO_DIAL;
             else request['operation'] = salesforceBridgeAPIMethodNames.DSB_CLICK_TO_DIAL;
 
-            var timeout = setTimeout(() => {
+            var timeout = setTimeout(function() {
                 delete requests[requestId];
                 reject('Timeout: Never received a response from salesforce!')
             }, 30 * 1000);
-            requests[requestId] = (response) => {
+            requests[requestId] = function(response) {
                 clearTimeout(timeout);
                 delete requests[requestId];
                 if(response.data.success){
@@ -251,7 +251,7 @@
     }
 
     function setSoftPhoneHeight(height) {
-        return new Promise((resolve, reject) => {
+        return new Promise(function(resolve, reject) {
             var requestId = getSequenceID();
             var request = {
                 operation: salesforceBridgeAPIMethodNames.SET_SP_HT,
@@ -259,11 +259,11 @@
                 requestId: requestId
             };
 
-            var timeout = setTimeout(() => {
+            var timeout = setTimeout(function() {
                 delete requests[requestId];
                 reject('Timeout: Never received a response from salesforce!')
             }, 30 * 1000);
-            requests[requestId] = (response) => {
+            requests[requestId] = function(response) {
                 clearTimeout(timeout);
                 delete requests[requestId];
                 if(response.success){
@@ -279,7 +279,7 @@
     }
 
     function setSoftPhoneWidth(width) {
-        return new Promise((resolve, reject) => {
+        return new Promise(function(resolve, reject) {
             var requestId = getSequenceID();
             var request = {
                 operation: salesforceBridgeAPIMethodNames.SET_SP_WTH,
@@ -287,11 +287,11 @@
                 requestId: requestId
             };
 
-            var timeout = setTimeout(() => {
+            var timeout = setTimeout(function() {
                 delete requests[requestId];
                 reject('Timeout: Never received a response from salesforce!')
             }, 30 * 1000);
-            requests[requestId] = (response) => {
+            requests[requestId] = function(response) {
                 clearTimeout(timeout);
                 delete requests[requestId];
                 if(response.success){
@@ -307,7 +307,7 @@
     }
 
     function getSoftPhoneLayout() {
-        return new Promise((resolve, reject) => {
+        return new Promise(function(resolve, reject) {
             if (searchLayout) {
                 resolve(searchLayout);
             } else {
@@ -317,11 +317,11 @@
                     requestId: requestId
                 };
 
-                var timeout = setTimeout(() => {
+                var timeout = setTimeout(function() {
                     delete requests[requestId];
                     reject('Timeout: Never received a response from salesforce!')
                 }, 30 * 1000);
-                requests[requestId] = (response) => {
+                requests[requestId] = function(response) {
                     clearTimeout(timeout);
                     delete requests[requestId];
                     var data = response.data;
@@ -341,7 +341,7 @@
     }
 
     function getApplicationSettings() {
-        return new Promise((resolve, reject) => {
+        return new Promise(function(resolve, reject) {
             if (searchLayout) {
                 resolve(searchLayout);
             } else {
@@ -351,11 +351,11 @@
                     requestId: requestId
                 };
 
-                var timeout = setTimeout(() => {
+                var timeout = setTimeout(function() {
                     delete requests[requestId];
                     reject('Timeout: Never received a response from salesforce!')
                 }, 30 * 1000);
-                requests[requestId] = (response) => {
+                requests[requestId] = function(response) {
                     clearTimeout(timeout);
                     delete requests[requestId];
                     if (response.data.returnValue) {
@@ -372,18 +372,18 @@
     }
 
     function getPageInfo() {
-        return new Promise((resolve, reject) => {
+        return new Promise(function(resolve, reject) {
             var requestId = getSequenceID();
             var request = {
                 operation: salesforceBridgeAPIMethodNames.GET_PAGE_INFO,
                 requestId: requestId
             };
 
-            var timeout = setTimeout(() => {
+            var timeout = setTimeout(function() {
                 delete requests[requestId];
                 reject('Timeout: Never received a response from salesforce!')
             }, 30 * 1000);
-            requests[requestId] = (response) => {
+            requests[requestId] = function(response) {
                 var records = new ContactCanvasApplicationAPI.SearchRecords();
                 var data = response.data.records;
                 Object.keys(data).forEach(function (k) {
@@ -424,7 +424,7 @@
     }
 
     function search(channel, direction, cad, query, maxRecords) {
-        return new Promise((resolve, reject) => {
+        return new Promise(function(resolve, reject) {
             var requestId = getSequenceID();
             var request = {
                 operation: salesforceBridgeAPIMethodNames.SEARCH,
@@ -445,11 +445,11 @@
                 request.interactionDirection = "Inbound";
             }
 
-            var timeout = setTimeout(() => {
+            var timeout = setTimeout(function() {
                 delete requests[requestId];
                 reject('Timeout: Never received a response from salesforce!')
             }, 30 * 1000);
-            requests[requestId] = (response) => {
+            requests[requestId] = function(response) {
                 clearTimeout(timeout);
                 delete requests[requestId];
                 if(response.success){
@@ -467,7 +467,7 @@
     }
 
     function cadSearch(channel, direction, cadValue, objectFields, objectType, maxRecords) {
-        return new Promise((resolve, reject) => {
+        return new Promise(function(resolve, reject) {
             var requestId = getSequenceID();
             var request = {
                 operation: salesforceBridgeAPIMethodNames.CAD_SEARCH,
@@ -487,11 +487,11 @@
                 request.interactionDirection = "Inbound";
             }
 
-            var timeout = setTimeout(() => {
+            var timeout = setTimeout(function() {
                 delete requests[requestId];
                 reject('Timeout: Never received a response from salesforce!')
             }, 30 * 1000);
-            requests[requestId] = (response) => {
+            requests[requestId] = function(response) {
                 clearTimeout(timeout);
                 delete requests[requestId];
                 if(response.success){
@@ -509,7 +509,7 @@
     }
 
     function searchAndScreenpop(channel, direction, cad, query, maxRecords) {
-        return new Promise((resolve, reject) => {
+        return new Promise(function(resolve, reject) {
             var request = {
                 operation: salesforceBridgeAPIMethodNames.SEARCH_AND_SCREEN_POP,
                 cadString: cad,
@@ -529,11 +529,11 @@
                 request.interactionDirection = "Inbound";
             }
 
-            var timeout = setTimeout(() => {
+            var timeout = setTimeout(function() {
                 delete requests[requestId];
                 reject('Timeout: Never received a response from salesforce!')
             }, 30 * 1000);
-            requests[requestId] = (response) => {
+            requests[requestId] = function(response) {
                 clearTimeout(timeout);
                 delete requests[requestId];
                 if(response.success){
@@ -552,7 +552,7 @@
 
 
     function screenPop(channel, direction, objectId, objectType) {
-        return new Promise((resolve, reject ) => {
+        return new Promise(function(resolve, reject ) {
             console.log("Start : screenPop");
             if (screenpopControlOn) {
                 var requestId = getSequenceID();
@@ -574,11 +574,11 @@
                     request.interactionDirection = "Inbound";
                 }
                 
-                var timeout = setTimeout(() => {
+                var timeout = setTimeout(function() {
                     delete requests[requestId];
                     reject('Timeout: Never received a response from salesforce!')
                 }, 30 * 1000);
-                requests[requestId] = (response) => {
+                requests[requestId] = function(response) {
                     clearTimeout(timeout);
                     delete requests[requestId];
                     if(response.success){
@@ -597,7 +597,7 @@
     }
 
     function saveActivity(activity) {
-        return new Promise((resolve, reject) => {
+        return new Promise(function(resolve, reject) {
             var params = {};
             var objectType = "";
             if (activity.type == ContactCanvasApplicationAPI.ActivityType.Appointment) {
@@ -691,11 +691,11 @@
                 requestId: requestId
             }
 
-            var timeout = setTimeout(() => {
+            var timeout = setTimeout(function() {
                 delete requests[requestId];
                 reject('Timeout: Never received a response from salesforce!')
             }, 30 * 1000);
-            requests[requestId] = (response) => {
+            requests[requestId] = function(response) {
                 clearTimeout(timeout);
                 delete requests[requestId];
                 if(response.data && response.data.entity && response.data.entity.Id){
@@ -715,18 +715,18 @@
     }
 
     function isVisible() {
-        return new Promise((resolve, reject) => {
+        return new Promise(function(resolve, reject) {
             var requestId = getSequenceID();
             var request = {
                 operation: salesforceBridgeAPIMethodNames.IS_VISIBLE,
                 requestId: requestId,
             }
     
-            var timeout = setTimeout(() => {
+            var timeout = setTimeout(function() {
                 delete requests[requestId];
                 reject('Timeout: Never received a response from salesforce!')
             }, 30 * 1000);
-            requests[requestId] = (response) => {
+            requests[requestId] = function(response) {
                 clearTimeout(timeout);
                 delete requests[requestId];
                 if(response.data.success){
