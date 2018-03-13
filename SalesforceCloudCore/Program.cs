@@ -33,8 +33,8 @@ namespace SalesforceCloudCore
                {
                    if (isDevelopment())
                    {
-                       options.Listen(IPAddress.Loopback, 5008);
-                       options.Listen(IPAddress.Loopback, 5007, listenOptions =>
+                       options.Listen(IPAddress.Loopback, 5015);
+                       options.Listen(IPAddress.Loopback, 5016, listenOptions =>
                        {
                            listenOptions.UseHttps(@"Certificates\localhost.pfx", "password");
                        });
