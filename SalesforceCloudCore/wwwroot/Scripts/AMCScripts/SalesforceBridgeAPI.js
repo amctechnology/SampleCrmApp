@@ -1,43 +1,7 @@
 ﻿(function (AMCSalesforceBridge) {
     var isSalesforceAPILoaded = false;
-    var userID = '';
-    var lstTranscript = {};
-    var previousStatus = '';
-    var activityIdValue = '';
-    var enableAudio = false;
-    var enableVideo = false;
-    var customerName = "";
-    var customerInfo = "";
-    var dictChatName = {};
-    var dictChatMeetingDetails = {};
-    var objChatTranscript = '';
-    var lstMinMax = {};
-    var lstContacts = {};
-    var lstMeetings = {};
-    var lstEmailAddress = {};
-    var lstPreviousState = {};
-    var lstConversations = {};
-    var lstAddedListeners = {};
-    var lstPersons = {};
-    var lstPreviousAudioState = {};
-    var lstPreviousVideoState = {};
-    var lstAlertConversations = {};
-    var lstTransferRequests = {};
-    var lstVideoConversations = {};
-    var lstAudioConversations = {};
-    var lstRelations = {};
-    var lstPreviousHoldAudioState = {};
-    var lstPreviousParticipantHoldAudioState = {};
-    var lstPreviousMuteAudioState = {};
-    var lstPreviousParticipantMuteAudioState = {};
-    var lstMuteDisconnected = {};
-    var lstHoldDisconnected = {};
-    var lstDisplayContacts = {};
-    var lstPhones = {};
-    var lstContactData = {};
     var listenerEventsQueue = [];
-    var CLICK_TO_DIAL_EVENT = 'clickToDialEvent';
-    var ON_FOCUS_EVENT = 'onFocusEvent';
+    var salesforceAppWindow;
 
 
     var lightning_enabled = false;
@@ -60,8 +24,12 @@
         IS_VISIBLE: "SalesforceBridgeIsVisible",
         SET_VISIBLE: "SalesforceBridgeSetVisible",
         USER_INFO: "SalesforceBridgeUSER_INFO",
+        LOGS: "SalesforceBridgeLOGS"
     };
 
+    var LogType = {VERBOSE : "Verbose", WARNING : "Warning", ERROR : "Error", INFORMATION : "Information"};
+
+    logMessage(LogType.VERBOSE, "Loading Salesforce Bridge File");
 
     if (window.addEventListener) {
         window.addEventListener("message", listener, false);
@@ -96,11 +64,12 @@
         }
         isSalesforceAPILoaded = true;
         processListenerQueueEvents();
-        
+        logMessage(LogType.VERBOSE,"Salesforce API loaded. Is Lightning Enabled : "+lightning_enabled);
     }
 
     var salesforcePluginWindow = null;
     var clickToDialListener = function (responseFromSalesForce) {
+        logMessage(LogType.INFORMATION, "Received Click to Dial Eventb from Salesforce. Details : "+JSON.stringify(responseFromSalesForce));
         if (salesforcePluginWindow != null) {
             var entity = {};
             var number = "";
@@ -138,6 +107,7 @@
     }
 
     var onFocusListener = function (responseFromSalesForce) {
+        logMessage(LogType.INFORMATION, "Received OnFocus Event from Salesforce. Details : "+JSON.stringify(responseFromSalesForce));
         if (salesforcePluginWindow != null) {
             var entity = {};
             if (lightning_enabled) {
@@ -159,6 +129,16 @@
             });
         }
     };
+
+    function logMessage(logType, message)
+    {
+        var msg = {
+            operation: salesforceBridgeAPIMethodNames.LOGS,
+            response : {logMessage : message, logType : logType}
+        };
+        if(salesforceAppWindow)
+            salesforceAppWindow.postMessage(JSON.stringify(msg), "*");
+    }
 
     function getEntityDetails(object, objectId, callback) {
         if (!object || !objectId) {
@@ -222,38 +202,18 @@
 
 
     function VerifyMode() {
-        // Extract dynamics domain address
         var fullUrl = document.location.href;
-        //AMCconsolelog("fullUrl= " + fullUrl);
-
         var tagsarray = fullUrl.split("&");
         for (var itr1 in tagsarray) {
             if (tagsarray[itr1].indexOf("mode") > 0) {
                 var splitframeOrigin = tagsarray[itr1].split("=");
                 if (splitframeOrigin.length == 2) {
-                    //uri_dec = decodeURIComponent(splitframeOrigin[1]);
                     if (splitframeOrigin[1] == "Lightning") {
                         lightning_enabled = true;
                     }
                 }
             }
         }
-    }
-    //add event cross browser
-    function addEvent(elem, event, fn) {
-        if (elem.addEventListener) {
-            elem.addEventListener(event, fn, false);
-        } else {
-            elem.attachEvent("on" + event, function () {
-                //  set the this pointer same as addEventListener when fn is called
-                return (fn.call(elem, window.event));
-            });
-        }
-    }
-
-    function registerCallback(method, callback) {
-        callbacks[method] = [callback];
-        return method;
     }
 
     function search(operation, objectId, objectType, cadString, queryString,
@@ -1110,6 +1070,8 @@
                     }
                 } else if (parseData.operation === salesforceBridgeAPIMethodNames.USER_INFO) {
                     getLoginUserInfo(event, parseData);
+                } else if (parseData.operation === salesforceBridgeAPIMethodNames.LOGS) {
+                    salesforceAppWindow = event.source;
                 }
             }
         } catch (err) {

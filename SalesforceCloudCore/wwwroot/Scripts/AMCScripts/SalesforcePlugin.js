@@ -1,48 +1,12 @@
 ﻿(function (AMCSalesforcePlugin) {
-
-    var Config = {};
-    var userID = '';
-    var lstTranscript = {};
-    var previousStatus = '';
-    var activityIdValue = '';
-    var enableAudio = false;
-    var enableVideo = false;
-    var customerName = "";
-    var customerInfo = "";
-    var dictChatName = {};
-    var dictChatMeetingDetails = {};
-    var objChatTranscript = '';
-    var lstMinMax = {};
-    var lstContacts = {};
-    var lstMeetings = {};
-    var lstEmailAddress = {};
-    var lstPreviousState = {};
-    var lstConversations = {};
-    var lstAddedListeners = {};
-    var lstPersons = {};
-    var lstPreviousAudioState = {};
-    var lstPreviousVideoState = {};
-    var lstAlertConversations = {};
-    var lstTransferRequests = {};
-    var lstVideoConversations = {};
-    var lstAudioConversations = {};
-    var lstRelations = {};
-    var lstPreviousHoldAudioState = {};
-    var lstPreviousParticipantHoldAudioState = {};
-    var lstPreviousMuteAudioState = {};
-    var lstPreviousParticipantMuteAudioState = {};
-    var lstMuteDisconnected = {};
-    var lstHoldDisconnected = {};
-    var lstDisplayContacts = {};
-    var lstPhones = {};
-    var lstContactData = {};
-
+    var logger = new ContactCanvasApplicationAPI.Logger("SalesforcePlugin.js");
+    var logger_bridge = new ContactCanvasApplicationAPI.Logger("SalesforceBridgeAPI.js");
     var maxRecordsDefault = 50;
-
     var scenarioInteractionMappings = {};
-
     var searchLayout = null;
     var screenpopControlOn = true;
+    var requests = {};
+    var sequenceId = 0;
 
     var salesforceBridgeAPIMethodNames = {
         SCREEN_POP: "SalesforceBridgeAPIScreenPop",
@@ -63,10 +27,10 @@
         IS_VISIBLE: "SalesforceBridgeIsVisible",
         SET_VISIBLE: "SalesforceBridgeSetVisible",
         USER_INFO: "SalesforceBridgeUSER_INFO",
+        LOGS: "SalesforceBridgeLOGS"
     };
 
-    var requests = {};// requestId -> callback
-    var sequenceId = 0;
+    
 
     $(document).ready(function () {
         if (window.addEventListener) {
@@ -74,14 +38,13 @@
         } else {
             window.attachEvent("onmessage", listener);
         }
+        logger.logVerbose('Loading bridge scripts -START-');
         ContactCanvasApplicationAPI.loadBridgeScripts([
                 "https://c.na1.visual.force.com/support/api/36.0/interaction.js",
                 "https://na15.salesforce.com/support/console/35.0/integration.js",
                 "https://gs0.lightning.force.com/support/api/38.0/lightning/opencti_min.js",
                 location.origin + "/Scripts/AMCScripts/SalesforceBridgeAPI.js",
             ]).then(LoadScriptComplete);
-        var data = {};
-        data.pluginIconPath = window.location.origin + window.location.pathname + "/Images/salesforce.png";
         ContactCanvasApplicationAPI.registerScreenpop(screenPop);
         ContactCanvasApplicationAPI.registerGlobalSearch(search);
         ContactCanvasApplicationAPI.registerGlobalSearchAndScreenpop(searchAndScreenpop);
@@ -90,28 +53,22 @@
         ContactCanvasApplicationAPI.registerSetSoftphoneHeight(setSoftPhoneHeight);
         ContactCanvasApplicationAPI.registerSetSoftphoneWidth(setSoftPhoneWidth);
         ContactCanvasApplicationAPI.registerGetSearchLayout(getSoftPhoneLayout);
-        // ContactCanvasApplicationAPI.registerGetApplicationSettings(getApplicationSettings);
         ContactCanvasApplicationAPI.registerGetPageInfo(getPageInfo);
         ContactCanvasApplicationAPI.registerSaveActivity(saveActivity);
         ContactCanvasApplicationAPI.registerIsToolbarVisible(isVisible);
-        // ContactCanvas.Application.registerSetToolbarVisible(ContactCanvas.Commons.getSequenceID(), setVisible);
-        // ContactCanvas.Application.addPluginImage(ContactCanvas.Commons.getSequenceID(), data, null);
 
         ContactCanvasApplicationAPI.registerScreenpopControlChanged(function (screenPopEnabled) {
+            logger.logVerbose('screenPopControlChanged Handlers: screenPopEnabled=' + screenPopEnabled);
             if (typeof screenPopEnabled == 'boolean') {
                 screenpopControlOn = screenPopEnabled;
                 return Promise.resolve();
             }
             return Promise.reject('Invalid parameters!');
         });
-        // ContactCanvas.Application.isScreenpopControlOn(function (msg) {
-        //     if (typeof msg.response.data.screenpopControlOn == 'boolean') {
-        //         screenpopControlOn = msg.response.data.screenpopControlOn;
-        //     }
-        // });
         ContactCanvasApplicationAPI.registerOnInteraction(onInteraction);
 
         ContactCanvasApplicationAPI.initializeComplete().then(function(config) {
+            logger.logVerbose('initializeComplete config: ' + JSON.stringify(config));
             maxRecordsDefault = parseInt(config.variables.maxRecordsDefault);
         });
     });
@@ -120,11 +77,41 @@
 
     function LoadScriptComplete()
     {
+        logger.logVerbose('Loading bridge scripts -END-');
         getUserInfo();
+        SendLogsInfoToBridge();
+    }
+
+    function SendLogsInfoToBridge()
+    {
+        var request = {
+            operation: salesforceBridgeAPIMethodNames.LOGS
+        };
+        window.parent.postMessage(JSON.stringify(request), "*");
+    }
+
+    function WriteBridgeLogs(response)
+    {
+        try
+        {
+            if(response.logType === 'Verbose')
+                logger_bridge.logVerbose(response.logMessage);
+            else if(response.logType === 'Information')
+                logger_bridge.logInformation(response.logMessage);
+            else if(response.logType === 'Error')
+                logger_bridge.logError(response.logMessage);
+            else if(response.logType === 'Warning')
+                logger_bridge.logWarning(response.logMessage);
+        }
+        catch(err)
+        {
+            logger.logError("Error in Writing Bridge Logs");
+        }
     }
 
     function onInteraction(interaction) {
         try {
+            logger.logVerbose('onInteraction -START-');
             var interactionId = interaction.interactionId;
             var scenarioIdInt = interaction.scenarioId;
             var isNewScenarioId = false;
@@ -134,7 +121,7 @@
                 isNewScenarioId = true;
             }
             scenarioInteractionMappings[scenarioIdInt][interactionId] = true;
-
+            logger.logInformation("Interaction Details : "+JSON.stringify(interaction));
             if ((interaction.state === ContactCanvasApplicationAPI.InteractionStates.Alerting || interaction.state === ContactCanvasApplicationAPI.InteractionStates.Connected)
                 && Object.keys(scenarioInteractionMappings).length < 2
                && isNewScenarioId
@@ -186,7 +173,6 @@
                                 }
                             }
 
-
                             if (cadValue && filterKey) {
                                 var request = {
                                     operation: salesforceBridgeAPIMethodNames.CAD_SEARCH_AND_SCREEN_POP,
@@ -206,8 +192,10 @@
                     delete scenarioInteractionMappings[scenarioIdInt];
                 }
             }
+            logger.logVerbose('onInteraction -END-');
         }
         catch (e) {
+            logger.logError('onInteraction error=' + e);
             return Promise.reject('Error=' + e.toString());
         }
         return Promise.resolve();
@@ -215,6 +203,7 @@
 
     function enableClickToDial(enabled) {
         return new Promise(function(resolve, reject) {
+            logger.logVerbose('enableClickToDial -START-');
             var requestId = getSequenceID();
             var request = { requestId: requestId };
             if(enabled) request['operation'] = salesforceBridgeAPIMethodNames.ENB_CLICK_TO_DIAL;
@@ -222,15 +211,18 @@
 
             var timeout = setTimeout(function() {
                 delete requests[requestId];
+                logger.logError('enableClickToDial: Timeout! Never received a response from salesforce!');
                 reject('Timeout: Never received a response from salesforce!')
             }, 30 * 1000);
             requests[requestId] = function(response) {
                 clearTimeout(timeout);
                 delete requests[requestId];
                 if(response.data.success){
+                    logger.logVerbose('enableClickToDial -END-');
                     resolve();
                 }
                 else{
+                    logger.logVerbose('enableClickToDial: Error returned from salesforce! error=' + JSON.stringify(response.errors));
                     reject('Error returned from salesforce! error=' + JSON.stringify(response.errors));
                 }
             };
@@ -246,12 +238,13 @@
             };
             window.parent.postMessage(JSON.stringify(request),"*");
         } catch (err) {
-            console.log("Error in getUserInfo. Exception Details : " + err.message);
+            logger.logError("Error in getUserInfo. Exception Details : " + err.message);
         }
     }
 
     function setSoftPhoneHeight(height) {
         return new Promise(function(resolve, reject) {
+            logger.logVerbose('setSoftPhoneHeight -START-');
             var requestId = getSequenceID();
             var request = {
                 operation: salesforceBridgeAPIMethodNames.SET_SP_HT,
@@ -261,15 +254,18 @@
 
             var timeout = setTimeout(function() {
                 delete requests[requestId];
+                logger.logError('setSoftPhoneHeight: Timeout! Never received a response from salesforce! -END-');
                 reject('Timeout: Never received a response from salesforce!')
             }, 30 * 1000);
             requests[requestId] = function(response) {
                 clearTimeout(timeout);
                 delete requests[requestId];
                 if(response.success){
+                    logger.logVerbose('setSoftPhoneHeight -END-');
                     resolve();
                 }
                 else{
+                    logger.logError('setSoftPhoneHeight : Error returned from salesforce! error=' + JSON.stringify(response.errors));
                     reject('Error returned from salesforce! error=' + JSON.stringify(response.errors));
                 }
             };
@@ -280,6 +276,7 @@
 
     function setSoftPhoneWidth(width) {
         return new Promise(function(resolve, reject) {
+            logger.logVerbose('setSoftPhoneWidth -START-');
             var requestId = getSequenceID();
             var request = {
                 operation: salesforceBridgeAPIMethodNames.SET_SP_WTH,
@@ -289,15 +286,18 @@
 
             var timeout = setTimeout(function() {
                 delete requests[requestId];
+                logger.logError('Timeout: Never received a response from salesforce!');
                 reject('Timeout: Never received a response from salesforce!')
             }, 30 * 1000);
             requests[requestId] = function(response) {
                 clearTimeout(timeout);
                 delete requests[requestId];
                 if(response.success){
+                    logger.logVerbose('setSoftPhoneWidth -END-');
                     resolve();
                 }
                 else{
+                    logger.logError('Error returned from salesforce! error=' + JSON.stringify(response.errors));
                     reject('Error returned from salesforce! error=' + JSON.stringify(response.errors));
                 }
             };
@@ -308,6 +308,7 @@
 
     function getSoftPhoneLayout() {
         return new Promise(function(resolve, reject) {
+            logger.logVerbose('getSoftPhoneLayout - START');
             if (searchLayout) {
                 resolve(searchLayout);
             } else {
@@ -319,18 +320,22 @@
 
                 var timeout = setTimeout(function() {
                     delete requests[requestId];
-                    reject('Timeout: Never received a response from salesforce!')
+                    logger.logError('Timeout: Never received a response from salesforce!');
+                    reject('Timeout: Never received a response from salesforce!');
                 }, 30 * 1000);
                 requests[requestId] = function(response) {
                     clearTimeout(timeout);
                     delete requests[requestId];
                     var data = response.data;
-                    if (data.returnValue) {
+                    if (data.returnValue) {                        
                         searchLayout = createLayouts(data.returnValue);
+                        logger.logVerbose('getSoftPhoneLayout - END');
                         resolve(searchLayout);
                     } else if (!data.errors) {
+                        logger.logError('Error returned from salesforce! error=' + JSON.stringify(response.errors));
                         reject('Error returned from salesforce! error=' + JSON.stringify(response.errors));
                     } else {
+                        logger.logVerbose('getSoftPhoneLayout - END');
                         resolve();
                     }
                 };
@@ -342,6 +347,7 @@
 
     function getApplicationSettings() {
         return new Promise(function(resolve, reject) {
+            logger.logVerbose('getApplicationSettings - START');
             if (searchLayout) {
                 resolve(searchLayout);
             } else {
@@ -353,15 +359,18 @@
 
                 var timeout = setTimeout(function() {
                     delete requests[requestId];
-                    reject('Timeout: Never received a response from salesforce!')
+                    logger.logError('Timeout: Never received a response from salesforce!');
+                    reject('Timeout: Never received a response from salesforce!');
                 }, 30 * 1000);
                 requests[requestId] = function(response) {
                     clearTimeout(timeout);
                     delete requests[requestId];
                     if (response.data.returnValue) {
                         var result = ContactCanvasApplicationAPI.ApplicationSettings(response.data.returnValue["/internalNameLabel"], response.data.returnValue["/displayNameLabel"], response.data.returnValue["/reqGeneralInfo/reqAdapterUrl"], response.data.returnValue["/reqGeneralInfo/reqStandbyUrl"], response.data.returnValue["/reqGeneralInfo/reqSoftphoneHeight"], response.data.returnValue["/reqGeneralInfo/reqSoftphoneWidth"], response.data.returnValue["/reqGeneralInfo/reqTimeout"]);
+                        logger.logVerbose('getApplicationSettings - END');
                         resolve(result);
                     } else {
+                        logger.logError('Salesforce did not return valid application settings!');
                         reject('Salesforce did not return valid application settings!');
                     }
                 };
@@ -373,6 +382,7 @@
 
     function getPageInfo() {
         return new Promise(function(resolve, reject) {
+            logger.logVerbose("getPageInfo - START");
             var requestId = getSequenceID();
             var request = {
                 operation: salesforceBridgeAPIMethodNames.GET_PAGE_INFO,
@@ -381,7 +391,8 @@
 
             var timeout = setTimeout(function() {
                 delete requests[requestId];
-                reject('Timeout: Never received a response from salesforce!')
+                logger.logError('Timeout: Never received a response from salesforce!');
+                reject('Timeout: Never received a response from salesforce!');
             }, 30 * 1000);
             requests[requestId] = function(response) {
                 var records = new ContactCanvasApplicationAPI.SearchRecords();
@@ -390,6 +401,7 @@
                     var infoItem = new ContactCanvasApplicationAPI.RecordItem(data[k].Id, data[k].attributes.type, data[k].Name);
                     records.addSearchRecord(infoItem);
                 });
+                logger.logVerbose("getPageInfo - END");
                 resolve(records);
             };
 
@@ -406,7 +418,7 @@
             };
             window.parent.postMessage(JSON.stringify(request), "*");
         } catch (err) {
-            console.log("Error in search. Exception Details : " + err.message);
+            logger.logError("clickToDial Error. Exception Details : " + err.message);
         }
     }
 
@@ -419,12 +431,13 @@
             };
             window.parent.postMessage(JSON.stringify(request), "*");
         } catch (err) {
-            console.log("Error in search. Exception Details : " + err.message);
+            logger.logError("Error in onFocus. Exception Details : " + err.message);
         }
     }
 
     function search(channel, direction, cad, query, maxRecords) {
         return new Promise(function(resolve, reject) {
+            logger.logVerbose('search - START');
             var requestId = getSequenceID();
             var request = {
                 operation: salesforceBridgeAPIMethodNames.SEARCH,
@@ -447,7 +460,8 @@
 
             var timeout = setTimeout(function() {
                 delete requests[requestId];
-                reject('Timeout: Never received a response from salesforce!')
+                logger.logError('search : Timeout: Never received a response from salesforce!');
+                reject('Timeout: Never received a response from salesforce!');
             }, 30 * 1000);
             requests[requestId] = function(response) {
                 clearTimeout(timeout);
@@ -455,9 +469,11 @@
                 if(response.success){
                     var data = JSON.parse(response.data.result);
                     var records = formatSearchResults(data);
+                    logger.logVerbose('search - END');
                     resolve(records);      
                 }
                 else{
+                    logger.logError('search : Error returned from salesforce! error=' + JSON.stringify(response.errors));
                     reject('Error returned from salesforce! error=' + JSON.stringify(response.errors));
                 }
             }; 
@@ -468,6 +484,7 @@
 
     function cadSearch(channel, direction, cadValue, objectFields, objectType, maxRecords) {
         return new Promise(function(resolve, reject) {
+            logger.logVerbose('cadSearch - START');
             var requestId = getSequenceID();
             var request = {
                 operation: salesforceBridgeAPIMethodNames.CAD_SEARCH,
@@ -489,7 +506,8 @@
 
             var timeout = setTimeout(function() {
                 delete requests[requestId];
-                reject('Timeout: Never received a response from salesforce!')
+                logger.logError('cadSearch : Timeout: Never received a response from salesforce!');
+                reject('Timeout: Never received a response from salesforce!');
             }, 30 * 1000);
             requests[requestId] = function(response) {
                 clearTimeout(timeout);
@@ -497,9 +515,11 @@
                 if(response.success){
                     var data = JSON.parse(response.data.result);
                     var records = formatSearchResults(data);
+                    logger.logVerbose('cadSearch - END');
                     resolve(records);      
                 }
                 else{
+                    logger.logError('cadSearch : Error returned from salesforce! error=' + JSON.stringify(response.errors));
                     reject('Error returned from salesforce! error=' + JSON.stringify(response.errors));
                 }
             }; 
@@ -510,6 +530,7 @@
 
     function searchAndScreenpop(channel, direction, cad, query, maxRecords) {
         return new Promise(function(resolve, reject) {
+            logger.logVerbose('searchAndScreenpop - START');
             var request = {
                 operation: salesforceBridgeAPIMethodNames.SEARCH_AND_SCREEN_POP,
                 cadString: cad,
@@ -531,6 +552,7 @@
 
             var timeout = setTimeout(function() {
                 delete requests[requestId];
+                logger.logError('searchAndScreenpop : Timeout! Never received a response from salesforce!');
                 reject('Timeout: Never received a response from salesforce!')
             }, 30 * 1000);
             requests[requestId] = function(response) {
@@ -539,9 +561,11 @@
                 if(response.success){
                     var data = JSON.parse(response.data.result);
                     var records = formatSearchResults(data);
+                    logger.logVerbose('searchAndScreenpop - END');
                     resolve(records);      
                 }
                 else{
+                    logger.logError('searchAndScreenpop : Error returned from salesforce! error=' + JSON.stringify(response.errors));
                     reject('Error returned from salesforce! error=' + JSON.stringify(response.errors));
                 }
             }; 
@@ -553,7 +577,7 @@
 
     function screenPop(channel, direction, objectId, objectType) {
         return new Promise(function(resolve, reject ) {
-            console.log("Start : screenPop");
+            logger.logVerbose("screenPop - START");
             if (screenpopControlOn) {
                 var requestId = getSequenceID();
                 var request = {
@@ -576,15 +600,18 @@
                 
                 var timeout = setTimeout(function() {
                     delete requests[requestId];
-                    reject('Timeout: Never received a response from salesforce!')
+                    logger.logError('screenPop : Timeout! Never received a response from salesforce!');
+                    reject('Timeout: Never received a response from salesforce!');
                 }, 30 * 1000);
                 requests[requestId] = function(response) {
                     clearTimeout(timeout);
                     delete requests[requestId];
                     if(response.success){
+                        logger.logVerbose("screenPop - END");
                         resolve();                        
                     }
                     else{
+                        logger.logError('screenPop : Error returned from salesforce! error=' + JSON.stringify(response.errors));
                         reject('Error returned from salesforce! error=' + JSON.stringify(response.errors));
                     }
                 };       
@@ -787,8 +814,11 @@
                     ContactCanvasApplicationAPI.onFocus(records);
                 }
             }
+            else if(parseData.operation === salesforceBridgeAPIMethodNames.LOGS) {
+                WriteBridgeLogs(parseData.response);
+            }
         } catch (err) {
-            console.log("Error in listener. Exception details: " + err.message);
+            logger.logError("Error in listener. Exception details: " + err.message);
         }
     }
    
