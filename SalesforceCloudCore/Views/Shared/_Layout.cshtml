@@ -4,7 +4,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Salesforce</title>
-
+    <script src="~/vendor/vendor.js" type="test/javascript"></script>
 </head>
 <body>    
     <div class="container body-content">
@@ -20,7 +20,7 @@
     <script src="https://code.jquery.com/ui/1.11.1/jquery-ui.min.js"></script>
     <link rel="stylesheet" href="https://code.jquery.com/ui/1.11.1/themes/smoothness/jquery-ui.css" /> 
     @{ string frameworkUrl = Environment.GetEnvironmentVariable("FRAMEWORK_URL");}
-    @{var apiLocation = frameworkUrl + "/Scripts/bundles/AMCAppPluginAPI.js";}
+    @{var apiLocation = frameworkUrl + "/Scripts/bundles/ApplicationAPI.js";}
     <script src="@apiLocation" type="text/javascript"></script>    
     <script src="~/Scripts/AMCScripts/SalesforcePlugin.js" type="text/javascript"></script>
     @RenderSection("scripts", required: false)

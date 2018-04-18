@@ -1,43 +1,7 @@
 ﻿(function (AMCSalesforceBridge) {
     var isSalesforceAPILoaded = false;
-    var userID = '';
-    var lstTranscript = {};
-    var previousStatus = '';
-    var activityIdValue = '';
-    var enableAudio = false;
-    var enableVideo = false;
-    var customerName = "";
-    var customerInfo = "";
-    var dictChatName = {};
-    var dictChatMeetingDetails = {};
-    var objChatTranscript = '';
-    var lstMinMax = {};
-    var lstContacts = {};
-    var lstMeetings = {};
-    var lstEmailAddress = {};
-    var lstPreviousState = {};
-    var lstConversations = {};
-    var lstAddedListeners = {};
-    var lstPersons = {};
-    var lstPreviousAudioState = {};
-    var lstPreviousVideoState = {};
-    var lstAlertConversations = {};
-    var lstTransferRequests = {};
-    var lstVideoConversations = {};
-    var lstAudioConversations = {};
-    var lstRelations = {};
-    var lstPreviousHoldAudioState = {};
-    var lstPreviousParticipantHoldAudioState = {};
-    var lstPreviousMuteAudioState = {};
-    var lstPreviousParticipantMuteAudioState = {};
-    var lstMuteDisconnected = {};
-    var lstHoldDisconnected = {};
-    var lstDisplayContacts = {};
-    var lstPhones = {};
-    var lstContactData = {};
     var listenerEventsQueue = [];
-    var CLICK_TO_DIAL_EVENT = 'clickToDialEvent';
-    var ON_FOCUS_EVENT = 'onFocusEvent';
+    var salesforceAppWindow;
 
 
     var lightning_enabled = false;
@@ -60,8 +24,12 @@
         IS_VISIBLE: "SalesforceBridgeIsVisible",
         SET_VISIBLE: "SalesforceBridgeSetVisible",
         USER_INFO: "SalesforceBridgeUSER_INFO",
+        LOGS: "SalesforceBridgeLOGS"
     };
 
+    var LogType = {VERBOSE : "Verbose", WARNING : "Warning", ERROR : "Error", INFORMATION : "Information"};
+
+    logMessage(LogType.VERBOSE, "Loading Salesforce Bridge File");
 
     if (window.addEventListener) {
         window.addEventListener("message", listener, false);
@@ -96,11 +64,12 @@
         }
         isSalesforceAPILoaded = true;
         processListenerQueueEvents();
-        
+        logMessage(LogType.VERBOSE,"Salesforce API loaded. Is Lightning Enabled : "+lightning_enabled);
     }
 
     var salesforcePluginWindow = null;
     var clickToDialListener = function (responseFromSalesForce) {
+        logMessage(LogType.INFORMATION, "Received Click to Dial Eventb from Salesforce. Details : "+JSON.stringify(responseFromSalesForce));
         if (salesforcePluginWindow != null) {
             var entity = {};
             var number = "";
@@ -138,6 +107,7 @@
     }
 
     var onFocusListener = function (responseFromSalesForce) {
+        logMessage(LogType.INFORMATION, "Received OnFocus Event from Salesforce. Details : "+JSON.stringify(responseFromSalesForce));
         if (salesforcePluginWindow != null) {
             var entity = {};
             if (lightning_enabled) {
@@ -159,6 +129,16 @@
             });
         }
     };
+
+    function logMessage(logType, message)
+    {
+        var msg = {
+            operation: salesforceBridgeAPIMethodNames.LOGS,
+            response : {logMessage : message, logType : logType}
+        };
+        if(salesforceAppWindow)
+            salesforceAppWindow.postMessage(JSON.stringify(msg), "*");
+    }
 
     function getEntityDetails(object, objectId, callback) {
         if (!object || !objectId) {
@@ -222,38 +202,18 @@
 
 
     function VerifyMode() {
-        // Extract dynamics domain address
         var fullUrl = document.location.href;
-        //AMCconsolelog("fullUrl= " + fullUrl);
-
         var tagsarray = fullUrl.split("&");
         for (var itr1 in tagsarray) {
             if (tagsarray[itr1].indexOf("mode") > 0) {
                 var splitframeOrigin = tagsarray[itr1].split("=");
                 if (splitframeOrigin.length == 2) {
-                    //uri_dec = decodeURIComponent(splitframeOrigin[1]);
                     if (splitframeOrigin[1] == "Lightning") {
                         lightning_enabled = true;
                     }
                 }
             }
         }
-    }
-    //add event cross browser
-    function addEvent(elem, event, fn) {
-        if (elem.addEventListener) {
-            elem.addEventListener(event, fn, false);
-        } else {
-            elem.attachEvent("on" + event, function () {
-                //  set the this pointer same as addEventListener when fn is called
-                return (fn.call(elem, window.event));
-            });
-        }
-    }
-
-    function registerCallback(method, callback) {
-        callbacks[method] = [callback];
-        return method;
     }
 
     function search(operation, objectId, objectType, cadString, queryString,
@@ -372,12 +332,12 @@
                     //var returnObject = response.returnValue;
                     //_salesforceWorkTop = returnObject.runApex;
 
-                    parseData.msg = {};
-                    parseData.msg.response = {};
-                    parseData.msg.response.data = {userinfo : response.returnValue.runApex};
+                    parseData = {};
+                    parseData.response = {};
+                    parseData.response.data = {userinfo : response.returnValue.runApex};
                     var msg = {
                         operation: parseData.operation,
-                        response: parseData.msg,
+                        response: parseData,
                         request: parseData,
                     };
                     event.source.postMessage(JSON.stringify(msg), event.origin);
@@ -393,12 +353,12 @@
             } else {
                 //_salesforceWorkTop = response.result;
 
-                parseData.msg = {};
-                parseData.msg.response = {};
-                parseData.msg.response.data = {userinfo : response.result};
+                parseData = {};
+                parseData.response = {};
+                parseData.response.data = {userinfo : response.result};
                 var msg = {
                     operation: parseData.operation,
-                    response: parseData.msg,
+                    response: parseData,
                     request: parseData,
                 };
                 event.source.postMessage(JSON.stringify(msg), event.origin);
@@ -425,23 +385,23 @@
                     salesforcePluginWindow = event.source;
                     var callback = function (response) {
                         if (lightning_enabled) {
-                            parseData.msg.response = {};
-                            parseData.msg.response.data = {
+                            parseData.response = {};
+                            parseData.response.data = {
                                 success: response.success,
                                 errors: response.errors
                             };
                         } else {
-                            parseData.msg.response = {};
-                            parseData.msg.response.data = {};
-                            parseData.msg.response.data.success = response.result;
-                            parseData.msg.response.data.errors = null;
+                            parseData.response = {};
+                            parseData.response.data = {};
+                            parseData.response.data.success = response.result;
+                            parseData.response.data.errors = null;
                             if (response.error) {
-                                parseData.msg.response.data.errors = [response.error];
+                                parseData.response.data.errors = [response.error];
                             }
                         }
                         var msg = {
                             operation: parseData.operation,
-                            response: parseData.msg
+                            response: parseData
                         };
                         event.source.postMessage(JSON.stringify(msg), event.origin);
                     };
@@ -466,11 +426,11 @@
 
                         screenPopObject.callback = function (response) {
                             response.result = JSON.stringify(response.returnValue);
-                            parseData.msg.response = {};
-                            parseData.msg.response.data = response;
+                            parseData.response = {};
+                            parseData.response.data = response;
                             var msg = {
                                 operation: parseData.operation,
-                                response: parseData.msg
+                                response: parseData
                                 // request: parseData,
                             };
                             event.source.postMessage(JSON.stringify(msg), event.origin);
@@ -494,11 +454,11 @@
                         sforce.opencti.searchAndScreenPop(screenPopObject);
                     } else {
                         sforce.interaction.searchAndGetScreenPopUrl(parseData.queryString, parseData.cadString, parseData.interactionDirection, function (response) {
-                            parseData.msg.response = {};
-                            parseData.msg.response.data = response;
+                            parseData.response = {};
+                            parseData.response.data = response;
                             var msg = {
                                 operation: parseData.operation,
-                                response: parseData.msg
+                                response: parseData
                                 // request: parseData,
                             };
                             event.source.postMessage(JSON.stringify(msg), event.origin);
@@ -513,11 +473,11 @@
 
                         screenPopObject.callback = function (response) {
                             response.result = JSON.stringify(response.returnValue);
-                            parseData.msg.response = {};
-                            parseData.msg.response.data = response;
+                            parseData.response = {};
+                            parseData.response.data = response;
                             var msg = {
                                 operation: parseData.operation,
-                                response: parseData.msg
+                                response: parseData
                                 // request: parseData,
                             };
                             event.source.postMessage(JSON.stringify(msg), event.origin);
@@ -542,22 +502,22 @@
                     } else {
                         if (deferred) {
                             sforce.interaction.searchAndGetScreenPopUrl(parseData.queryString, parseData.cadString, parseData.interactionDirection, function (response) {
-                                parseData.msg.response = {};
-                                parseData.msg.response.data = response;
+                                parseData.response = {};
+                                parseData.response.data = response;
                                 var msg = {
                                     operation: parseData.operation,
-                                    response: parseData.msg
+                                    response: parseData
                                     //request: parseData,
                                 };
                                 event.source.postMessage(JSON.stringify(msg), event.origin);
                             }); //queryString, callType, cadString
                         } else {
                             sforce.interaction.searchAndScreenPop(parseData.queryString, parseData.cadString, parseData.interactionDirection, function (response) {
-                                parseData.msg.response = {};
-                                parseData.msg.response.data = response;
+                                parseData.response = {};
+                                parseData.response.data = response;
                                 var msg = {
                                     operation: parseData.operation,
-                                    response: parseData.msg
+                                    response: parseData
                                     //request: parseData,
                                 };
                                 event.source.postMessage(JSON.stringify(msg), event.origin);
@@ -582,11 +542,11 @@
                             } else {
                                 response.response = [];
                             }
-                            parseData.msg.response = {};
-                            parseData.msg.response.data = response;
+                            parseData.response = {};
+                            parseData.response.data = response;
                             var msg = {
                                 operation: parseData.operation,
-                                response: parseData.msg
+                                response: parseData
                                 //request: parseData,
                             };
                             event.source.postMessage(JSON.stringify(msg), event.origin);
@@ -595,11 +555,11 @@
                         sforce.opencti.runApex(cadSearchRequest);
                     } else {
                         sforce.interaction.runApex("AMCOpenCTINS.ObjectRetrieval", "getObject", query, function (response) {
-                            parseData.msg.response = {};
-                            parseData.msg.response.data = response;
+                            parseData.response = {};
+                            parseData.response.data = response;
                             var msg = {
                                 operation: parseData.operation,
-                                response: parseData.msg
+                                response: parseData
                                 // request: parseData,
                             };
                             event.source.postMessage(JSON.stringify(msg), event.origin);
@@ -665,20 +625,20 @@
                     if (lightning_enabled) {
                         sforce.opencti.enableClickToDial({
                             callback: function (response) {
-                                parseData.msg.response = {};
-                                parseData.msg.response.data = {
+                                parseData.response = {};
+                                parseData.response.data = {
                                     success: response.success,
                                     errors: null
                                 };
                                 if (response.errors) {
-                                    parseData.msg.response.data.errors = [];
+                                    parseData.response.data.errors = [];
                                     for (var i in response.errors) {
-                                        parseData.msg.response.data.errors.push(response.errors[i].description);
+                                        parseData.response.data.errors.push(response.errors[i].description);
                                     }
                                 }
                                 var msg = {
                                     operation: parseData.operation,
-                                    response: parseData.msg,
+                                    response: parseData,
                                     request: parseData,
                                 };
                                 event.source.postMessage(JSON.stringify(msg), event.origin);
@@ -686,18 +646,18 @@
                         });
                     } else {
                         sforce.interaction.cti.enableClickToDial(function (response) {
-                            parseData.msg.response = {};
-                            parseData.msg.response.data = {
+                            parseData.response = {};
+                            parseData.response.data = {
                                 success: response.result,
                                 errors: null
                             };
                             if (response.error) {
-                                parseData.msg.response.data.errors = [response.error];
+                                parseData.response.data.errors = [response.error];
                             }
 
                             var msg = {
                                 operation: parseData.operation,
-                                response: parseData.msg,
+                                response: parseData,
                                 request: parseData,
                             };
                             event.source.postMessage(JSON.stringify(msg), event.origin);
@@ -708,20 +668,20 @@
                     if (lightning_enabled) {
                         sforce.opencti.disableClickToDial({
                             callback: function (response) {
-                                parseData.msg.response = {};
-                                parseData.msg.response.data = {
+                                parseData.response = {};
+                                parseData.response.data = {
                                     success: response.success,
                                     errors: null
                                 };
                                 if (response.errors) {
-                                    parseData.msg.response.data.errors = [];
+                                    parseData.response.data.errors = [];
                                     for (var i in response.errors) {
-                                        parseData.msg.response.data.errors.push(response.errors[i].description);
+                                        parseData.response.data.errors.push(response.errors[i].description);
                                     }
                                 }
                                 var msg = {
                                     operation: parseData.operation,
-                                    response: parseData.msg,
+                                    response: parseData,
                                     request: parseData,
                                 };
                                 event.source.postMessage(JSON.stringify(msg), event.origin);
@@ -729,18 +689,18 @@
                         });
                     } else {
                         sforce.interaction.cti.disableClickToDial(function (response) {
-                            parseData.msg.response = {};
-                            parseData.msg.response.data = {
+                            parseData.response = {};
+                            parseData.response.data = {
                                 success: response.result,
                                 errors: null
                             };
                             if (response.error) {
-                                parseData.msg.response.data.errors = [response.error];
+                                parseData.response.data.errors = [response.error];
                             }
 
                             var msg = {
                                 operation: parseData.operation,
-                                response: parseData.msg,
+                                response: parseData,
                                 request: parseData,
                             };
                             event.source.postMessage(JSON.stringify(msg), event.origin);
@@ -748,117 +708,117 @@
                     }
                 } else if (parseData.operation === salesforceBridgeAPIMethodNames.SET_SP_HT) {
                     salesforcePluginWindow = event.source;
-                    if (parseData.msg.request.data.height) {
+                    if (parseData.request.data.height) {
                         if (lightning_enabled) {
                             var setSoftphoneHeightObject = {};
-                            setSoftphoneHeightObject.heightPX = parseData.msg.request.data.height;
+                            setSoftphoneHeightObject.heightPX = parseData.request.data.height;
                             setSoftphoneHeightObject.callback = function (response) {
-                                parseData.msg.response = {};
-                                parseData.msg.response.data = {
+                                parseData.response = {};
+                                parseData.response.data = {
                                     success: response.success,
                                     errors: null
                                 };
                                 if (response.errors) {
-                                    parseData.msg.response.data.errors = [];
+                                    parseData.response.data.errors = [];
                                     for (var i in response.errors) {
-                                        parseData.msg.response.data.errors.push(response.errors[i].description);
+                                        parseData.response.data.errors.push(response.errors[i].description);
                                     }
                                 }
                                 var msg = {
                                     operation: parseData.operation,
-                                    response: parseData.msg,
+                                    response: parseData,
                                     request: parseData,
                                 };
                                 event.source.postMessage(JSON.stringify(msg), event.origin);
                             };
                             sforce.opencti.setSoftphonePanelHeight(setSoftphoneHeightObject);
                         } else {
-                            sforce.interaction.cti.setSoftphoneHeight(parseData.msg.request.data.height, function (response) {
-                                parseData.msg.response = {};
-                                parseData.msg.response.data = {
+                            sforce.interaction.cti.setSoftphoneHeight(parseData.request.data.height, function (response) {
+                                parseData.response = {};
+                                parseData.response.data = {
                                     success: response.result,
                                     errors: null
                                 };
                                 if (response.error) {
-                                    parseData.msg.response.data.errors = [response.error];
+                                    parseData.response.data.errors = [response.error];
                                 }
 
                                 var msg = {
                                     operation: parseData.operation,
-                                    response: parseData.msg,
+                                    response: parseData,
                                     request: parseData,
                                 };
                                 event.source.postMessage(JSON.stringify(msg), event.origin);
                             }); //queryString, callType, cadString
                         }
                     } else {
-                        parseData.msg.response = {};
-                        parseData.msg.response.data = {
+                        parseData.response = {};
+                        parseData.response.data = {
                             success: false,
                             errors: ["No height parameter passed!"]
                         };
                         var msg = {
                             operation: parseData.operation,
-                            response: parseData.msg,
+                            response: parseData,
                             request: parseData,
                         };
                         event.source.postMessage(JSON.stringify(msg), event.origin);
                     }
                 } else if (parseData.operation === salesforceBridgeAPIMethodNames.SET_SP_WTH) {
                     salesforcePluginWindow = event.source;
-                    if (parseData.msg.request.data.width) {
+                    if (parseData.request.data.width) {
                         if (lightning_enabled) {
                             var setSoftphoneWidthObject = {};
-                            setSoftphoneWidthObject.widthPX = parseData.msg.request.data.width;
+                            setSoftphoneWidthObject.widthPX = parseData.request.data.width;
                             setSoftphoneWidthObject.callback = function (response) {
-                                parseData.msg.response = {};
-                                parseData.msg.response.data = {
+                                parseData.response = {};
+                                parseData.response.data = {
                                     success: response.success,
                                     errors: null
                                 };
                                 if (response.errors) {
-                                    parseData.msg.response.data.errors = [];
+                                    parseData.response.data.errors = [];
                                     for (var i in response.errors) {
-                                        parseData.msg.response.data.errors.push(response.errors[i].description);
+                                        parseData.response.data.errors.push(response.errors[i].description);
                                     }
                                 }
 
                                 var msg = {
                                     operation: parseData.operation,
-                                    response: parseData.msg,
+                                    response: parseData,
                                     request: parseData,
                                 };
                                 event.source.postMessage(JSON.stringify(msg), event.origin);
                             };
                             sforce.opencti.setSoftphonePanelWidth(setSoftphoneWidthObject);
                         } else {
-                            sforce.interaction.cti.setSoftphoneWidth(parseData.msg.request.data.width, function (response) {
-                                parseData.msg.response = {};
-                                parseData.msg.response.data = {
+                            sforce.interaction.cti.setSoftphoneWidth(parseData.request.data.width, function (response) {
+                                parseData.response = {};
+                                parseData.response.data = {
                                     success: response.result,
                                     errors: null
                                 };
                                 if (response.error) {
-                                    parseData.msg.response.data.errors = [response.error];
+                                    parseData.response.data.errors = [response.error];
                                 }
 
                                 var msg = {
                                     operation: parseData.operation,
-                                    response: parseData.msg,
+                                    response: parseData,
                                     request: parseData,
                                 };
                                 event.source.postMessage(JSON.stringify(msg), event.origin);
                             }); //queryString, callType, cadString
                         }
                     } else {
-                        parseData.msg.response = {};
-                        parseData.msg.response.data = {
+                        parseData.response = {};
+                        parseData.response.data = {
                             success: false,
                             errors: ["No width parameter passed!"]
                         };
                         var msg = {
                             operation: parseData.operation,
-                            response: parseData.msg,
+                            response: parseData,
                             request: parseData,
                         };
                         event.source.postMessage(JSON.stringify(msg), event.origin);
@@ -869,11 +829,11 @@
                     if (lightning_enabled) {
                         sforce.opencti.getSoftphoneLayout({
                             callback: function (response) {
-                                parseData.msg.response = {};
-                                parseData.msg.response.data = response;
+                                parseData.response = {};
+                                parseData.response.data = response;
                                 var msg = {
                                     operation: parseData.operation,
-                                    response: parseData.msg,
+                                    response: parseData,
                                     request: parseData,
                                 };
                                 event.source.postMessage(JSON.stringify(msg), event.origin);
@@ -881,13 +841,13 @@
                         });
                     } else {
                         sforce.interaction.cti.getSoftphoneLayout(function (response) {
-                            parseData.msg.response = {};
-                            parseData.msg.response.data = {
+                            parseData.response = {};
+                            parseData.response.data = {
                                 returnValue: JSON.parse(response.result)
                             };
                             var msg = {
                                 operation: parseData.operation,
-                                response: parseData.msg,
+                                response: parseData,
                                 request: parseData,
                             };
                             event.source.postMessage(JSON.stringify(msg), event.origin);
@@ -898,11 +858,11 @@
                     if (lightning_enabled) {
                         sforce.opencti.getCallCenterSettings({
                             callback: function (response) {
-                                parseData.msg.response = {};
-                                parseData.msg.response.data = response;
+                                parseData.response = {};
+                                parseData.response.data = response;
                                 var msg = {
                                     operation: parseData.operation,
-                                    response: parseData.msg,
+                                    response: parseData,
                                     // request: parseData,
                                 };
                                 event.source.postMessage(JSON.stringify(msg), event.origin);
@@ -910,13 +870,13 @@
                         });
                     } else {
                         sforce.interaction.cti.getCallCenterSettings(function (response) {
-                            parseData.msg.response = {};
-                            parseData.msg.response.data = {
+                            parseData.response = {};
+                            parseData.response.data = {
                                 returnValue: JSON.parse(response.result)
                             };
                             var msg = {
                                 operation: parseData.operation,
-                                response: parseData.msg,
+                                response: parseData,
                                 // request: parseData,
                             };
                             event.source.postMessage(JSON.stringify(msg), event.origin);
@@ -936,14 +896,14 @@
                         }
                         getEntityDetails(entity.object, entity.objectId, function (res) {
                             if (res) {
-                                parseData.msg.response = {};
-                                parseData.msg.response.data = {
+                                parseData.response = {};
+                                parseData.response.data = {
                                     url: url,
                                     records: res
                                 };
                                 var msg = {
                                     operation: parseData.operation,
-                                    response: parseData.msg,
+                                    response: parseData,
                                     // request: parseData,
                                 };
                                 event.source.postMessage(JSON.stringify(msg), event.origin);
@@ -990,15 +950,15 @@
                                 };
                             }
                         }
-                        parseData.msg.response = {};
-                        parseData.msg.response.data = {
+                        parseData.response = {};
+                        parseData.response.data = {
                             success: success,
                             entity: entity,
                             errors: errors
                         };
                         var msg = {
                             operation: parseData.operation,
-                            response: parseData.msg,
+                            response: parseData,
                             request: parseData,
                         };
                         event.source.postMessage(JSON.stringify(msg), event.origin);
@@ -1046,15 +1006,15 @@
                                 visible = response.result;
                             }
                         }
-                        parseData.msg.response = {};
-                        parseData.msg.response.data = {
+                        parseData.response = {};
+                        parseData.response.data = {
                             success: success,
                             visible: visible,
                             errors: errors
                         };
                         var msg = {
                             operation: parseData.operation,
-                            response: parseData.msg,
+                            response: parseData,
                             request: parseData,
                         };
                         event.source.postMessage(JSON.stringify(msg), event.origin);
@@ -1087,14 +1047,14 @@
                                 success = true;
                             }
                         }
-                        parseData.msg.response = {};
-                        parseData.msg.response.data = {
+                        parseData.response = {};
+                        parseData.response.data = {
                             success: success,
                             errors: errors
                         };
                         var msg = {
                             operation: parseData.operation,
-                            response: parseData.msg,
+                            response: parseData,
                             request: parseData,
                         };
                         event.source.postMessage(JSON.stringify(msg), event.origin);
@@ -1102,14 +1062,16 @@
 
                     if (lightning_enabled) {
                         sforce.opencti.setSoftphonePanelVisibility({
-                            visible: parseData.msg.request.data.visible,
+                            visible: parseData.request.data.visible,
                             callback: callback
                         });
                     } else {
-                        sforce.interaction.setVisible(parseData.msg.request.data.visible, callback);
+                        sforce.interaction.setVisible(parseData.request.data.visible, callback);
                     }
                 } else if (parseData.operation === salesforceBridgeAPIMethodNames.USER_INFO) {
                     getLoginUserInfo(event, parseData);
+                } else if (parseData.operation === salesforceBridgeAPIMethodNames.LOGS) {
+                    salesforceAppWindow = event.source;
                 }
             }
         } catch (err) {
