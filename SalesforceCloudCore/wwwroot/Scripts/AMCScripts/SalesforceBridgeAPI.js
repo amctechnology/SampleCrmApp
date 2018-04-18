@@ -233,7 +233,7 @@
             }
             window.parent.postMessage(JSON.stringify(msg), "*");
         } catch (err) {
-            console.log("Error in search. Exception Details : " + err.message);
+            logMessage(LogType.ERROR,"Error in search. Exception Details : " + err.message);
         }
     }
 
@@ -254,7 +254,7 @@
             }
             window.parent.postMessage(JSON.stringify(msg), "*");
         } catch (err) {
-            console.log("Error in cadSearch. Exception Details : " + err.message);
+            logMessage(LogType.ERROR, "Error in cadSearch. Exception Details : " + err.message);
         }
     }
 
@@ -275,14 +275,13 @@
             }
             window.parent.postMessage(JSON.stringify(msg), "*");
         } catch (err) {
-            console.log("Error in searchAndScreenpop. Exception Details : " + err.message);
+            logMessage(LogType.ERROR,"Error in searchAndScreenpop. Exception Details : " + err.message);
         }
     }
 
 
     function screenPop(popType, objectId, objectType, cadString, filterKey, cadValue, queryString, interactionDirection, callMode) {
         try {
-            console.log("Start : screenPop");
             var msg = {
                 type: popType,
                 message: "screenPop",
@@ -296,9 +295,8 @@
                 callMode: callMode,
             }
             window.parent.postMessage(JSON.stringify(msg), "*");
-            console.log("End : screenPop");
         } catch (err) {
-            console.log("Error in screenPop. Exception details: " + err.message);
+            logMessage(LogType.ERROR, "Error in screenPop. Exception details: " + err.message);
         }
     }
 
@@ -315,23 +313,21 @@
             } else {
                 sforce.interaction.runApex("UserInfo", "getUserName", "", function (response) { getLoginUserInfoCallback(response, event, parseData) });
             }
-        } catch (err) { }
+        } catch (err) { 
+            logMessage(LogType.Error, "Error in getLoginUserInfo. Details : "+err.message);
+        }
     }
 
     var getLoginUserInfoCallback = function (response, event, parseData) {
         if (lightning_enabled) {
             if (response.errors) {
                 for (var i = 0; i < response.errors.length; i++) {
-                    //amcEvents.handleVoiceError("Failed to get UserName Code - " + response.errors[i].code + " : Description: " + response.errors[i].description);
-                    console.log("Failed to get UserName Code - " + response.errors[i].code + " : Description: " + response.errors[i].description);
+                    logMessage(LogType.Error, "Failed to get UserName Code - " + response.errors[i].code + " : Description: " + response.errors[i].description);
                 }
 
             }
             else {
                 if (response.success == true) {
-                    //var returnObject = response.returnValue;
-                    //_salesforceWorkTop = returnObject.runApex;
-
                     parseData = {};
                     parseData.response = {};
                     parseData.response.data = {userinfo : response.returnValue.runApex};
@@ -341,18 +337,15 @@
                         request: parseData,
                     };
                     event.source.postMessage(JSON.stringify(msg), event.origin);
-                    //getCallCenterSettings();
                 }
                 else {
-                    console.log("Failed to get UserName");
+                    logMessage(LogType.Error, "Failed to get UserName");
                 }
             }
         } else {
             if (response.error) {
-                console.log("Failed to get UserName - " + response.error);
+                logMessage(LogType.Error, "Failed to get UserName - " + response.error);
             } else {
-                //_salesforceWorkTop = response.result;
-
                 parseData = {};
                 parseData.response = {};
                 parseData.response.data = {userinfo : response.result};
@@ -362,7 +355,6 @@
                     request: parseData,
                 };
                 event.source.postMessage(JSON.stringify(msg), event.origin);
-                //getCallCenterSettings();
             }
         }
     }
@@ -374,7 +366,6 @@
                 return;
             }
             var parseData = JSON.parse(options);
-            // salesforcePluginWindow = event.source;
             if (parseData != undefined) {
                 if (!isSalesforceAPILoaded)
                 {
@@ -382,6 +373,7 @@
                     return;
                 }
                 if (parseData.operation === salesforceBridgeAPIMethodNames.SCREEN_POP) {
+                    logMessage(LogType.INFORMATION, "Received event from Salesforce App. Details : "+JSON.stringify(parseData));
                     salesforcePluginWindow = event.source;
                     var callback = function (response) {
                         if (lightning_enabled) {
@@ -420,6 +412,7 @@
                         sforce.interaction.screenPop("/" + parseData.objectId, true, callback);
                     }
                 } else if (parseData.operation === salesforceBridgeAPIMethodNames.SEARCH) {
+                    logMessage(LogType.INFORMATION, "Received event from Salesforce App. Details : "+JSON.stringify(parseData));
                     salesforcePluginWindow = event.source;
                     if (lightning_enabled) {
                         var screenPopObject = {};
@@ -431,7 +424,6 @@
                             var msg = {
                                 operation: parseData.operation,
                                 response: parseData
-                                // request: parseData,
                             };
                             event.source.postMessage(JSON.stringify(msg), event.origin);
                         };
@@ -459,13 +451,13 @@
                             var msg = {
                                 operation: parseData.operation,
                                 response: parseData
-                                // request: parseData,
                             };
                             event.source.postMessage(JSON.stringify(msg), event.origin);
                         });
 
                     }
                 } else if (parseData.operation === salesforceBridgeAPIMethodNames.SEARCH_AND_SCREEN_POP) {
+                    logMessage(LogType.INFORMATION, "Received event from Salesforce App. Details : "+JSON.stringify(parseData));
                     salesforcePluginWindow = event.source;
                     var deferred = typeof parseData.screenpop === 'boolean' ? !parseData.screenpop : false;
                     if (lightning_enabled) {
@@ -478,7 +470,6 @@
                             var msg = {
                                 operation: parseData.operation,
                                 response: parseData
-                                // request: parseData,
                             };
                             event.source.postMessage(JSON.stringify(msg), event.origin);
                         };
@@ -507,10 +498,9 @@
                                 var msg = {
                                     operation: parseData.operation,
                                     response: parseData
-                                    //request: parseData,
                                 };
                                 event.source.postMessage(JSON.stringify(msg), event.origin);
-                            }); //queryString, callType, cadString
+                            });
                         } else {
                             sforce.interaction.searchAndScreenPop(parseData.queryString, parseData.cadString, parseData.interactionDirection, function (response) {
                                 parseData.response = {};
@@ -518,13 +508,13 @@
                                 var msg = {
                                     operation: parseData.operation,
                                     response: parseData
-                                    //request: parseData,
                                 };
                                 event.source.postMessage(JSON.stringify(msg), event.origin);
-                            }); //queryString, callType, cadString
+                            });
                         }
                     }
                 } else if (parseData.operation === salesforceBridgeAPIMethodNames.CAD_SEARCH) {
+                    logMessage(LogType.INFORMATION, "Received event from Salesforce App. Details : "+JSON.stringify(parseData));
                     salesforcePluginWindow = event.source;
                     var query = "" +
                         "fields=" + parseData.objectFields +
@@ -532,7 +522,7 @@
                         "&key=" + parseData.filterKey +
                         "&Value=" + parseData.cadValue;
                     if (lightning_enabled) {
-                        var cadSearchRequest = {}; //apexClass: 'UserInfo', callback: amcOpenCti.getPageInfoCallback };
+                        var cadSearchRequest = {};
                         cadSearchRequest.apexClass = 'AMCOpenCTINS.ObjectRetrieval';
                         cadSearchRequest.methodName = 'getObject';
                         cadSearchRequest.methodParams = query;
@@ -547,7 +537,6 @@
                             var msg = {
                                 operation: parseData.operation,
                                 response: parseData
-                                //request: parseData,
                             };
                             event.source.postMessage(JSON.stringify(msg), event.origin);
                         };
@@ -560,12 +549,12 @@
                             var msg = {
                                 operation: parseData.operation,
                                 response: parseData
-                                // request: parseData,
                             };
                             event.source.postMessage(JSON.stringify(msg), event.origin);
                         });
                     }
                 } else if (parseData.operation === salesforceBridgeAPIMethodNames.CAD_SEARCH_AND_SCREEN_POP) {
+                    logMessage(LogType.INFORMATION, "Received event from Salesforce App. Details : "+JSON.stringify(parseData));
                     salesforcePluginWindow = event.source;
 
                     var callback = function (res) {
@@ -611,7 +600,7 @@
                         "&Value=" + parseData.cadValue;
                     if (lightning_enabled) {
                         
-                        var cadSearchRequest = {}; //apexClass: 'UserInfo', callback: amcOpenCti.getPageInfoCallback };
+                        var cadSearchRequest = {}; 
                         cadSearchRequest.apexClass = 'AMCOpenCTINS.ObjectRetrieval';
                         cadSearchRequest.methodName = 'getObject';
                         cadSearchRequest.methodParams = query;
@@ -621,6 +610,7 @@
                         sforce.interaction.runApex("AMCOpenCTINS.ObjectRetrieval", "getObject", query, callback);
                     }
                 } else if (parseData.operation === salesforceBridgeAPIMethodNames.ENB_CLICK_TO_DIAL) {
+                    logMessage(LogType.INFORMATION, "Received event from Salesforce App. Details : "+JSON.stringify(parseData));
                     salesforcePluginWindow = event.source;
                     if (lightning_enabled) {
                         sforce.opencti.enableClickToDial({
@@ -661,9 +651,10 @@
                                 request: parseData,
                             };
                             event.source.postMessage(JSON.stringify(msg), event.origin);
-                        }); //queryString, callType, cadString
+                        }); 
                     }
                 } else if (parseData.operation === salesforceBridgeAPIMethodNames.DSB_CLICK_TO_DIAL) {
+                    logMessage(LogType.INFORMATION, "Received event from Salesforce App. Details : "+JSON.stringify(parseData));
                     salesforcePluginWindow = event.source;
                     if (lightning_enabled) {
                         sforce.opencti.disableClickToDial({
@@ -704,9 +695,10 @@
                                 request: parseData,
                             };
                             event.source.postMessage(JSON.stringify(msg), event.origin);
-                        }); //queryString, callType, cadString
+                        }); 
                     }
                 } else if (parseData.operation === salesforceBridgeAPIMethodNames.SET_SP_HT) {
+                    logMessage(LogType.INFORMATION, "Received event from Salesforce App. Details : "+JSON.stringify(parseData));
                     salesforcePluginWindow = event.source;
                     if (parseData.request.data.height) {
                         if (lightning_enabled) {
@@ -749,7 +741,7 @@
                                     request: parseData,
                                 };
                                 event.source.postMessage(JSON.stringify(msg), event.origin);
-                            }); //queryString, callType, cadString
+                            });
                         }
                     } else {
                         parseData.response = {};
@@ -765,6 +757,7 @@
                         event.source.postMessage(JSON.stringify(msg), event.origin);
                     }
                 } else if (parseData.operation === salesforceBridgeAPIMethodNames.SET_SP_WTH) {
+                    logMessage(LogType.INFORMATION, "Received event from Salesforce App. Details : "+JSON.stringify(parseData));
                     salesforcePluginWindow = event.source;
                     if (parseData.request.data.width) {
                         if (lightning_enabled) {
@@ -808,7 +801,7 @@
                                     request: parseData,
                                 };
                                 event.source.postMessage(JSON.stringify(msg), event.origin);
-                            }); //queryString, callType, cadString
+                            });
                         }
                     } else {
                         parseData.response = {};
@@ -825,6 +818,7 @@
                     }
 
                 } else if (parseData.operation === salesforceBridgeAPIMethodNames.GET_SP_LAYOUT) {
+                    logMessage(LogType.INFORMATION, "Received event from Salesforce App. Details : "+JSON.stringify(parseData));
                     salesforcePluginWindow = event.source;
                     if (lightning_enabled) {
                         sforce.opencti.getSoftphoneLayout({
@@ -851,9 +845,10 @@
                                 request: parseData,
                             };
                             event.source.postMessage(JSON.stringify(msg), event.origin);
-                        }); //queryString, callType, cadString
+                        });
                     }
                 } else if (parseData.operation === salesforceBridgeAPIMethodNames.GET_CALL_CENTER_SETTINGS) {
+                    logMessage(LogType.INFORMATION, "Received event from Salesforce App. Details : "+JSON.stringify(parseData));
                     salesforcePluginWindow = event.source;
                     if (lightning_enabled) {
                         sforce.opencti.getCallCenterSettings({
@@ -863,7 +858,6 @@
                                 var msg = {
                                     operation: parseData.operation,
                                     response: parseData,
-                                    // request: parseData,
                                 };
                                 event.source.postMessage(JSON.stringify(msg), event.origin);
                             }
@@ -877,12 +871,12 @@
                             var msg = {
                                 operation: parseData.operation,
                                 response: parseData,
-                                // request: parseData,
                             };
                             event.source.postMessage(JSON.stringify(msg), event.origin);
-                        }); //queryString, callType, cadString
+                        });
                     }
                 } else if (parseData.operation === salesforceBridgeAPIMethodNames.GET_PAGE_INFO) {
+                    logMessage(LogType.INFORMATION, "Received event from Salesforce App. Details : "+JSON.stringify(parseData));
                     salesforcePluginWindow = event.source;
                     var pageInfoCallback = function (response) {
                         var entity = {};
@@ -904,7 +898,6 @@
                                 var msg = {
                                     operation: parseData.operation,
                                     response: parseData,
-                                    // request: parseData,
                                 };
                                 event.source.postMessage(JSON.stringify(msg), event.origin);
                             }
@@ -915,11 +908,12 @@
                             callback: pageInfoCallback
                         });
                     } else {
-                        sforce.interaction.getPageInfo(pageInfoCallback); //queryString, callType, cadString
+                        sforce.interaction.getPageInfo(pageInfoCallback); 
                     }
                 } else if (parseData.operation === salesforceBridgeAPIMethodNames.SAVE_ACTIVITY) {
+                    logMessage(LogType.INFORMATION, "Received event from Salesforce App. Details : "+JSON.stringify(parseData));
                     var objectType = parseData.objectType;
-                    var params = parseData.params || {}; //FieldName: FieldValue; Note that the Id of the entity will be here if passed
+                    var params = parseData.params || {}; 
                     var callback = function (response) {
                         var success = false;
                         var entity = null;
@@ -977,11 +971,12 @@
                                 paramString += "&" + key + "=" + params[key];
                             }
                         }
-                        paramString.slice(1); //remove leading '&'
+                        paramString.slice(1); 
 
                         sforce.interaction.saveLog(objectType, paramString, callback);
                     }
                 } else if (parseData.operation === salesforceBridgeAPIMethodNames.IS_VISIBLE) {
+                    logMessage(LogType.INFORMATION, "Received event from Salesforce App. Details : "+JSON.stringify(parseData));
                     var callback = function (response) {
                         var visible = null;
                         var success = false;
@@ -1028,6 +1023,7 @@
                         sforce.interaction.isVisible(callback);
                     }
                 } else if (parseData.operation === salesforceBridgeAPIMethodNames.SET_VISIBLE) {
+                    logMessage(LogType.INFORMATION, "Received event from Salesforce App. Details : "+JSON.stringify(parseData));
                     var callback = function (response) {
                         var success = false;
                         var errors = null;
@@ -1069,13 +1065,15 @@
                         sforce.interaction.setVisible(parseData.request.data.visible, callback);
                     }
                 } else if (parseData.operation === salesforceBridgeAPIMethodNames.USER_INFO) {
+                    logMessage(LogType.INFORMATION, "Received event from Salesforce App. Details : "+JSON.stringify(parseData));
                     getLoginUserInfo(event, parseData);
                 } else if (parseData.operation === salesforceBridgeAPIMethodNames.LOGS) {
+                    logMessage(LogType.INFORMATION, "Received event from Salesforce App. Details : "+JSON.stringify(parseData));
                     salesforceAppWindow = event.source;
                 }
             }
         } catch (err) {
-            console.log("Error in listener. Exception details: " + err.message);
+            logMessage(LogType.ERROR, "SalesforceBridgeAPI: Error in listener. Exception details: " + err.message);
         }
     }
 }(window.AMCSalesforceBridge = window.AMCSalesforceBridge || {}));
