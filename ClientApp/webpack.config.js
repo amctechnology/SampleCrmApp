@@ -9,7 +9,7 @@ const autoprefixer = require('autoprefixer');
 const postcssUrl = require('postcss-url');
 const postcssImports = require('postcss-import');
 
-const { NoEmitOnErrorsPlugin, SourceMapDevToolPlugin, NamedModulesPlugin } = require('webpack');
+const { NoEmitOnErrorsPlugin, SourceMapDevToolPlugin, NamedModulesPlugin, ProvidePlugin } = require('webpack');
 const { NamedLazyChunksWebpackPlugin, BaseHrefWebpackPlugin, PostcssCliResources } = require('@angular/cli/plugins/webpack');
 const { CommonsChunkPlugin } = require('webpack').optimize;
 const { AngularCompilerPlugin } = require('@ngtools/webpack');
@@ -555,7 +555,7 @@ module.exports = (env) => {
       "rules": [
         {
           "test": /\.ts$/,
-          "loader": "@ngtools/webpack"
+          "loader": "@ngtools/webpack",
         }
       ]
     },

@@ -15,7 +15,7 @@
   },
   "private": true,
   "dependencies": {
-    "@amc/applicationangularframework": "^1.0.3",
+    "@amc/applicationangularframework": "^1.0.4",
     "@angular/animations": "^5.2.0",
     "@angular/common": "^5.2.0",
     "@angular/compiler": "^5.2.0",
@@ -51,6 +51,7 @@
     "copy-webpack-plugin": "~4.4.1",
     "file-loader": "^1.1.5",
     "html-webpack-plugin": "^2.29.0",
+    "imports-loader": "^0.8.0",
     "istanbul-instrumenter-loader": "^3.0.0",
     "jasmine-core": "~2.8.0",
     "jasmine-spec-reporter": "~4.2.1",
