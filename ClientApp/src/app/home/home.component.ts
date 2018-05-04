@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import * as api from '@amc/application-api';
 import { Application } from '@amc/applicationangularframework';
+import { bind } from 'bind-decorator';
 
 @Component({
   selector: 'app-home',
@@ -20,5 +21,10 @@ export class HomeComponent extends Application {
 
   formatCrmResults(crmResults: any): api.SearchRecords {
     return null;
+  }
+
+  @bind
+  protected getUserInfoHandler() {
+    return this.bridgeEventsService.sendEvent('getUserInfo');
   }
 }

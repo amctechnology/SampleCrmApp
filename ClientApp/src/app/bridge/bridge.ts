@@ -13,6 +13,32 @@ class MyBridge extends Bridge {
         this.appName = 'Salesforce';
         this.VerifyMode();
         this.initialize();
+        this.eventService.subscribe('getUserInfo', this.getUserInfo);
+    }
+
+    @bind
+    async getUserInfo() {
+        return new Promise((resolve, reject) => {
+            if (this.isLightning) {
+                sforce.opencti.runApex({
+                    apexClass: 'UserInfo',
+                    methodName: 'getUserName',
+                    methodParams: '',
+                    callback: result => {
+                        resolve(result.returnValue.runApex);
+                    }
+                });
+            } else {
+                sforce.interaction.runApex(
+                    'UserInfo',
+                    'getUserName',
+                    '',
+                    result => {
+                        resolve(result.result);
+                    }
+                );
+            }
+        });
     }
 
     @bind

@@ -15,7 +15,7 @@
   },
   "private": true,
   "dependencies": {
-    "@amc/applicationangularframework": "^1.0.4",
+    "@amc/applicationangularframework": "^1.0.9",
     "@angular/animations": "^5.2.0",
     "@angular/common": "^5.2.0",
     "@angular/compiler": "^5.2.0",
@@ -34,7 +34,7 @@
     "zone.js": "^0.8.19"
   },
   "devDependencies": {
-    "@amc/application-api": "0.0.7",
+    "@amc/application-api": "0.0.10",
     "@angular-devkit/core": "0.3.1",
     "@angular/cli": "~1.7.0",
     "@angular/compiler-cli": "^5.2.0",
