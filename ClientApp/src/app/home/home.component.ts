@@ -60,7 +60,6 @@ export class HomeComponent extends Application implements OnInit {
     return result;
   }
 
-  @bind
   protected getUserInfoHandler() {
     return this.bridgeEventsService.sendEvent('getUserInfo');
   }
