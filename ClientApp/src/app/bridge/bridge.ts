@@ -14,17 +14,31 @@ class MyBridge extends Bridge {
         this.VerifyMode();
         this.initialize();
         this.eventService.subscribe('getUserInfo', this.getUserInfo);
+        this.eventService.subscribe('getSearchLayout', this.getSearchLayout);
     }
 
     async afterScriptsLoad(): Promise<any> {
         await super.afterScriptsLoad();
         if (this.isLightning) {
-            sforce.opencti.onClickToDial({listener: this.clickToDialListener});
-            sforce.opencti.onNavigationChange({listener: this.onFocusListener});
+            sforce.opencti.onClickToDial({ listener: this.clickToDialListener });
+            sforce.opencti.onNavigationChange({ listener: this.onFocusListener });
         } else {
             sforce.interaction.cti.onClickToDial(this.clickToDialListener);
             sforce.interaction.onFocus(this.onFocusListener);
         }
+    }
+
+    @bind
+    getSearchLayout() {
+        return new Promise((resolve, reject) => {
+            if (this.isLightning) {
+                sforce.opencti.getSoftphoneLayout({
+                    callback: response => resolve(response.returnValue)
+                });
+            } else {
+                sforce.interaction.cti.getSoftphoneLayout(response => resolve(safeJSONParse(response.result)));
+            }
+        });
     }
 
     @bind
@@ -48,29 +62,29 @@ class MyBridge extends Bridge {
             entity.Name = temp.objectName;
         }
 
-        this.eventService.sendEvent('onFocus', {[id]: entity});
+        this.eventService.sendEvent('onFocus', { [id]: entity });
     }
 
     @bind
     async clickToDialListener(event) {
-            let entity = {
-                object: '',
-                objectId: '',
-                number: ''
-            };
-            if (this.isLightning) {
-                entity.object = event.objectType;
-                entity.objectId = event.recordId;
-                entity.number = event.number;
-            } else {
-                entity = JSON.parse(event.result);
-            }
+        let entity = {
+            object: '',
+            objectId: '',
+            number: ''
+        };
+        if (this.isLightning) {
+            entity.object = event.objectType;
+            entity.objectId = event.recordId;
+            entity.number = event.number;
+        } else {
+            entity = JSON.parse(event.result);
+        }
 
-            const records = await this.trySearch(entity.number, InteractionDirectionTypes.Outbound, '', false);
-            this.eventService.sendEvent('clickToDial', {
-                number: entity.number,
-                records: records
-            });
+        const records = await this.trySearch(entity.number, InteractionDirectionTypes.Outbound, '', false);
+        this.eventService.sendEvent('clickToDial', {
+            number: entity.number,
+            records: records
+        });
     }
 
     @bind
@@ -155,7 +169,7 @@ class MyBridge extends Bridge {
     }
 
     private trySearch(queryString: string, callDirection: InteractionDirectionTypes, cadString: string, shouldScreenpop: boolean = true)
-    : Promise<any> {
+        : Promise<any> {
         return new Promise((resolve, reject) => {
             if (this.isLightning) {
                 const screenPopObject = {
@@ -244,6 +258,56 @@ class MyBridge extends Bridge {
                 } else {
                     sforce.interaction.cti.disableClickToDial(callback);
                 }
+            }
+        });
+    }
+
+    protected setSoftphoneHeight(heightInPixels: number) {
+        return new Promise<void>((resolve, reject) => {
+            if (this.isLightning) {
+                sforce.opencti.setSoftphonePanelHeight({
+                    heightPX: heightInPixels,
+                    callback: response => {
+                        if (response.errors) {
+                            reject(response.errors);
+                        } else {
+                            resolve();
+                        }
+                    }
+                });
+            } else {
+                sforce.interaction.cti.setSoftphoneHeight(heightInPixels, response => {
+                    if (response.error) {
+                        reject(response.error);
+                    } else {
+                        resolve();
+                    }
+                });
+            }
+        });
+    }
+
+    protected setSoftphoneWidth(widthInPixels: number) {
+        return new Promise<void>((resolve, reject) => {
+            if (this.isLightning) {
+                sforce.opencti.setSoftphonePanelWidth({
+                    widthPX: widthInPixels,
+                    callback: response => {
+                        if (response.errors) {
+                            reject(response.errors);
+                        } else {
+                            resolve();
+                        }
+                    }
+                });
+            } else {
+                sforce.interaction.cti.setSoftphoneWidth(widthInPixels, response => {
+                    if (response.error) {
+                        reject(response.error);
+                    } else {
+                        resolve();
+                    }
+                });
             }
         });
     }

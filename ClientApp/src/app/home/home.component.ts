@@ -64,4 +64,119 @@ export class HomeComponent extends Application implements OnInit {
   protected getUserInfoHandler() {
     return this.bridgeEventsService.sendEvent('getUserInfo');
   }
+
+  protected async getSearchLayout() {
+    const salesforceLayouts = await this.bridgeEventsService.sendEvent('getSearchLayout');
+
+    const result = new api.SearchLayouts();
+
+    const telephonyLayout = new api.SearchLayout(false, []);
+
+
+    if (salesforceLayouts.Internal) {
+      telephonyLayout.setInternal(this.parseSearchLayoutEntities(salesforceLayouts.Internal));
+    }
+
+    if (salesforceLayouts.Inbound) {
+      const openInNewWindow =
+        salesforceLayouts.Inbound.screenPopSettings &&
+        salesforceLayouts.Inbound.screenPopSettings.screenPopOpenWithin &&
+        salesforceLayouts.Inbound.screenPopSettings.screenPopOpenWithin !== 'ExistingWindow';
+
+      switch (salesforceLayouts.Inbound.screenPopSettings.NoMatch.screenPopType) {
+        case 'PopToEntity':
+          telephonyLayout.setNoMatch({
+            type: api.NoMatchPopTypes.PopToNewEntity,
+            data: salesforceLayouts.Inbound.screenPopSettings.NoMatch.screenPopData
+          });
+          break;
+        case 'DoNotPop':
+          telephonyLayout.setNoMatch({
+            type: api.NoMatchPopTypes.NoPop
+          });
+          break;
+        case 'PopToVisualforce':
+          telephonyLayout.setNoMatch({
+            type: api.NoMatchPopTypes.PopToUrl,
+            data: salesforceLayouts.Inbound.screenPopSettings.NoMatch.screenPopData
+          });
+      }
+
+      switch (salesforceLayouts.Inbound.screenPopSettings.SingleMatch.screenPopType) {
+        case 'PopToEntity':
+          telephonyLayout.setSingleMatch({
+            type: api.SingleMatchPopTypes.PopToDetials
+          });
+          break;
+        case 'DoNotPop':
+          telephonyLayout.setSingleMatch({
+            type: api.SingleMatchPopTypes.NoPop
+          });
+          break;
+        case 'PopToVisualforce':
+          telephonyLayout.setSingleMatch({
+            type: api.SingleMatchPopTypes.PopToUrl,
+            data: salesforceLayouts.Inbound.screenPopSettings.SingleMatch.screenPopData
+          });
+      }
+
+      switch (salesforceLayouts.Inbound.screenPopSettings.MultipleMatches.screenPopType) {
+        case 'PopToEntity':
+          telephonyLayout.setMultiMatch({
+            type: api.MultiMatchPopTypes.PopToSearch
+          });
+          break;
+        case 'DoNotPop':
+          telephonyLayout.setMultiMatch({
+            type: api.MultiMatchPopTypes.NoPop
+          });
+          break;
+        case 'PopToVisualforce':
+          telephonyLayout.setMultiMatch({
+            type: api.MultiMatchPopTypes.PopToUrl,
+            data: salesforceLayouts.Inbound.screenPopSettings.MultipleMatches.screenPopData
+          });
+      }
+
+      telephonyLayout.setInbound(this.parseSearchLayoutEntities(salesforceLayouts.Inbound));
+
+      telephonyLayout.setDefault(telephonyLayout.getInbound());
+      telephonyLayout.setOpenInNewWindow(openInNewWindow);
+    }
+
+    if (salesforceLayouts.Outbound) {
+      telephonyLayout.setOutbound(this.parseSearchLayoutEntities(salesforceLayouts.Outbound));
+    }
+
+
+    result.setLayout([api.ChannelTypes.Telephony], telephonyLayout);
+    return result;
+
+  }
+  private parseSearchLayoutEntities(salesforceLayout: any): api.ISearchLayoutForEntity[] {
+    const layoutsForEntities: api.ISearchLayoutForEntity[] = [];
+    for (const entityName of Object.keys(salesforceLayout.objects)) {
+      const layoutForEntity: api.ISearchLayoutForEntity = {
+        DisplayName: entityName,
+        DevName: entityName,
+        DisplayFields: [],
+        PhoneFields: [],
+        EmailFields: [],
+        SocialFields: [],
+        NameFields: []
+      };
+
+      for (const field of Object.values<{ apiName, displayName }>(salesforceLayout.objects[entityName])) {
+        layoutForEntity.DisplayFields.push({
+          DevName: field.apiName,
+          DisplayName: field.displayName,
+          Value: null,
+        });
+      }
+
+      layoutsForEntities.push(layoutForEntity);
+    }
+
+    return layoutsForEntities;
+  }
 }
