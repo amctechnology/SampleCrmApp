@@ -178,4 +178,12 @@ export class HomeComponent extends Application implements OnInit {
 
     return layoutsForEntities;
   }
+
+  protected isToolbarVisible(): Promise<boolean> {
+    return this.bridgeEventsService.sendEvent('isToolbarVisible');
+  }
+
+  protected saveActivity(activity: api.Activity): Promise<string> {
+    return Promise.reject('Not Implemented!'); // Note: this has not been implemented because it is going to be reworked soon
+  }
 }

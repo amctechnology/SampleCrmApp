@@ -15,6 +15,7 @@ class MyBridge extends Bridge {
         this.initialize();
         this.eventService.subscribe('getUserInfo', this.getUserInfo);
         this.eventService.subscribe('getSearchLayout', this.getSearchLayout);
+        this.eventService.subscribe('isToolbarVisible', this.isToolbarVisible);
     }
 
     async afterScriptsLoad(): Promise<any> {
@@ -26,6 +27,31 @@ class MyBridge extends Bridge {
             sforce.interaction.cti.onClickToDial(this.clickToDialListener);
             sforce.interaction.onFocus(this.onFocusListener);
         }
+    }
+
+    @bind
+    isToolbarVisible() {
+        return new Promise((resolve, reject) => {
+            if (this.isLightning) {
+                sforce.opencti.isSoftphonePanelVisible({
+                    callback: response => {
+                        if (response.errors) {
+                            reject(response.errors);
+                        } else {
+                            resolve(response.returnValue.visible);
+                        }
+                    }
+                });
+            } else {
+                sforce.interaction.isVisible(response => {
+                    if (response.error) {
+                        reject(response.error);
+                    } else {
+                        resolve(response.result);
+                    }
+                });
+            }
+        });
     }
 
     @bind
