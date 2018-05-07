@@ -166,6 +166,12 @@ module.exports = (env) => {
     "module": {
       "rules": [
         {
+          enforce: 'pre',
+          test: /\.js$/,
+          loader: 'source-map-loader',
+          exclude: [/\.ngfactory\.js$/,/\.ngstyle\.js$/ ]
+         },
+        {
           "test": /\.html$/,
           "loader": "raw-loader"
         },
@@ -553,6 +559,12 @@ module.exports = (env) => {
     },
     "module": {
       "rules": [
+        {
+          enforce: 'pre',
+          test: /\.js$/,
+          loader: 'source-map-loader',
+          exclude: [/\.ngfactory\.js$/,/\.ngstyle\.js$/ ]
+         },
         {
           "test": /\.ts$/,
           "loader": "@ngtools/webpack",
