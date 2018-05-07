@@ -1,4 +1,4 @@
-import { Bridge } from '@amc/applicationangularframework';
+import { Bridge, BridgeEventsService } from '@amc/applicationangularframework';
 import { InteractionDirectionTypes } from '@amc/application-api';
 import { bind } from 'bind-decorator';
 import { safeJSONParse } from '../utils';
@@ -14,6 +14,63 @@ class MyBridge extends Bridge {
         this.VerifyMode();
         this.initialize();
         this.eventService.subscribe('getUserInfo', this.getUserInfo);
+    }
+
+    async afterScriptsLoad(): Promise<any> {
+        await super.afterScriptsLoad();
+        if (this.isLightning) {
+            sforce.opencti.onClickToDial({listener: this.clickToDialListener});
+            sforce.opencti.onNavigationChange({listener: this.onFocusListener});
+        } else {
+            sforce.interaction.cti.onClickToDial(this.clickToDialListener);
+            sforce.interaction.onFocus(this.onFocusListener);
+        }
+    }
+
+    @bind
+    async onFocusListener(event) {
+        let id = '';
+        const entity = {
+            object: '',
+            displayName: '',
+            Name: ''
+        };
+        if (this.isLightning) {
+            entity.object = event.objectType;
+            entity.displayName = event.objectType;
+            id = event.recordId;
+            entity.Name = event.recordName;
+        } else {
+            const temp = JSON.parse(event.result);
+            entity.object = temp.object;
+            entity.displayName = temp.displayName;
+            id = temp.objectId;
+            entity.Name = temp.objectName;
+        }
+
+        this.eventService.sendEvent('onFocus', {[id]: entity});
+    }
+
+    @bind
+    async clickToDialListener(event) {
+            let entity = {
+                object: '',
+                objectId: '',
+                number: ''
+            };
+            if (this.isLightning) {
+                entity.object = event.objectType;
+                entity.objectId = event.recordId;
+                entity.number = event.number;
+            } else {
+                entity = JSON.parse(event.result);
+            }
+
+            const records = await this.trySearch(entity.number, InteractionDirectionTypes.Outbound, '', false);
+            this.eventService.sendEvent('clickToDial', {
+                number: entity.number,
+                records: records
+            });
     }
 
     @bind
@@ -41,6 +98,7 @@ class MyBridge extends Bridge {
         });
     }
 
+    // TODO: finish implementing this. CAD search
     @bind
     async screenpopHandler(event): Promise<any> {
         this.eventService.sendEvent('logVerbose', 'screenpopHandler START: ' + event);
@@ -58,7 +116,7 @@ class MyBridge extends Bridge {
             if (screenpopRecords == null && event.phoneNumbers.length > 0) {
                 for (const phoneNumber of event.phoneNumbers) {
                     // TODO: update this so that interaction direction is more flexible
-                    screenpopRecords = await this.trySearchAndScreenpop(phoneNumber, InteractionDirectionTypes.Inbound, event.cadString);
+                    screenpopRecords = await this.trySearch(phoneNumber, InteractionDirectionTypes.Inbound, event.cadString);
                     if (screenpopRecords != null) { break; }
                 }
             }
@@ -96,7 +154,8 @@ class MyBridge extends Bridge {
         });
     }
 
-    private trySearchAndScreenpop(queryString: string, callDirection: InteractionDirectionTypes, cadString: string): Promise<any> {
+    private trySearch(queryString: string, callDirection: InteractionDirectionTypes, cadString: string, shouldScreenpop: boolean = true)
+    : Promise<any> {
         return new Promise((resolve, reject) => {
             if (this.isLightning) {
                 const screenPopObject = {
@@ -105,7 +164,7 @@ class MyBridge extends Bridge {
                     },
                     searchParams: queryString,
                     queryParams: cadString,
-                    deferred: false,
+                    deferred: !shouldScreenpop,
                     callType: null
                 };
 
@@ -136,9 +195,14 @@ class MyBridge extends Bridge {
                         break;
                 }
 
-                sforce.interaction.searchAndScreenPop(queryString, cadString, salesforceCallDirection, result => {
+                const callback = result => {
                     resolve(safeJSONParse(result.result));
-                });
+                };
+                if (shouldScreenpop) {
+                    sforce.interaction.searchAndScreenPop(queryString, cadString, salesforceCallDirection, callback);
+                } else {
+                    sforce.interaction.searchAndGetScreenPopUrl(queryString, cadString, salesforceCallDirection, callback);
+                }
             }
         });
     }
@@ -156,6 +220,32 @@ class MyBridge extends Bridge {
                 }
             }
         }
+    }
+
+    @bind
+    enableClickToDialHandler(clickToDialEnabled: boolean): Promise<void> {
+        return new Promise((resolve, reject) => {
+            const callback = result => {
+                if (result.success || result.result) {
+                    resolve();
+                } else {
+                    reject(result.errors || result.error);
+                }
+            };
+            if (this.isLightning) {
+                if (clickToDialEnabled) {
+                    sforce.opencti.enableClickToDial({ callback: callback });
+                } else {
+                    sforce.opencti.disableClickToDial({ callback: callback });
+                }
+            } else {
+                if (clickToDialEnabled) {
+                    sforce.interaction.cti.enableClickToDial(callback);
+                } else {
+                    sforce.interaction.cti.disableClickToDial(callback);
+                }
+            }
+        });
     }
 
 }
