@@ -332,14 +332,14 @@
                     //var returnObject = response.returnValue;
                     //_salesforceWorkTop = returnObject.runApex;
 
-                    parseData = {};
-                    parseData.response = {};
-                    parseData.response.data = {userinfo : response.returnValue.runApex};
                     var msg = {
                         operation: parseData.operation,
                         response: parseData,
                         request: parseData,
+                        requestId: parseData.requestId
                     };
+                    msg.response = {};
+                    msg.response.data = {userinfo : response.returnValue.runApex};
                     event.source.postMessage(JSON.stringify(msg), event.origin);
                     //getCallCenterSettings();
                 }
@@ -353,14 +353,15 @@
             } else {
                 //_salesforceWorkTop = response.result;
 
-                parseData = {};
-                parseData.response = {};
-                parseData.response.data = {userinfo : response.result};
                 var msg = {
                     operation: parseData.operation,
                     response: parseData,
                     request: parseData,
+                    requestId: parseData.requestId
                 };
+                msg.response.response = {};
+                msg.response.response.data = {userinfo : response.result};
+                
                 event.source.postMessage(JSON.stringify(msg), event.origin);
                 //getCallCenterSettings();
             }

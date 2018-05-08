@@ -39,12 +39,6 @@
             window.attachEvent("onmessage", listener);
         }
         logger.logVerbose('Loading bridge scripts -START-');
-        ContactCanvasApplicationAPI.loadBridgeScripts([
-                "https://c.na1.visual.force.com/support/api/36.0/interaction.js",
-                "https://na15.salesforce.com/support/console/35.0/integration.js",
-                "https://gs0.lightning.force.com/support/api/38.0/lightning/opencti_min.js",
-                location.origin + "/Scripts/AMCScripts/SalesforceBridgeAPI.js",
-            ]).then(LoadScriptComplete);
         ContactCanvasApplicationAPI.registerScreenpop(screenPop);
         ContactCanvasApplicationAPI.registerGlobalSearch(search);
         ContactCanvasApplicationAPI.registerGlobalSearchAndScreenpop(searchAndScreenpop);
@@ -56,6 +50,7 @@
         ContactCanvasApplicationAPI.registerGetPageInfo(getPageInfo);
         ContactCanvasApplicationAPI.registerSaveActivity(saveActivity);
         ContactCanvasApplicationAPI.registerIsToolbarVisible(isVisible);
+        ContactCanvasApplicationAPI.registerGetUserInfo(getUserInfo);
 
         ContactCanvasApplicationAPI.registerScreenpopControlChanged(function (screenPopEnabled) {
             logger.logVerbose('screenPopControlChanged Handlers: screenPopEnabled=' + screenPopEnabled);
@@ -66,11 +61,12 @@
             return Promise.reject('Invalid parameters!');
         });
         ContactCanvasApplicationAPI.registerOnInteraction(onInteraction);
-
-        ContactCanvasApplicationAPI.initializeComplete().then(function(config) {
-            logger.logVerbose('initializeComplete config: ' + JSON.stringify(config));
-            maxRecordsDefault = parseInt(config.variables.maxRecordsDefault);
-        });
+        ContactCanvasApplicationAPI.loadBridgeScripts([
+            "https://c.na1.visual.force.com/support/api/36.0/interaction.js",
+            "https://na15.salesforce.com/support/console/35.0/integration.js",
+            "https://gs0.lightning.force.com/support/api/38.0/lightning/opencti_min.js",
+            location.origin + "/Scripts/AMCScripts/SalesforceBridgeAPI.js",
+        ]).then(LoadScriptComplete);
     });
 
     function getSequenceID() { return sequenceId++; }
@@ -78,8 +74,12 @@
     function LoadScriptComplete()
     {
         logger.logVerbose('Loading bridge scripts -END-');
-        getUserInfo();
         SendLogsInfoToBridge();
+
+        ContactCanvasApplicationAPI.initializeComplete().then(function(config) {
+            logger.logVerbose('initializeComplete config: ' + JSON.stringify(config));
+            maxRecordsDefault = parseInt(config.variables.maxRecordsDefault);
+        });
     }
 
     function SendLogsInfoToBridge()
@@ -232,14 +232,30 @@
     }
 
     function getUserInfo() {
-        try{
+        return new Promise(function(resolve, reject) {
+            var requestId = getSequenceID();
             var request = {
-                operation: salesforceBridgeAPIMethodNames.USER_INFO
-            };
-            window.parent.postMessage(JSON.stringify(request),"*");
-        } catch (err) {
-            logger.logError("Error in getUserInfo. Exception Details : " + err.message);
-        }
+                operation: salesforceBridgeAPIMethodNames.USER_INFO,
+                requestId: requestId,
+            }
+    
+            var timeout = setTimeout(function() {
+                delete requests[requestId];
+                reject('Timeout: Never received a response from salesforce!')
+            }, 30 * 1000);
+            requests[requestId] = function(response) {
+                clearTimeout(timeout);
+                delete requests[requestId];
+                if(response.data.userinfo){
+                    resolve(response.data.userinfo);                        
+                }
+                else{
+                    reject('Error returned from salesforce! error=' + JSON.stringify(response.data.errors));
+                }
+            };  
+    
+            window.parent.postMessage(JSON.stringify(request), "*");
+        });
     }
 
     function setSoftPhoneHeight(height) {
