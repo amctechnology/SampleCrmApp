@@ -5,7 +5,7 @@ import { safeJSONParse } from '../utils';
 
 declare var sforce: any;
 
-class MyBridge extends Bridge {
+class SalesforceBridge extends Bridge {
   private isLightning = false;
 
   constructor() {
@@ -323,4 +323,4 @@ class MyBridge extends Bridge {
 
 }
 
-const bridge = new MyBridge();
+const bridge = new SalesforceBridge();
