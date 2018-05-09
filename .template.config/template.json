@@ -1,0 +1,20 @@
+{
+    "$schema": "http://json.schemastore.org/template",
+    "author": "AMC Technology",
+    "classifications": [ "Console" ], 
+    "name": "Application Integration Angular",
+    "identity": "AMCTechnology.ApplicationIntegration.Angular.CSharp",         
+    "shortName": "amc-app-angular",
+    "tags": {
+      "language": "C#",
+      "framework": "Angular",
+      "type":"project"
+    },
+    "sourceName": "Salesforce",
+    "preferNameDirectory": true,
+    "sources": [{
+      "source": "./",
+      "target": "./",
+      "exclude": "**/.git/**"
+    }]
+  }
