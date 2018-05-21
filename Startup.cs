@@ -9,11 +9,17 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.AspNetCore.NodeServices.Util;
 using Microsoft.AspNetCore.SpaServices.Util;
 using Microsoft.AspNetCore.NodeServices.Npm;
+using Microsoft.AspNetCore.Authentication.Cookies;
+using System;
+using Salesforce.Models;
+using System.Net;
 
 namespace Salesforce
 {
     public class Startup
     {
+        private static CustomJwtDataFormat CustomJwtDataFormat = new CustomJwtDataFormat();
+
         public Startup(IConfiguration configuration)
         {
             Configuration = configuration;
@@ -25,6 +31,17 @@ namespace Salesforce
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddMvc();
+
+            services.AddAuthentication(options => {
+                options.DefaultAuthenticateScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+                options.DefaultSignInScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+                options.DefaultChallengeScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+            }).AddCookie(options => {
+                options.Cookie.Expiration = TimeSpan.FromDays(14);
+                options.Cookie.Name = "access_token";
+                options.Cookie.Domain = Environment.GetEnvironmentVariable("AUTH_COOKIE_DOMAIN");
+                options.TicketDataFormat = CustomJwtDataFormat;
+            });
 
             // In production, the Angular files will be served from this directory
             services.AddSpaStaticFiles(configuration =>
@@ -40,12 +57,26 @@ namespace Salesforce
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
+
                 app.UseWebpackDevMiddleware(new WebpackDevMiddlewareOptions
                 {
                     HotModuleReplacement = true,
                     ProjectPath = Path.Combine(Directory.GetCurrentDirectory(), "ClientApp")
                 });
+            } else {
+                // Check auth of user
+                app.Use(async (context, next) => {
+                    var authTicket = CustomJwtDataFormat.Unprotect(context.Request.Cookies["access_token"]);
+
+                    if (authTicket != null && authTicket.Principal.IsInRole("Agent")) {
+                        await next.Invoke();
+                    } else {
+                        context.Response.StatusCode = (int)HttpStatusCode.Forbidden;
+                    }
+                });
             }
+
+            
 
             app.UseDefaultFiles();
             app.UseStaticFiles();

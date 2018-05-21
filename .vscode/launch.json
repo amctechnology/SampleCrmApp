@@ -30,7 +30,9 @@
                 }
             },
             "env": {
-                "ASPNETCORE_ENVIRONMENT": "Development"
+                "ASPNETCORE_ENVIRONMENT": "Development",
+                "AUTH_PROVIDER_URL": "http://auth.cloud.contactcanvas.com",
+                "AUTH_COOKIE_DOMAIN": "cloud.contactcanvas.com",
             },
             "sourceFileMap": {
                 "/Views": "${workspaceFolder}/Views"
