@@ -13,6 +13,7 @@ using Microsoft.AspNetCore.Authentication.Cookies;
 using System;
 using Salesforce.Models;
 using System.Net;
+using System.Security.Claims;
 
 namespace Salesforce
 {
@@ -32,11 +33,13 @@ namespace Salesforce
         {
             services.AddMvc();
 
-            services.AddAuthentication(options => {
+            services.AddAuthentication(options =>
+            {
                 options.DefaultAuthenticateScheme = CookieAuthenticationDefaults.AuthenticationScheme;
                 options.DefaultSignInScheme = CookieAuthenticationDefaults.AuthenticationScheme;
                 options.DefaultChallengeScheme = CookieAuthenticationDefaults.AuthenticationScheme;
-            }).AddCookie(options => {
+            }).AddCookie(options =>
+            {
                 options.Cookie.Expiration = TimeSpan.FromDays(14);
                 options.Cookie.Name = "access_token";
                 options.Cookie.Domain = Environment.GetEnvironmentVariable("AUTH_COOKIE_DOMAIN");
@@ -57,26 +60,44 @@ namespace Salesforce
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
+            }
 
+            // Check auth of user
+            bool useAuth = IsProduction() || Environment.GetEnvironmentVariable("USE_AUTH") == "true";
+            app.Use(async (context, next) =>
+            {
+
+                if (useAuth)
+                {
+                    var authTicket = CustomJwtDataFormat.Unprotect(context.Request.Cookies["access_token"]);
+
+                    if (authTicket != null && authTicket.Principal.IsInRole("Agent"))
+                    {
+                        await next.Invoke();
+                    }
+                    else
+                    {
+                        context.Response.StatusCode = (int)HttpStatusCode.Forbidden;
+                    }
+                }
+                else
+                {
+                    context.User = new ClaimsPrincipal();
+                    var Id = new ClaimsIdentity();
+                    Id.AddClaim(new Claim(ClaimTypes.Role, "Agent"));
+                    context.User.AddIdentity(Id);
+                    await next.Invoke();
+                }
+            });
+
+            if (env.IsDevelopment())
+            {
                 app.UseWebpackDevMiddleware(new WebpackDevMiddlewareOptions
                 {
                     HotModuleReplacement = true,
                     ProjectPath = Path.Combine(Directory.GetCurrentDirectory(), "ClientApp")
                 });
-            } else {
-                // Check auth of user
-                app.Use(async (context, next) => {
-                    var authTicket = CustomJwtDataFormat.Unprotect(context.Request.Cookies["access_token"]);
-
-                    if (authTicket != null && authTicket.Principal.IsInRole("Agent")) {
-                        await next.Invoke();
-                    } else {
-                        context.Response.StatusCode = (int)HttpStatusCode.Forbidden;
-                    }
-                });
             }
-
-            
 
             app.UseDefaultFiles();
             app.UseStaticFiles();
@@ -87,6 +108,11 @@ namespace Salesforce
                   name: "spa-fallback",
                   defaults: new { controller = "Home", action = "Index" });
             });
+        }
+        private static bool IsProduction()
+        {
+            string environment = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT");
+            return !string.IsNullOrEmpty(environment) && environment.Equals("Production");
         }
     }
 }

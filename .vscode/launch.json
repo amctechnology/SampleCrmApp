@@ -31,7 +31,8 @@
             },
             "env": {
                 "ASPNETCORE_ENVIRONMENT": "Development",
-                "AUTH_PROVIDER_URL": "http://auth.cloud.contactcanvas.com",
+                "USE_AUTH": "true",
+                "AUTH_PROVIDER_URL": "https://auth.cloud.contactcanvas.com",
                 "AUTH_COOKIE_DOMAIN": "cloud.contactcanvas.com",
             },
             "sourceFileMap": {
