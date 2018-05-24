@@ -71,7 +71,7 @@ namespace Salesforce
                 {
                     var authTicket = CustomJwtDataFormat.Unprotect(context.Request.Cookies["access_token"]);
 
-                    if (authTicket != null && authTicket.Principal.IsInRole("Agent"))
+                    if (authTicket != null && (authTicket.Principal.IsInRole("Agent") || authTicket.Principal.IsInRole("Admin")))
                     {
                         await next.Invoke();
                     }
