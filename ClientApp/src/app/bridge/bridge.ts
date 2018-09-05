@@ -66,7 +66,7 @@ class SalesforceBridge extends Bridge {
       }
     });
   }
-
+// Use for registering changes on screen within CRM
   @bind
   async onFocusListener(event) {
     let id = '';
@@ -88,7 +88,7 @@ class SalesforceBridge extends Bridge {
       entity.Name = temp.objectName;
     }
 
-    this.eventService.sendEvent('onFocus', { [id]: entity });
+    this.eventService.sendEvent('setNavigationDetails', { [id]: entity });
   }
 
   @bind

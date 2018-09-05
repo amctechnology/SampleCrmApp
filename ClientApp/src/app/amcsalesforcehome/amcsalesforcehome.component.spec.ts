@@ -1,10 +1,10 @@
 import { TestBed, inject } from '@angular/core/testing';
-import { HomeComponent } from './home.component';
+import { AMCSalesforceHomeComponent } from './amcsalesforcehome.component';
 import { SearchRecords } from '@amc/application-api';
 
 describe('Home', () => {
   it('formatCrmResults', () => {
-    const home = new HomeComponent();
+    const home = new AMCSalesforceHomeComponent();
     const crmResults = {
       '00Q3600000AS3QD': {
         'object': 'Lead',

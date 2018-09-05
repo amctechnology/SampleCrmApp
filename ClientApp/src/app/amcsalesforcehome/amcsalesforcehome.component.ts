@@ -1,15 +1,23 @@
 import { Component, OnInit } from '@angular/core';
 import * as api from '@amc/application-api';
-import { Application } from '@amc/applicationangularframework';
+import { Application, BridgeEventsService } from '@amc/applicationangularframework';
 import { bind } from 'bind-decorator';
+import { search } from '@amc/channel-api';
 
 @Component({
-  selector: 'app-home',
-  templateUrl: './home.component.html',
+  selector: 'app-amcsalesforcehome',
+  templateUrl: './amcsalesforcehome.component.html',
 })
-export class HomeComponent extends Application implements OnInit {
+export class AMCSalesforceHomeComponent extends Application implements OnInit {
+  interactions: Map<String, api.IInteraction>;
+  interactionList: Array<api.IInteraction>;
+  navigationDetailsCollection: Array<api.SearchRecords>;
+  currentInteraction: api.IInteraction;
   constructor() {
     super();
+    this.interactions = new Map();
+    this.interactionList = [];
+    this.navigationDetailsCollection = [];
     this.appName = 'Salesforce';
     this.bridgeScripts = this.bridgeScripts.concat([
       window.location.origin + '/bridge.bundle.js',
@@ -17,6 +25,7 @@ export class HomeComponent extends Application implements OnInit {
       'https://na15.salesforce.com/support/console/42.0/integration.js',
       'https://gs0.lightning.force.com/support/api/42.0/lightning/opencti_min.js'
     ]);
+
   }
 
   async ngOnInit() {
@@ -24,6 +33,9 @@ export class HomeComponent extends Application implements OnInit {
     this.bridgeEventsService.subscribe('clickToDial', event => {
       api.clickToDial(event.number, this.formatCrmResults(event.records));
     });
+
+    this.bridgeEventsService.subscribe('setNavigationDetails', this.setNavigationDetails);
+
   }
 
   formatCrmResults(crmResults: any): api.SearchRecords {
@@ -186,4 +198,118 @@ export class HomeComponent extends Application implements OnInit {
   protected saveActivity(activity: api.Activity): Promise<string> {
     return Promise.reject('Not Implemented!'); // Note: this has not been implemented because it is going to be reworked soon
   }
+
+    /**
+   * This listens for onInteraction events. It will call preformScreenpop if needed.
+   * Note: if overridden you do not need to bind the new method
+   */
+  protected async onInteraction(interaction: api.IInteraction): Promise<api.SearchRecords> {
+    try {
+      this.logger.logVerbose('onInteraction START: ' + interaction);
+      const interactionId = interaction.interactionId;
+      const scenarioIdInt = interaction.scenarioId;
+      let isNewScenarioId = false;
+      if (!this.scenarioInteractionMappings.hasOwnProperty(scenarioIdInt)) {
+
+        this.scenarioInteractionMappings[scenarioIdInt] = {};
+
+        isNewScenarioId = true;
+      }
+      this.scenarioInteractionMappings[scenarioIdInt][interactionId] = true;
+
+
+      if (this.shouldPreformScreenpop(interaction, isNewScenarioId)) {
+        let searchRecord: api.SearchRecords = null;
+        searchRecord = await this.preformScreenpop(interaction);
+        interaction = this.addSearchResultsToInteraction(interaction, searchRecord);
+        // interaction does not exist.
+        this.mapInteraction(interaction);
+        return searchRecord;
+      } else if (interaction.state === api.InteractionStates.Disconnected) {
+        delete this.scenarioInteractionMappings[scenarioIdInt][interactionId];
+
+        if (Object.keys(this.scenarioInteractionMappings[scenarioIdInt]).length === 0) {
+
+          delete this.scenarioInteractionMappings[scenarioIdInt];
+
+        }
+      }
+      // map interaction if interaction already is mapped.
+      this.mapInteraction(interaction);
+    } catch (e) {
+      const msg = 'Error in onInteraction! Exception details: ' + e.message;
+      this.logger.logError(msg);
+      throw msg;
+    }
+    this.logger.logVerbose('onInteraction END');
+    return;
+  }
+
+  protected setInteractionDetails(details) {
+    const detailsObject = {
+
+    };
+   // this.interactions.set(detailsObject);
+  }
+
+  // Add the current interaction to the interaction map
+  protected mapInteraction(interaction: api.IInteraction) {
+    if (this.interactions.has(interaction.interactionId)) {
+      if (interaction.state === api.InteractionStates.Disconnected) {
+        this.interactions.delete(interaction.interactionId);
+        this.saveActivity(this.createActivity(interaction));
+      }
+    } else {
+      let callNotes = new api.RecordItem('Call Notes', 'Call Notes', 'Call Notes');
+      callNotes.fields['Callnotes'] = {
+      DevName: 'Call Notes',
+      DisplayName: 'Call Notes',
+      Value: ''
+      };
+      // add a field for call notes to this interaction
+      interaction.details['Call Notes'] = callNotes;
+      this.interactions.set(interaction.interactionId, interaction);
+    }
+
+  }
+  protected addSearchResultsToInteraction(interaction: api.IInteraction, searchResults: api.SearchRecords): api.IInteraction {
+    let searchRecord = new api.RecordItem('Search Record', 'Search Record', 'Search Record');
+    searchRecord.fields['search Record'] = {
+    DevName: 'Search Record',
+    DisplayName: 'Search Record',
+    Value: searchResults
+    };
+    interaction.details['Search Record'] = searchRecord;
+    if (!this.interactionsListContains(interaction)) {
+      this.interactionList.push(interaction);
+    }
+    return interaction;
+  }
+
+  protected createActivity(interaction: api.IInteraction): api.Activity {
+    let activity: api.Activity = null;
+    activity.id = interaction.interactionId;
+
+    return activity;
+  }
+@bind
+  setNavigationDetails(navigationDetails) {
+    if (!navigationDetails['']) {
+      if (!this.navigationDetailsCollection.includes(navigationDetails)) {
+        this.navigationDetailsCollection.push(navigationDetails);
+      }
+    }
+  }
+protected interactionsListContains(interaction: api.IInteraction): boolean {
+  for ( let i = 0; i < this.interactionList.length; i++) {
+    if (this.interactionList[i].interactionId === interaction.interactionId) {
+      return true;
+    }
+    return false;
+  }
+}
+
+
+
+
 }

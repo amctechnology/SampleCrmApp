@@ -1,3 +1,75 @@
-<p>
-  activity works!
-</p>
+
+<div class="callDisplay">
+  <div class="editor callHeader">
+      <label style="margin-left: 20px">
+          <b>Activity Information</b>
+      </label>
+      <img id="ViewExpandImageId6-amcCallActivityId" class="imageExpandCollapse ViewExpandImage" src="/assets/images/section_expand.png" title="Expand" onclick="amcUI.onViewExpandClick(this, 'ViewExpandImageId6-amcCallActivityId', 'ViewCollapseImageId6-amcCallActivityId', 'ViewDivId6-amcCallActivityId')">
+      <img id="ViewCollapseImageId6-amcCallActivityId" class="imageExpandCollapse" src="/assets/images/section_collapse.png" title="Collapse" onclick="amcUI.onViewCollapseClick(this, 'ViewCollapseImageId6-amcCallActivityId', 'ViewExpandImageId6-amcCallActivityId', 'ViewDivId6-amcCallActivityId')">
+  </div>
+  <div id="ViewDivId6-amcCallActivityId" class="callBody">
+      <div id="ProgressDivId6-amcCallActivityId" style="top: 0; left: 0; position: absolute; z-index: 1; background: white; opacity: 0.7; filter: alpha(opacity=70); width: 100%; height: 100%; display: none; ">
+          <input id="ProgressImageDivId6-amcCallActivityId" style="position: absolute; top: 30%; left: 40%;" title="" type="image" src="/assets/images/view_progress.gif">
+      </div>
+      <div id="DetailViewDivId6-amcCallActivityId" style="position: relative; z-index: 0">
+          <form id="current-call-activity-form">
+
+                  <div class="editor displayDiv">
+                      <label class="displayLabels" for="DummyEmptyString" title="Call From">Call From</label>
+
+
+                      <select class="dropDownListStyle displayData" (change) = 'setSelectedInteraction($event)' data-resetperactivity="false" >
+                          <option *ngFor="let interaction of interactionList" id="{{interaction.interactionId}}" >{{interaction.details["Search Record"].fields["search Record"].Value.records["0"].fields.FullName.Value}}</option>
+                        </select>
+                  </div>
+
+
+              <div class="editor displayDiv">
+                  <label class="displayLabels" for="DummyEmptyString" id="LabelCallActivityRelatedToElementID" title="Regarding" style="display: inline;">Regarding</label>
+                  <select class="dropDownListStyle displayData" (change) = 'setSelectedInteraction($event)' data-resetperactivity="false" >
+                      <option *ngFor="let detail of navigationDetailsCollection" id="{{interaction.interactionId}}" >{{interaction.details["Search Record"].fields["search Record"].Value.records["0"].fields.FullName.Value}}</option>
+                    </select>
+              </div>
+              <div class="editor displayDiv">
+                  <label class="displayLabels" for="DummyEmptyString" title="Subject">Subject</label>
+                  <input class="activitySubjectTextBoxStyle displayData" data-activityfield="Subject" data-resetperactivity="false" title="call [{{selectedInteraction.details.fields.Phone.Value}}]" type="text" value="call [{{selectedInteraction.details.fields.Phone.Value}}]">
+              </div>
+              <div class="editor displayDiv">
+                  <label class="displayLabels" for="DummyEmptyString" title="Call Notes">Call Notes</label>
+
+                  <div style="float:left;height:120px;width:68%">
+                      <div style="height:80px">
+                          <textarea class="activityCommentsTextBoxStyle" cols="20" data-activityfield="Description" data-resetperactivity="true" id="CallActivityCommentsElementID" name="DummyEmptyString" oninput="amcUI.callActivity.updateTrackedField(this);" rows="2" style="width:100%;height:100%;resize: none" title=""> </textarea>
+
+                      </div>
+                      <div style="background-color: #F6F7FB;border-left: 1px solid #d1c7ac;border-bottom: 1px solid #d1c7ac;border-right: 1px solid #d1c7ac;height:25px">
+                          <input type="button" style="background-color: #838488;border: 0;color: white;height: 15px;width: 15px;font-weight:bold;padding-left: 4px;margin-left: 3px;margin-top:5px;outline:none;" value="1" onclick="loadText(this)" onmouseover="loadText(this, true)">
+                          <input type="button" style="background-color: #838488;border: 0;color: white;height: 15px;width: 15px;font-weight:bold;padding-left: 4px;margin-left: 3px;margin-top:5px;outline:none;" value="2" onclick="loadText(this)" onmouseover="loadText(this, true)">
+                          <input type="button" style="background-color: #838488;border: 0;color: white;height: 15px;width: 15px;font-weight:bold;padding-left: 4px;margin-left: 3px;margin-top:5px;outline:none;" value="3" onclick="loadText(this)" onmouseover="loadText(this, true)">
+                          <input type="button" style="background-color: #838488;border: 0;color: white;height: 15px;width: 15px;font-weight:bold;padding-left: 4px;margin-left: 3px;margin-top:5px;outline:none;" value="4" onclick="loadText(this)" onmouseover="loadText(this, true)">
+                          <input type="button" style="background-color: #838488;border: 0;color: white;height: 15px;width: 15px;font-weight:bold;padding-left: 4px;margin-left: 3px;margin-top:5px;outline:none;" value="5" onclick="loadText(this)" onmouseover="loadText(this, true)">
+                          <input type="button" style="background-color: #838488;border: 0;color: white;height: 15px;width: 15px;font-weight:bold;padding-left: 4px;margin-left: 3px;margin-top:5px;outline:none;" value="6" onclick="loadText(this)" onmouseover="loadText(this, true)">
+                          <input id="call-activity-submit-button" type="button" style="background-color: #F6F7FB;color: #476B9B;border: 0;font-weight:bold;float:right;margin-top:5px;outline:none;cursor:pointer;" value="SUBMIT" onclick="amcUI.submitCurrentCallActivity(this)">
+                      </div>
+                  </div>
+
+              </div>
+
+              <input id="call-activity-disposition-reason-code-textual" type="hidden" data-activityfield="CallDispositionTextual" data-resetperactivity="false">
+
+              <input id="call-activity-disposition-reason-code-numeric" type="hidden" data-activityfield="CallDispositionNumeric" data-resetperactivity="false">
+
+              <input id="call-activity-preview-disposition-reason-code-numeric" type="hidden" data-activityfield="CallPreviewDispositionNumeric" data-resetperactivity="false">
+
+              <input id="call-activity-preview-disposition-reason-code-textual" type="hidden" data-activityfield="CallPreviewDispositionTextual" data-resetperactivity="false">
+
+              <input id="call-activity-preview-direct-disposition-reason-code-numeric" type="hidden" data-activityfield="CallPreviewDirectDispositionNumeric" data-resetperactivity="false">
+
+              <input id="call-activity-preview-direct-disposition-reason-code-textual" type="hidden" data-activityfield="CallPreviewDirectDispositionTextual" data-resetperactivity="false">
+
+
+          </form>
+      </div>
+  </div>
+</div>
+
