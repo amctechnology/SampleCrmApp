@@ -15,31 +15,32 @@
           <form id="current-call-activity-form">
 
                   <div class="editor displayDiv">
-                      <label class="displayLabels" for="DummyEmptyString" title="Call From">Call From</label>
-
-
-                      <select class="dropDownListStyle displayData" (change) = 'setSelectedInteraction($event)' data-resetperactivity="false" >
-                          <option *ngFor="let interaction of interactionList" id="{{interaction.interactionId}}" >{{interaction.details["Search Record"].fields["search Record"].Value.records["0"].fields.FullName.Value}}</option>
+                      <label class="displayLabels" for="DummyEmptyString" title="Call From">Name</label>
+                      <select id = 'nameSelect' class="dropDownListStyle displayData" data-resetperactivity="false" (change) = 'onNameChange($event)' >
+                          <option *ngFor="let who of whoList" id="{{who.objectId}}" value = "{{who.objectId}}">{{who.objectName}}</option>
                         </select>
                   </div>
 
-
               <div class="editor displayDiv">
-                  <label class="displayLabels" for="DummyEmptyString" id="LabelCallActivityRelatedToElementID" title="Regarding" style="display: inline;">Regarding</label>
-                  <select class="dropDownListStyle displayData" (change) = 'setSelectedInteraction($event)' data-resetperactivity="false" >
-                      <option *ngFor="let detail of navigationDetailsCollection" id="{{interaction.interactionId}}" >{{interaction.details["Search Record"].fields["search Record"].Value.records["0"].fields.FullName.Value}}</option>
-                    </select>
+                  <label class="displayLabels" for="DummyEmptyString" id="LabelCallActivityRelatedToElementID" title="Regarding" style="display: inline;">Relate To</label>
+                  <select id = "relateToSelect" class="dropDownListStyle displayData" (change) = 'onRelatedToChange($event)' data-resetperactivity="false" >
+                    <option *ngFor="let what of whatList" id="what.objectId" value = "{{what.objectId}}" >{{parseWhat(what)}}</option>
+                  </select>
               </div>
+
+
               <div class="editor displayDiv">
                   <label class="displayLabels" for="DummyEmptyString" title="Subject">Subject</label>
-                  <input class="activitySubjectTextBoxStyle displayData" data-activityfield="Subject" data-resetperactivity="false" title="call [{{selectedInteraction.details.fields.Phone.Value}}]" type="text" value="call [{{selectedInteraction.details.fields.Phone.Value}}]">
+                  <input id = "subject" class="activitySubjectTextBoxStyle displayData" (change) = 'onSubjectChange($event)'data-activityfield="Subject" data-resetperactivity="false" title="Call [{{currentInteraction.details.fields.Phone.Value}}]" type="text" value="Call [{{currentInteraction.details.fields.Phone.Value}}]">
               </div>
+
+
+
               <div class="editor displayDiv">
                   <label class="displayLabels" for="DummyEmptyString" title="Call Notes">Call Notes</label>
-
                   <div style="float:left;height:120px;width:68%">
                       <div style="height:80px">
-                          <textarea class="activityCommentsTextBoxStyle" cols="20" data-activityfield="Description" data-resetperactivity="true" id="CallActivityCommentsElementID" name="DummyEmptyString" oninput="amcUI.callActivity.updateTrackedField(this);" rows="2" style="width:100%;height:100%;resize: none" title=""> </textarea>
+                          <textarea id = "callNotes" class="activityCommentsTextBoxStyle" (change) = 'onCallNotesChange($event)' cols="20" data-activityfield="Description" data-resetperactivity="true" id="CallActivityCommentsElementID" name="DummyEmptyString" oninput="amcUI.callActivity.updateTrackedField(this);" rows="2" style="width:100%;height:100%;resize: none" title=""> </textarea>
 
                       </div>
                       <div style="background-color: #F6F7FB;border-left: 1px solid #d1c7ac;border-bottom: 1px solid #d1c7ac;border-right: 1px solid #d1c7ac;height:25px">
@@ -49,7 +50,7 @@
                           <input type="button" style="background-color: #838488;border: 0;color: white;height: 15px;width: 15px;font-weight:bold;padding-left: 4px;margin-left: 3px;margin-top:5px;outline:none;" value="4" onclick="loadText(this)" onmouseover="loadText(this, true)">
                           <input type="button" style="background-color: #838488;border: 0;color: white;height: 15px;width: 15px;font-weight:bold;padding-left: 4px;margin-left: 3px;margin-top:5px;outline:none;" value="5" onclick="loadText(this)" onmouseover="loadText(this, true)">
                           <input type="button" style="background-color: #838488;border: 0;color: white;height: 15px;width: 15px;font-weight:bold;padding-left: 4px;margin-left: 3px;margin-top:5px;outline:none;" value="6" onclick="loadText(this)" onmouseover="loadText(this, true)">
-                          <input id="call-activity-submit-button" type="button" style="background-color: #F6F7FB;color: #476B9B;border: 0;font-weight:bold;float:right;margin-top:5px;outline:none;cursor:pointer;" value="SUBMIT" onclick="amcUI.submitCurrentCallActivity(this)">
+                          <input id="call-activity-submit-button" type="button" style="background-color: #F6F7FB;color: #476B9B;border: 0;font-weight:bold;float:right;margin-top:5px;outline:none;cursor:pointer;" value="SUBMIT" (click)="activitySave()">
                       </div>
                   </div>
 

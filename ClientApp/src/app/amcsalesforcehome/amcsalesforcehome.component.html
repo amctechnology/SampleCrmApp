@@ -1,5 +1,7 @@
-<div class="body">
-<app-activity [interactionList] = 'interactionList' [navigationDetailsCollection] = 'navigationDetailsCollection'></app-activity>
+<div class="body" >
+
+<app-activity [whoList] = 'whoList' [whatList] = 'whatList' [currentInteraction] = 'currentInteraction'
+[ActivityMap] = 'ActivityMap' (ActivitySave)="saveActivity($event)"></app-activity>
 <app-recent></app-recent>
 <app-create></app-create>
 </div>

@@ -7,15 +7,18 @@ declare var sforce: any;
 
 class SalesforceBridge extends Bridge {
   private isLightning = false;
-
+  private currentEvent: any;
   constructor() {
     super();
+    this.currentEvent = null;
     this.appName = 'Salesforce';
     this.VerifyMode();
     this.initialize();
     this.eventService.subscribe('getUserInfo', this.getUserInfo);
     this.eventService.subscribe('getSearchLayout', this.getSearchLayout);
     this.eventService.subscribe('isToolbarVisible', this.isToolbarVisible);
+    // subscribe for activities to be saved
+    this.eventService.subscribe('saveActivity', this.saveActivity);
   }
 
   async afterScriptsLoad(): Promise<any> {
@@ -69,26 +72,34 @@ class SalesforceBridge extends Bridge {
 // Use for registering changes on screen within CRM
   @bind
   async onFocusListener(event) {
-    let id = '';
+    if ( event !== this.currentEvent) {
+      this.currentEvent = event;
+      const temp = JSON.parse(event.result);
+      if (temp.objectId !== '') {
     const entity = {
-      object: '',
+      objectType: '',
       displayName: '',
-      Name: ''
+      objectName: '',
+      objectId: '',
+      url: ''
     };
     if (this.isLightning) {
-      entity.object = event.objectType;
+      entity.objectType = event.objectType;
       entity.displayName = event.objectType;
-      id = event.recordId;
-      entity.Name = event.recordName;
+      entity.objectId = event.recordId;
+      entity.objectName = event.recordName;
+      entity.url = event.url;
     } else {
-      const temp = JSON.parse(event.result);
-      entity.object = temp.object;
+      entity.objectType = temp.object;
       entity.displayName = temp.displayName;
-      id = temp.objectId;
-      entity.Name = temp.objectName;
+      entity.objectId = temp.objectId;
+      entity.objectName = temp.objectName;
+      entity.url = temp.url;
     }
+    this.eventService.sendEvent('setActivityDetails', entity);
+    }
+  }
 
-    this.eventService.sendEvent('setNavigationDetails', { [id]: entity });
   }
 
   @bind
@@ -319,6 +330,21 @@ class SalesforceBridge extends Bridge {
         });
       }
     });
+  }
+  protected saveActivity(activity) {
+    let activityString = JSON.stringify(activity);
+    activityString = 'WhoId=' + activity.WhoId + '&WhatId=' + activity.WhatId + '&CallType=' +
+    activity.CallType + '&CallDurationInSeconds=' + activity.CallDurationInSeconds + '&Subject=' +
+    activity.Subject + '&Description=' + activity.Description + '&Status=' + activity.Status +
+    '&ActivityDate=' + activity.ActivityDate;
+    if (activity.ActivityId) {
+      activityString = activityString + 'Id=' + activity.ActivityId;
+    }
+    sforce.interaction.saveLog('Task', activityString, function(result) {
+      activity.ActivityId = result.result;
+        this.eventService.sendEvent('saveActivityResponse', result);
+    });
+
   }
 
 }

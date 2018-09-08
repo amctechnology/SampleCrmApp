@@ -3,6 +3,7 @@ import * as api from '@amc/application-api';
 import { Application, BridgeEventsService } from '@amc/applicationangularframework';
 import { bind } from 'bind-decorator';
 import { search } from '@amc/channel-api';
+import { InteractionDirectionTypes } from '@amc/application-api';
 
 @Component({
   selector: 'app-amcsalesforcehome',
@@ -10,14 +11,16 @@ import { search } from '@amc/channel-api';
 })
 export class AMCSalesforceHomeComponent extends Application implements OnInit {
   interactions: Map<String, api.IInteraction>;
-  interactionList: Array<api.IInteraction>;
-  navigationDetailsCollection: Array<api.SearchRecords>;
+  whoList: Array<IActivityDetails>;
+  whatList: Array<IActivityDetails>;
   currentInteraction: api.IInteraction;
+  ActivityMap: Map<string, IActivity>;
   constructor() {
     super();
     this.interactions = new Map();
-    this.interactionList = [];
-    this.navigationDetailsCollection = [];
+    this.whoList = [];
+    this.whatList = [];
+    this.ActivityMap = new Map();
     this.appName = 'Salesforce';
     this.bridgeScripts = this.bridgeScripts.concat([
       window.location.origin + '/bridge.bundle.js',
@@ -34,7 +37,8 @@ export class AMCSalesforceHomeComponent extends Application implements OnInit {
       api.clickToDial(event.number, this.formatCrmResults(event.records));
     });
 
-    this.bridgeEventsService.subscribe('setNavigationDetails', this.setNavigationDetails);
+    this.bridgeEventsService.subscribe('setActivityDetails', this.setActivityDetails);
+    this.bridgeEventsService.subscribe('saveActivityResponse', this.saveActivityResponse);
 
   }
 
@@ -195,16 +199,21 @@ export class AMCSalesforceHomeComponent extends Application implements OnInit {
     return this.bridgeEventsService.sendEvent('isToolbarVisible');
   }
 
-  protected saveActivity(activity: api.Activity): Promise<string> {
-    return Promise.reject('Not Implemented!'); // Note: this has not been implemented because it is going to be reworked soon
+  protected saveActivity(activity): Promise<string> {
+    return Promise.resolve(this.bridgeEventsService.sendEvent('saveActivity', activity));
   }
-
+  protected saveActivityResponse(response) {
+    console.log(response);
+  }
     /**
    * This listens for onInteraction events. It will call preformScreenpop if needed.
    * Note: if overridden you do not need to bind the new method
    */
   protected async onInteraction(interaction: api.IInteraction): Promise<api.SearchRecords> {
     try {
+      if (!this.ActivityMap.has(interaction.interactionId)) {
+        this.ActivityMap.set(interaction.interactionId, this.createActivity(interaction));
+      }
       this.logger.logVerbose('onInteraction START: ' + interaction);
       const interactionId = interaction.interactionId;
       const scenarioIdInt = interaction.scenarioId;
@@ -219,23 +228,17 @@ export class AMCSalesforceHomeComponent extends Application implements OnInit {
 
 
       if (this.shouldPreformScreenpop(interaction, isNewScenarioId)) {
-        let searchRecord: api.SearchRecords = null;
+        let searchRecord = null;
         searchRecord = await this.preformScreenpop(interaction);
-        interaction = this.addSearchResultsToInteraction(interaction, searchRecord);
-        // interaction does not exist.
-        this.mapInteraction(interaction);
+        this.currentInteraction = interaction;
         return searchRecord;
       } else if (interaction.state === api.InteractionStates.Disconnected) {
         delete this.scenarioInteractionMappings[scenarioIdInt][interactionId];
 
         if (Object.keys(this.scenarioInteractionMappings[scenarioIdInt]).length === 0) {
-
           delete this.scenarioInteractionMappings[scenarioIdInt];
-
         }
       }
-      // map interaction if interaction already is mapped.
-      this.mapInteraction(interaction);
     } catch (e) {
       const msg = 'Error in onInteraction! Exception details: ' + e.message;
       this.logger.logError(msg);
@@ -245,71 +248,86 @@ export class AMCSalesforceHomeComponent extends Application implements OnInit {
     return;
   }
 
-  protected setInteractionDetails(details) {
-    const detailsObject = {
-
-    };
-   // this.interactions.set(detailsObject);
-  }
 
   // Add the current interaction to the interaction map
   protected mapInteraction(interaction: api.IInteraction) {
     if (this.interactions.has(interaction.interactionId)) {
       if (interaction.state === api.InteractionStates.Disconnected) {
         this.interactions.delete(interaction.interactionId);
-        this.saveActivity(this.createActivity(interaction));
+       // this.saveActivity(this.createActivity(interaction));
       }
     } else {
-      let callNotes = new api.RecordItem('Call Notes', 'Call Notes', 'Call Notes');
-      callNotes.fields['Callnotes'] = {
-      DevName: 'Call Notes',
-      DisplayName: 'Call Notes',
-      Value: ''
-      };
-      // add a field for call notes to this interaction
-      interaction.details['Call Notes'] = callNotes;
       this.interactions.set(interaction.interactionId, interaction);
     }
 
   }
-  protected addSearchResultsToInteraction(interaction: api.IInteraction, searchResults: api.SearchRecords): api.IInteraction {
-    let searchRecord = new api.RecordItem('Search Record', 'Search Record', 'Search Record');
-    searchRecord.fields['search Record'] = {
-    DevName: 'Search Record',
-    DisplayName: 'Search Record',
-    Value: searchResults
-    };
-    interaction.details['Search Record'] = searchRecord;
-    if (!this.interactionsListContains(interaction)) {
-      this.interactionList.push(interaction);
-    }
-    return interaction;
-  }
 
-  protected createActivity(interaction: api.IInteraction): api.Activity {
-    let activity: api.Activity = null;
-    activity.id = interaction.interactionId;
+  protected createActivity(interaction: api.IInteraction): IActivity {
+    const date = new Date();
+    const activity: IActivity = {
+      WhatId: '',
+      WhoId: '',
+      Subject: '',
+      CallType: '',
+      CallDurationInSeconds: '0',
+      Description: '',
+      Status: 'Completed',
+      ActivityDate: date,
+      ActivityId: '',
+      InteractionId: interaction.interactionId
+    };
 
     return activity;
   }
-@bind
-  setNavigationDetails(navigationDetails) {
-    if (!navigationDetails['']) {
-      if (!this.navigationDetailsCollection.includes(navigationDetails)) {
-        this.navigationDetailsCollection.push(navigationDetails);
-      }
-    }
-  }
-protected interactionsListContains(interaction: api.IInteraction): boolean {
-  for ( let i = 0; i < this.interactionList.length; i++) {
-    if (this.interactionList[i].interactionId === interaction.interactionId) {
+protected whatListContains(whatObject: IActivityDetails): boolean {
+  for ( let i = 0; i < this.whatList.length; i++) {
+    if (this.whatList[i].objectId === whatObject.objectId) {
       return true;
     }
-    return false;
   }
+  return false;
+}
+protected whoListContains(whoObject) {
+  for ( let i = 0; i < this.whoList.length; i++) {
+    if (this.whoList[i].objectId === whoObject.objectId) {
+      return true;
+    }
+  }
+  return false;
+}
+@bind
+protected setActivityDetails(eventObject) {
+  if (eventObject.objectType === 'Contact' || eventObject.objectType === 'Lead') {
+    if (!this.whoListContains(eventObject)) {
+      this.whoList.push(eventObject);
+    }
+  } else {
+    if (!this.whatListContains(eventObject)) {
+      this.whatList.push(eventObject);
+    }
+  }
+
 }
 
 
+}
+interface IActivityDetails  {
+  objectType: string;
+  displayName: string;
+  objectName: string;
+  objectId: string;
+  url: string;
+}
 
-
+interface IActivity {
+  WhoId: string;
+  WhatId: string;
+  CallType: string;
+  CallDurationInSeconds: string;
+  Subject: string;
+  Description: string;
+  Status: string;
+  ActivityDate: Date;
+  ActivityId: string;
+  InteractionId: string;
 }
