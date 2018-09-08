@@ -1,9 +1,10 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, Output, EventEmitter } from '@angular/core';
 import * as api from '@amc/application-api';
 import { Application, BridgeEventsService } from '@amc/applicationangularframework';
 import { bind } from 'bind-decorator';
 import { search } from '@amc/channel-api';
 import { InteractionDirectionTypes } from '@amc/application-api';
+import { Subject } from 'rxjs/Subject';
 
 @Component({
   selector: 'app-amcsalesforcehome',
@@ -15,6 +16,7 @@ export class AMCSalesforceHomeComponent extends Application implements OnInit {
   whatList: Array<IActivityDetails>;
   currentInteraction: api.IInteraction;
   ActivityMap: Map<string, IActivity>;
+  private eventsSubject: Subject<void> = new Subject<void>();
   constructor() {
     super();
     this.interactions = new Map();
@@ -234,7 +236,7 @@ export class AMCSalesforceHomeComponent extends Application implements OnInit {
         return searchRecord;
       } else if (interaction.state === api.InteractionStates.Disconnected) {
         delete this.scenarioInteractionMappings[scenarioIdInt][interactionId];
-
+        this.eventsSubject.next();
         if (Object.keys(this.scenarioInteractionMappings[scenarioIdInt]).length === 0) {
           delete this.scenarioInteractionMappings[scenarioIdInt];
         }

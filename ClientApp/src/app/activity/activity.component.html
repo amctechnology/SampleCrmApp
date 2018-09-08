@@ -22,9 +22,9 @@
                   </div>
 
               <div class="editor displayDiv">
-                  <label class="displayLabels" for="DummyEmptyString" id="LabelCallActivityRelatedToElementID" title="Regarding" style="display: inline;">Relate To</label>
+                  <label class="displayLabels" for="DummyEmptyString" id="LabelCallActivityRelatedToElementID" title="Regarding" style="display: inline;">Related To</label>
                   <select id = "relateToSelect" class="dropDownListStyle displayData" (change) = 'onRelatedToChange($event)' data-resetperactivity="false" >
-                    <option *ngFor="let what of whatList" id="what.objectId" value = "{{what.objectId}}" >{{parseWhat(what)}}</option>
+                    <option *ngFor="let what of whatList" id="what.objectId" value = "{{what.objectId}}" style="background-image:url(/assets/images/Create_Case.png );" >{{parseWhat(what)}}</option>
                   </select>
               </div>
 

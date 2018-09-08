@@ -342,7 +342,7 @@ class SalesforceBridge extends Bridge {
     }
     sforce.interaction.saveLog('Task', activityString, function(result) {
       activity.ActivityId = result.result;
-        this.eventService.sendEvent('saveActivityResponse', result);
+        this.eventService.sendEvent('saveActivityResponse', activity);
     });
 
   }

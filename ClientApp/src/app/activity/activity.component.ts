@@ -1,5 +1,6 @@
 import { Component, OnInit, Input, Output, EventEmitter } from '@angular/core';
 import * as api from '@amc/application-api';
+import { Observable } from 'rxjs/Observable';
 
 @Component({
   selector: 'app-activity',
@@ -11,8 +12,10 @@ export class ActivityComponent implements OnInit {
   @Input() whatList: Array<IActivityDetails>;
   @Input() currentInteraction: api.IInteraction;
   @Input() ActivityMap: Map<string, IActivity>;
-  @Output() ActivitySave: EventEmitter<IActivity> = new EventEmitter<IActivity>();
+  @Input() events: Observable<void>;
 
+  @Output() ActivitySave: EventEmitter<IActivity> = new EventEmitter<IActivity>();
+  private eventsSubscription: any;
   whatId: string;
   whoId: string;
   subject: string;
@@ -28,6 +31,7 @@ export class ActivityComponent implements OnInit {
   }
 
   ngOnInit() {
+    this.eventsSubscription = this.events.subscribe(() => this.activitySave());
   }
   setSelectedInteraction(interactionList) {
     console.log('interaction ' + interactionList.srcElement[0].id );
