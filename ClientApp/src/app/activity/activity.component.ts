@@ -1,6 +1,8 @@
 import { Component, OnInit, Input, Output, EventEmitter } from '@angular/core';
 import * as api from '@amc/application-api';
 import { Observable } from 'rxjs/Observable';
+import { Subject } from 'rxjs/Subject';
+import * as channelApi from '@amc/channel-api/';
 
 @Component({
   selector: 'app-activity',
@@ -12,10 +14,9 @@ export class ActivityComponent implements OnInit {
   @Input() whatList: Array<IActivityDetails>;
   @Input() currentInteraction: api.IInteraction;
   @Input() ActivityMap: Map<string, IActivity>;
-  @Input() events: Observable<void>;
+  @Input() interactionDisconnected: Subject<boolean>;
 
   @Output() ActivitySave: EventEmitter<IActivity> = new EventEmitter<IActivity>();
-  private eventsSubscription: any;
   whatId: string;
   whoId: string;
   subject: string;
@@ -31,7 +32,9 @@ export class ActivityComponent implements OnInit {
   }
 
   ngOnInit() {
-    this.eventsSubscription = this.events.subscribe(() => this.activitySave());
+    this.interactionDisconnected.subscribe(event => {
+      this.activitySave();
+    });
   }
   setSelectedInteraction(interactionList) {
     console.log('interaction ' + interactionList.srcElement[0].id );
@@ -63,7 +66,7 @@ export class ActivityComponent implements OnInit {
     } else {
       activity.Subject = this.subject;
     }
-    activity.Description = this.callNotes;
+    activity.Description = this.callNotes.trim();
     activity.CallType = this.getInteractionDirection(this.currentInteraction.direction);
 
     this.ActivitySave.emit(activity);
@@ -93,6 +96,10 @@ export class ActivityComponent implements OnInit {
     const EndDate = new Date();
     return Math.round((EndDate.getTime() - startDate.getTime()) / 1000);
   }
+
+
+
+
   }
 
   interface IActivityDetails  {

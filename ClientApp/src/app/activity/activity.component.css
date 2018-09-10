@@ -24,7 +24,37 @@
   width: 100% !important;
   margin-top: 0px !important;
 }
-
+.notesBottonBorder {
+  background-color: #F6F7FB;
+  border-left: 1px solid #d1c7ac;
+  border-bottom: 1px solid #d1c7ac;
+  border-right: 1px solid #d1c7ac;
+  height:25px
+}
+.quickNotesBotton {
+  background-color: #838488;
+  border: 0;
+  color: white;
+  height: 80%;
+  width: 15px;
+  font-weight:bold;
+  padding-left: 4px;
+  margin-left: 3px;
+  margin-top:3px;
+  outline:none;
+}
+.submitButton {
+  border: 0;
+  font-weight:bold;
+  float:right;
+  margin-top:3px;
+  outline:none;
+  cursor:pointer;
+  background-color: #F6F7FB;
+  color: #476B9B;
+  padding-right: 5px;
+  margin-bottom: 5px;
+}
 .callBody {
   border: 1px solid #939598;
   border-top: 0;

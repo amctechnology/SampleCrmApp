@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, EventEmitter, Output } from '@angular/core';
 
 @Component({
   selector: 'app-create',
@@ -6,10 +6,13 @@ import { Component, OnInit } from '@angular/core';
   styleUrls: ['./create.component.css']
 })
 export class CreateComponent implements OnInit {
-
+  @Output() CreateNewEntity: EventEmitter<any> = new EventEmitter<any>();
   constructor() { }
 
   ngOnInit() {
   }
 
+  protected createNewEntity(type) {
+    this.CreateNewEntity.emit(type);
+  }
 }

@@ -8,6 +8,7 @@ declare var sforce: any;
 class SalesforceBridge extends Bridge {
   private isLightning = false;
   private currentEvent: any;
+
   constructor() {
     super();
     this.currentEvent = null;
@@ -19,6 +20,8 @@ class SalesforceBridge extends Bridge {
     this.eventService.subscribe('isToolbarVisible', this.isToolbarVisible);
     // subscribe for activities to be saved
     this.eventService.subscribe('saveActivity', this.saveActivity);
+    // create new entity
+    this.eventService.subscribe('createNewEntity', this.createNewEntity);
   }
 
   async afterScriptsLoad(): Promise<any> {
@@ -331,6 +334,7 @@ class SalesforceBridge extends Bridge {
       }
     });
   }
+  @bind
   protected saveActivity(activity) {
     let activityString = JSON.stringify(activity);
     activityString = 'WhoId=' + activity.WhoId + '&WhatId=' + activity.WhatId + '&CallType=' +
@@ -342,9 +346,25 @@ class SalesforceBridge extends Bridge {
     }
     sforce.interaction.saveLog('Task', activityString, function(result) {
       activity.ActivityId = result.result;
-        this.eventService.sendEvent('saveActivityResponse', activity);
+      this.eventService.sendEvent('saveActivityResponse', activity);
     });
 
+  }
+
+  protected createNewEntity(param) {
+    let URL = '';
+    if (param.entityName === 'Case') {
+      URL = '/500/e';
+    } else if (param.entityName === 'Lead') {
+      URL = '/00Q/e';
+    } else if (param.entityName === 'Account') {
+        URL = '/001/e';
+    } else if (param.entityName === 'Contact') {
+        URL = '/003/e';
+    }
+    sforce.interaction.screenPop(URL, true, function(result)  {
+      console.log(result);
+    });
   }
 
 }

@@ -1,5 +1,5 @@
 
-<div id="createNewEntityId" class="callDisplay" style="display: grid;">
+<div id="createNewEntityId" class="callDisplay" style="display: grid;" >
   <div class="editor callHeader">
       <label style="margin-left: 20px">
           <b>Create New</b>
@@ -10,19 +10,19 @@
   <div id="ViewDivId-CreateNewSection" class="callBody">
     <div class="body">
       <div class="container">
-          <img class="newEntityImages" src="/assets/images/Create_Case.png" onclick="amcUI.onCRMEntityClicked(this,'','Incident')">
+          <img class="newEntityImages" src="/assets/images/Create_Case.png" (click) = 'createNewEntity("Case")'>
           <label for="Case" title="Case" style="margin-left:10px;padding-top:8px;">Case</label>
       </div>
       <div class="container">
-          <img class="newEntityImages" src="/assets/images/Create_Lead.png" onclick="amcUI.onCRMEntityClicked(this,'','Lead')">
+          <img class="newEntityImages" src="/assets/images/Create_Lead.png" (click) = 'createNewEntity("Lead")'>
           <label for="Lead" title="Lead" style="margin-left:10px;">Lead</label>
       </div>
       <div class="container">
-          <img class="newEntityImages" src="/assets/images/Create_Account.png" onclick="amcUI.onCRMEntityClicked(this,'','Account')">
+          <img class="newEntityImages" src="/assets/images/Create_Account.png" (click) = 'createNewEntity("Account")'>
           <label for="Contact" title="Contact" style="margin-left:10px;padding-bottom:3px;">Account</label>
       </div>
       <div class="container">
-          <img class="newEntityImages" src="/assets/images/Create_Contact.png" onclick="amcUI.onCRMEntityClicked(this,'','Contact')">
+          <img class="newEntityImages" src="/assets/images/Create_Contact.png" (click) = 'createNewEntity("Contact")'>
           <label for="Contact" title="Contact" style="margin-left:10px;padding-bottom:3px;">Contact</label>
       </div>
     </div>

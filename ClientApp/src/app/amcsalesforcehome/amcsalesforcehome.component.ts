@@ -11,14 +11,16 @@ import { Subject } from 'rxjs/Subject';
   templateUrl: './amcsalesforcehome.component.html',
 })
 export class AMCSalesforceHomeComponent extends Application implements OnInit {
+  interactionDisconnected: Subject<boolean> = new Subject();
+  flag: boolean;
   interactions: Map<String, api.IInteraction>;
   whoList: Array<IActivityDetails>;
   whatList: Array<IActivityDetails>;
   currentInteraction: api.IInteraction;
   ActivityMap: Map<string, IActivity>;
-  private eventsSubject: Subject<void> = new Subject<void>();
   constructor() {
     super();
+    this.flag = true;
     this.interactions = new Map();
     this.whoList = [];
     this.whatList = [];
@@ -32,7 +34,6 @@ export class AMCSalesforceHomeComponent extends Application implements OnInit {
     ]);
 
   }
-
   async ngOnInit() {
     await super.ngOnInit();
     this.bridgeEventsService.subscribe('clickToDial', event => {
@@ -204,6 +205,7 @@ export class AMCSalesforceHomeComponent extends Application implements OnInit {
   protected saveActivity(activity): Promise<string> {
     return Promise.resolve(this.bridgeEventsService.sendEvent('saveActivity', activity));
   }
+  @bind
   protected saveActivityResponse(response) {
     console.log(response);
   }
@@ -236,7 +238,7 @@ export class AMCSalesforceHomeComponent extends Application implements OnInit {
         return searchRecord;
       } else if (interaction.state === api.InteractionStates.Disconnected) {
         delete this.scenarioInteractionMappings[scenarioIdInt][interactionId];
-        this.eventsSubject.next();
+        this.interactionDisconnected.next(!this.flag);
         if (Object.keys(this.scenarioInteractionMappings[scenarioIdInt]).length === 0) {
           delete this.scenarioInteractionMappings[scenarioIdInt];
         }
@@ -310,7 +312,21 @@ protected setActivityDetails(eventObject) {
   }
 
 }
+@bind
+protected createNewEntity(type) {
+  const params = this.buildParams(type);
+  this.bridgeEventsService.sendEvent('createNewEntity', params);
+}
 
+protected buildParams(type) {
+  const params: IParams = {
+    entityName: type,
+    defaultFieldValues: {
+      Phone: this.currentInteraction.details.fields.Phone.Value
+    }
+  };
+  return params;
+}
 
 }
 interface IActivityDetails  {
@@ -332,4 +348,10 @@ interface IActivity {
   ActivityDate: Date;
   ActivityId: string;
   InteractionId: string;
+}
+interface IParams {
+  entityName: string;
+  defaultFieldValues?: {
+    Phone: string
+  };
 }

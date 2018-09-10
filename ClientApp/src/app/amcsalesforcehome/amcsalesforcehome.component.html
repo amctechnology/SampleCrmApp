@@ -1,7 +1,7 @@
 <div class="body" >
 
-<app-activity [events]="eventsSubject.asObservable()" [whoList] = 'whoList' [whatList] = 'whatList' [currentInteraction] = 'currentInteraction'
+<app-activity [interactionDisconnected] = 'interactionDisconnected' [whoList] = 'whoList' [whatList] = 'whatList' [currentInteraction] = 'currentInteraction'
 [ActivityMap] = 'ActivityMap' (ActivitySave)="saveActivity($event)"></app-activity>
 <app-recent></app-recent>
-<app-create></app-create>
+<app-create (CreateNewEntity)="createNewEntity($event)"></app-create>
 </div>
