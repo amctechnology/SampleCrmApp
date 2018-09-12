@@ -2,12 +2,15 @@ import { Bridge, BridgeEventsService } from '@amc/applicationangularframework';
 import { InteractionDirectionTypes } from '@amc/application-api';
 import { bind } from 'bind-decorator';
 import { safeJSONParse } from '../utils';
+import { Subject } from 'rxjs/Subject';
+import { OnInit } from '@angular/core';
 
 declare var sforce: any;
 
 class SalesforceBridge extends Bridge {
   private isLightning = false;
   private currentEvent: any;
+  activity: IActivity = null;
 
   constructor() {
     super();
@@ -22,6 +25,8 @@ class SalesforceBridge extends Bridge {
     this.eventService.subscribe('saveActivity', this.saveActivity);
     // create new entity
     this.eventService.subscribe('createNewEntity', this.createNewEntity);
+
+
   }
 
   async afterScriptsLoad(): Promise<any> {
@@ -335,21 +340,23 @@ class SalesforceBridge extends Bridge {
     });
   }
   @bind
-  protected saveActivity(activity) {
-    let activityString = JSON.stringify(activity);
-    activityString = 'WhoId=' + activity.WhoId + '&WhatId=' + activity.WhatId + '&CallType=' +
-    activity.CallType + '&CallDurationInSeconds=' + activity.CallDurationInSeconds + '&Subject=' +
-    activity.Subject + '&Description=' + activity.Description + '&Status=' + activity.Status +
-    '&ActivityDate=' + activity.ActivityDate;
-    if (activity.ActivityId) {
-      activityString = activityString + 'Id=' + activity.ActivityId;
-    }
-    sforce.interaction.saveLog('Task', activityString, function(result) {
-      activity.ActivityId = result.result;
-      this.eventService.sendEvent('saveActivityResponse', activity);
+  protected saveActivity(activity: IActivity): Promise<any> {
+    return new Promise((resolve, reject) => {
+      let activityString = JSON.stringify(activity);
+      activityString = 'WhoId=' + activity.WhoId + '&WhatId=' + activity.WhatId + '&CallType=' +
+      activity.CallType + '&CallDurationInSeconds=' + activity.CallDurationInSeconds + '&Subject=' +
+      activity.Subject + '&Description=' + activity.Description + '&Status=' + activity.Status +
+      '&ActivityDate=' + activity.ActivityDate;
+      if (activity.ActivityId) {
+        activityString = activityString + '&Id=' + activity.ActivityId;
+      }
+      sforce.interaction.saveLog('Task', activityString, result => {
+        activity.ActivityId = result.result;
+        resolve(this.eventService.sendEvent('saveActivityResponse', activity));
+      });
     });
-
   }
+
 
   protected createNewEntity(param) {
     let URL = '';
@@ -370,3 +377,16 @@ class SalesforceBridge extends Bridge {
 }
 
 const bridge = new SalesforceBridge();
+
+interface IActivity {
+  WhoId: string;
+  WhatId: string;
+  CallType: string;
+  CallDurationInSeconds: string;
+  Subject: string;
+  Description: string;
+  Status: string;
+  ActivityDate: string;
+  ActivityId: string;
+  InteractionId: string;
+}

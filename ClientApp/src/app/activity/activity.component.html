@@ -31,7 +31,7 @@
 
               <div class="editor displayDiv">
                   <label class="displayLabels" for="DummyEmptyString" title="Subject">Subject</label>
-                  <input id = "subject" class="activitySubjectTextBoxStyle displayData" (change) = 'onSubjectChange($event)'data-activityfield="Subject" data-resetperactivity="false" title="Call [{{currentInteraction.details.fields.Phone.Value}}]" type="text" value="Call [{{currentInteraction.details.fields.Phone.Value}}]">
+                  <input id = "subject" class="activitySubjectTextBoxStyle displayData" (change) = 'onSubjectChange($event)'data-activityfield="Subject" data-resetperactivity="false" title="{{subject}}" type="text" value="{{subject}}">
               </div>
 
 
@@ -40,7 +40,7 @@
                   <label class="displayLabels" for="DummyEmptyString" title="Call Notes">Call Notes</label>
                   <div style="float:left;height:120px;width:68%">
                       <div style="height:80px">
-                          <textarea id = "callNotes" class="activityCommentsTextBoxStyle" (change) = 'onCallNotesChange($event)' cols="20" data-activityfield="Description" data-resetperactivity="true" id="CallActivityCommentsElementID" name="DummyEmptyString" oninput="amcUI.callActivity.updateTrackedField(this);" rows="2" style="width:100%;height:100%;resize: none" title=""> </textarea>
+                          <textarea id = "callNotes" value = "{{callNotes}}"class="activityCommentsTextBoxStyle" (change) = 'onCallNotesChange($event)' cols="20" data-activityfield="Description" data-resetperactivity="true" id="CallActivityCommentsElementID" name="DummyEmptyString" oninput="amcUI.callActivity.updateTrackedField(this);" rows="2" style="width:100%;height:100%;resize: none" title=""> </textarea>
 
                       </div>
                       <div class = "notesBottonBorder" >
@@ -50,7 +50,7 @@
                           <input class = "quickNotesBotton" type="button"  value="4" onclick="loadText(this)" onmouseover="loadText(this, true)">
                           <input class = "quickNotesBotton" type="button"  value="5" onclick="loadText(this)" onmouseover="loadText(this, true)">
                           <input class = "quickNotesBotton" type="button"  value="6" onclick="loadText(this)" onmouseover="loadText(this, true)">
-                          <input id="call-activity-submit-button" class = "submitButton" type="button" value="SUBMIT" (click)="activitySave()">
+                          <input id="call-activity-submit-button" class = "submitButton" type="button" value="SUBMIT" (click)="activitySave(true)">
                       </div>
                   </div>
 

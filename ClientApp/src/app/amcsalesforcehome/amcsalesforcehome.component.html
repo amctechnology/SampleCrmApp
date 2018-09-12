@@ -1,6 +1,6 @@
 <div class="body" >
 
-<app-activity [interactionDisconnected] = 'interactionDisconnected' [whoList] = 'whoList' [whatList] = 'whatList' [currentInteraction] = 'currentInteraction'
+<app-activity [subject] = 'subject' [interactionDisconnected] = 'interactionDisconnected' [whoList] = 'whoList' [whatList] = 'whatList' [currentInteraction] = 'currentInteraction'
 [ActivityMap] = 'ActivityMap' (ActivitySave)="saveActivity($event)"></app-activity>
 <app-recent></app-recent>
 <app-create (CreateNewEntity)="createNewEntity($event)"></app-create>

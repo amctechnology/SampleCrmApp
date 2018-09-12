@@ -11,7 +11,6 @@ export class AppComponent implements OnInit, AfterViewChecked {
   constructor(el: ElementRef) {
     this.height = 500;
     this.el = el;
-    channelApi.setSoftphoneHeight(450);
   }
   ngOnInit(): void {
     throw new Error('Method not implemented.');

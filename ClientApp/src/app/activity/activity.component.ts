@@ -15,11 +15,10 @@ export class ActivityComponent implements OnInit {
   @Input() currentInteraction: api.IInteraction;
   @Input() ActivityMap: Map<string, IActivity>;
   @Input() interactionDisconnected: Subject<boolean>;
-
+  @Input() subject: string;
   @Output() ActivitySave: EventEmitter<IActivity> = new EventEmitter<IActivity>();
   whatId: string;
   whoId: string;
-  subject: string;
   callNotes: string;
 
 
@@ -33,7 +32,7 @@ export class ActivityComponent implements OnInit {
 
   ngOnInit() {
     this.interactionDisconnected.subscribe(event => {
-      this.activitySave();
+      this.activitySave(false);
     });
   }
   setSelectedInteraction(interactionList) {
@@ -46,8 +45,8 @@ export class ActivityComponent implements OnInit {
     }
     return whatObject.objectName;
   }
-  protected activitySave() {
-
+  protected activitySave(event) {
+    if (this.currentInteraction) {
     let activity = this.ActivityMap.get(this.currentInteraction.interactionId);
     activity.CallDurationInSeconds = this.getSecondsElapsed(activity.ActivityDate).toString();
 
@@ -61,17 +60,24 @@ export class ActivityComponent implements OnInit {
     } else {
       activity.WhoId = this.whoId;
     }
-    if (this.subject === null) {
-      activity.Subject = 'Call [' + this.currentInteraction.details.fields.Phone.Value + ']';
-    } else {
-      activity.Subject = this.subject;
-    }
-    activity.Description = this.callNotes.trim();
+
+    activity.Description = this.callNotes;
     activity.CallType = this.getInteractionDirection(this.currentInteraction.direction);
-
-    this.ActivitySave.emit(activity);
+    activity.Subject = this.subject;
+    if (event) {
+      activity.Status = 'Completed';
+      this.clearActivityDetails();
+      this.ActivitySave.emit(activity);
+    } else {
+      this.ActivitySave.emit(activity);
+    }
   }
-
+  }
+  protected clearActivityDetails() {
+    this.subject = null;
+    this.callNotes = null;
+    this.currentInteraction = null;
+  }
   protected onNameSelectChange(event) {
     this.whoId = event.srcElement[0].value;
   }
@@ -82,7 +88,7 @@ export class ActivityComponent implements OnInit {
     this.subject = event.srcElement.value;
   }
   protected onCallNotesChange(event) {
-    this.callNotes = event.srcElement.value;
+    this.callNotes = event.srcElement.value.trim();
   }
   protected getInteractionDirection(directionNumber) {
     if (directionNumber === 0 ) {

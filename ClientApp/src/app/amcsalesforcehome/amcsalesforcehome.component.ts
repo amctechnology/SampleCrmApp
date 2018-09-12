@@ -16,6 +16,7 @@ export class AMCSalesforceHomeComponent extends Application implements OnInit {
   interactions: Map<String, api.IInteraction>;
   whoList: Array<IActivityDetails>;
   whatList: Array<IActivityDetails>;
+  subject: string;
   currentInteraction: api.IInteraction;
   ActivityMap: Map<string, IActivity>;
   constructor() {
@@ -203,11 +204,18 @@ export class AMCSalesforceHomeComponent extends Application implements OnInit {
   }
 
   protected saveActivity(activity): Promise<string> {
+    if (this.ActivityMap.has(activity.InteractionId)) {
+      activity.ActivityId = this.ActivityMap.get(activity.InteractionId).ActivityId;
+    }
+    if (activity.Status === 'Completed') {
+      this.whoList = [];
+      this.whatList = [];
+    }
     return Promise.resolve(this.bridgeEventsService.sendEvent('saveActivity', activity));
   }
   @bind
-  protected saveActivityResponse(response) {
-    console.log(response);
+  protected saveActivityResponse(activity: IActivity) {
+    this.ActivityMap.set(activity.InteractionId, activity);
   }
     /**
    * This listens for onInteraction events. It will call preformScreenpop if needed.
@@ -215,9 +223,6 @@ export class AMCSalesforceHomeComponent extends Application implements OnInit {
    */
   protected async onInteraction(interaction: api.IInteraction): Promise<api.SearchRecords> {
     try {
-      if (!this.ActivityMap.has(interaction.interactionId)) {
-        this.ActivityMap.set(interaction.interactionId, this.createActivity(interaction));
-      }
       this.logger.logVerbose('onInteraction START: ' + interaction);
       const interactionId = interaction.interactionId;
       const scenarioIdInt = interaction.scenarioId;
@@ -235,6 +240,8 @@ export class AMCSalesforceHomeComponent extends Application implements OnInit {
         let searchRecord = null;
         searchRecord = await this.preformScreenpop(interaction);
         this.currentInteraction = interaction;
+        this.subject = 'Call [' + interaction.details.fields.Phone.Value + ']';
+        this.saveActivity(this.createActivity(searchRecord, interaction));
         return searchRecord;
       } else if (interaction.state === api.InteractionStates.Disconnected) {
         delete this.scenarioInteractionMappings[scenarioIdInt][interactionId];
@@ -266,16 +273,16 @@ export class AMCSalesforceHomeComponent extends Application implements OnInit {
 
   }
 
-  protected createActivity(interaction: api.IInteraction): IActivity {
+  protected createActivity(searchRecord: any, interaction: api.IInteraction): IActivity {
     const date = new Date();
     const activity: IActivity = {
       WhatId: '',
-      WhoId: '',
+      WhoId: searchRecord.records[0].id,
       Subject: '',
       CallType: '',
       CallDurationInSeconds: '0',
       Description: '',
-      Status: 'Completed',
+      Status: 'Open',
       ActivityDate: date,
       ActivityId: '',
       InteractionId: interaction.interactionId
