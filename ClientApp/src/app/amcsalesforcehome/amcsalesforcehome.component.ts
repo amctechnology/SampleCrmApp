@@ -296,10 +296,8 @@ export class AMCSalesforceHomeComponent extends Application implements OnInit {
   protected createActivity(searchRecord: any, interaction: api.IInteraction): IActivity {
     const date = new Date();
     const activity: IActivity = {
-      WhatId: '',
-      WhatName: '',
-      WhoId: searchRecord.records[0].id,
-      WhoName: '',
+      WhoObject: null,
+      WhatObject: null,
       Subject: '',
       CallType: '',
       CallDurationInSeconds: '0',
@@ -343,29 +341,52 @@ protected setActivityDetails(eventObject) {
 
 }
 @bind
-protected createNewEntity(type) {
-  let params: IParams = {
-     entityName: type
-  };
+protected createNewEntity(entityType) {
+  let params: IParams;
   if (this.currentInteraction) {
     if (this.ActivityMap.has(this.currentInteraction.interactionId)) {
-      params = this.buildParams(type);
+      const activity = this.ActivityMap.get(this.currentInteraction.interactionId);
+      params = this.buildParams(entityType, activity);
     }
   }
 
   this.bridgeEventsService.sendEvent('createNewEntity', params);
 }
 
-protected buildParams(type) {
-  const params: IParams = {
-    entityName: type,
-    defaultFieldValues: {
-      // Phone: this.currentInteraction.details.fields.Phone.Value,
-      ContactName: 'Tim Barr',
-      AccountName: 'Grand Hotels Resorts Ltd',
-      Subject: 'Call [4042024631]'
+protected buildParams(entityType, activity) {
+  let params: IParams = {
+    entityName: entityType,
+    caseFields: {
+      AccountId: '',
+      ContactId: '',
+      Origin: '',
+      Status: '',
+      Description: '',
+    },
+    opportunityFields: {
+      AccountId: '',
+      StageName: '',
+      CloseDate: '',
     }
   };
+  if (entityType === 'Case') {
+    if (activity.whatObject.objectType === 'Account') {
+      if (activity.WhatObject) {
+        params.caseFields.AccountId = activity.WhatId;
+      }
+    }
+    if (activity.whoObject) {
+      params.caseFields.ContactId = activity.whoObject.objectId;
+    }
+    params.caseFields.Description = activity.Description;
+  } else if ( entityType === 'Opportunity') {
+    if (activity.whatObject.objectType === 'Account') {
+      if (activity.WhatObject) {
+        params.opportunityFields.AccountId = activity.WhatId;
+      }
+    }
+    params.opportunityFields.CloseDate = activity.ActivityDate;
+  }
   return params;
 }
 

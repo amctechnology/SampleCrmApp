@@ -1,9 +1,17 @@
 export interface IParams {
   entityName: string;
-  defaultFieldValues?: {
-    Phone?: string;
-    ContactName?: string;
-    AccountName?: string;
-    Subject?: string;
+  caseFields?: {
+    AccountId?: string;
+    ContactId?: string;
+    Origin?: string;
+    Status?: string;
+    Description?: string;
   };
+  opportunityFields?: {
+    AccountId?: string;
+    StageName?: string;
+    CloseDate?: string;
+  };
+
 }
+

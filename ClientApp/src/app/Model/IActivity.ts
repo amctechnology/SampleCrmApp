@@ -1,9 +1,7 @@
-
+import { IActivityDetails } from './../Model/IActivityDetails';
 export interface IActivity {
-  WhoId: string;
-  WhoName: string;
-  WhatId: string;
-  WhatName: string;
+  WhoObject: IActivityDetails;
+  WhatObject: IActivityDetails;
   CallType: string;
   CallDurationInSeconds: string;
   Subject: string;

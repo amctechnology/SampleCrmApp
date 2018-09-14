@@ -367,8 +367,8 @@ class SalesforceBridge extends Bridge {
         const activityObject: object = {
           value: {
             entityApiName: 'Task',
-            WhoId: activity.WhoId,
-            WhatId: activity.WhatId,
+            WhoId: activity.WhoObject.objectId,
+            WhatId: activity.WhatObject.objectId,
             CallType: activity.CallType,
             CallDurationInSeconds: activity.CallDurationInSeconds,
             Subject: activity.Subject,
@@ -393,7 +393,7 @@ class SalesforceBridge extends Bridge {
     }
     return new Promise((resolve, reject) => {
       let activityString = '';
-      activityString = 'WhoId=' + activity.WhoId + '&WhatId=' + activity.WhatId + '&CallType=' +
+      activityString = 'WhoId=' + activity.WhoObject.objectId + '&WhatId=' + activity.WhatObject.objectId + '&CallType=' +
       activity.CallType + '&CallDurationInSeconds=' + activity.CallDurationInSeconds + '&Subject=' +
       activity.Subject + '&Description=' + activity.Description + '&Status=' + activity.Status +
       '&ActivityDate=' + activity.ActivityDate;
@@ -411,6 +411,9 @@ class SalesforceBridge extends Bridge {
 
   protected createNewEntity(param) {
     let URL = '';
+    if (this.isLightning) {
+
+    } else {
     if (param.entityName === 'Case') {
       URL = '/500/e?&cas3=' + param.defaultFieldValues.ContactName + '&cas4=' + param.defaultFieldValues.AccountName + '&cas14=' +
        param.defaultFieldValues.Subject;
@@ -424,6 +427,8 @@ class SalesforceBridge extends Bridge {
     sforce.interaction.screenPop(URL, true, function(result)  {
       console.log(result);
     });
+  }
+
   }
 
 }

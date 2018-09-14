@@ -49,18 +49,14 @@ export class ActivityComponent implements OnInit {
     activity.CallDurationInSeconds = this.getSecondsElapsed(activity.TimeStamp).toString();
 
     if (this.curWhat === null) {
-      activity.WhatId = this.whatList[0].objectId;
-      activity.WhatName = this.whatList[0].objectName;
+      activity.WhatObject = this.whatList[0];
     } else {
-      activity.WhatId = this.curWhat.objectId ;
-      activity.WhatName = this.curWhat.objectName ;
+      activity.WhatObject = this.curWhat;
     }
     if (this.curWho === null) {
-      activity.WhoId = this.whoList[0].objectId;
-      activity.WhoName = this.whoList[0].objectName;
+      activity.WhoObject = this.whoList[0];
     } else {
-      activity.WhoId = this.curWho.objectId;
-      activity.WhoName = this.curWho.objectName;
+      activity.WhoObject = this.curWho;
     }
     activity.Description = this.callNotes;
     activity.CallType = this.getInteractionDirection(this.currentInteraction.direction);
