@@ -32,7 +32,7 @@ export class ActivityComponent implements OnInit {
     this.whatName = null;
     this.whoId = null;
     this.subject = '';
-    this. callNotes = '';
+    this. callNotes = 'Click to add a comment';
     this.ActivityMap = new Map();
   }
 
@@ -71,7 +71,6 @@ export class ActivityComponent implements OnInit {
       activity.WhoId = this.whoId;
       activity.WhoName = this.whoName;
     }
-
     activity.Description = this.callNotes;
     activity.CallType = this.getInteractionDirection(this.currentInteraction.direction);
     activity.Subject = this.subject;
@@ -87,7 +86,6 @@ export class ActivityComponent implements OnInit {
   protected clearActivityDetails() {
     this.subject = null;
     this.callNotes = null;
-    this.currentInteraction = null;
   }
   protected onNameSelectChange(event) {
     this.whoId = event.srcElement[0].id;
@@ -102,6 +100,11 @@ export class ActivityComponent implements OnInit {
   }
   protected onCallNotesChange(event) {
     this.callNotes = event.srcElement.value.trim();
+  }
+  protected removeDefaultCallNote() {
+    if (this.callNotes === 'Click to add a comment') {
+      this.callNotes = '';
+    }
   }
   protected getInteractionDirection(directionNumber) {
     if (directionNumber === 0 ) {
