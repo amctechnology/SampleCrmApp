@@ -263,6 +263,7 @@ export class AMCSalesforceHomeComponent extends Application implements OnInit {
       } else if (interaction.state === api.InteractionStates.Disconnected) {
         delete this.scenarioInteractionMappings[scenarioIdInt][interactionId];
         this.currentInteraction = null;
+        this.interaction = false;
         this.interactionDisconnected.next(true);
         if (Object.keys(this.scenarioInteractionMappings[scenarioIdInt]).length === 0) {
           delete this.scenarioInteractionMappings[scenarioIdInt];
