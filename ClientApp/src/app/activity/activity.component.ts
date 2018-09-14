@@ -86,7 +86,8 @@ export class ActivityComponent implements OnInit {
     this.currentInteraction = null;
   }
   protected onNameSelectChange(event) {
-    this.whoId = event.srcElement[0].value;
+    this.whoId = event.srcElement[0].id;
+    this.whoName = event.srcElement[0].value;
   }
   protected onRelatedToChange(event) {
     this.whatId = event.srcElement[0].id;

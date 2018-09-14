@@ -296,7 +296,9 @@ export class AMCSalesforceHomeComponent extends Application implements OnInit {
     const date = new Date();
     const activity: IActivity = {
       WhatId: '',
+      WhatName: '',
       WhoId: searchRecord.records[0].id,
+      WhoName: '',
       Subject: '',
       CallType: '',
       CallDurationInSeconds: '0',
