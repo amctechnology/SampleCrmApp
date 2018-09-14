@@ -31,8 +31,8 @@ export class ActivityComponent implements OnInit {
     this.whoName = null;
     this.whatName = null;
     this.whoId = null;
-    this.subject = null;
-    this. callNotes = null;
+    this.subject = '';
+    this. callNotes = '';
     this.ActivityMap = new Map();
   }
 
@@ -53,19 +53,23 @@ export class ActivityComponent implements OnInit {
     return whatObject.objectName;
   }
   protected activitySave(clear_activity_fields) {
-    if (this.currentInteraction && this.whoList[0].objectId && this.whatList[0].objectId) {
+    if (this.currentInteraction && this.whoList.length !== 0 && this.whatList.length !== 0) {
     let activity = this.ActivityMap.get(this.currentInteraction.interactionId);
     activity.CallDurationInSeconds = this.getSecondsElapsed(activity.TimeStamp).toString();
 
     if (this.whatId === null) {
       activity.WhatId = this.whatList[0].objectId;
+      activity.WhatName = this.whatList[0].objectName;
     } else {
       activity.WhatId = this.whatId ;
+      activity.WhatName = this.whatName ;
     }
     if (this.whoId === null) {
       activity.WhoId = this.whoList[0].objectId;
+      activity.WhoName = this.whoList[0].objectName;
     } else {
       activity.WhoId = this.whoId;
+      activity.WhoName = this.whoName;
     }
 
     activity.Description = this.callNotes;

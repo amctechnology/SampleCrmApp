@@ -25,7 +25,6 @@ export class AMCSalesforceHomeComponent extends Application implements OnInit {
   constructor() {
     super();
     this.interaction = false;
-    this.flag = true;
     this.interactions = new Map();
     this.whoList = [];
     this.whatList = [];
@@ -262,9 +261,9 @@ export class AMCSalesforceHomeComponent extends Application implements OnInit {
         this.saveActivity(this.createActivity(searchRecord, interaction));
         return searchRecord;
       } else if (interaction.state === api.InteractionStates.Disconnected) {
-        this.interaction = false;
         delete this.scenarioInteractionMappings[scenarioIdInt][interactionId];
-        this.interactionDisconnected.next(!this.flag);
+        // this.currentInteraction = null;
+        this.interactionDisconnected.next(true);
         if (Object.keys(this.scenarioInteractionMappings[scenarioIdInt]).length === 0) {
           delete this.scenarioInteractionMappings[scenarioIdInt];
         }
