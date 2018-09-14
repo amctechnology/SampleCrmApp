@@ -2,10 +2,12 @@ import { Component, OnInit, Output, EventEmitter } from '@angular/core';
 import * as api from '@amc/application-api';
 import { Application, BridgeEventsService } from '@amc/applicationangularframework';
 import { bind } from 'bind-decorator';
-import { search } from '@amc/channel-api';
+import { search, RecordItem } from '@amc/channel-api';
 import { InteractionDirectionTypes } from '@amc/application-api';
 import { Subject } from 'rxjs/Subject';
-
+import { IActivity } from './../Model/IActivity';
+import { IActivityDetails } from './../Model/IActivityDetails';
+import { IParams } from './../Model/IParams';
 @Component({
   selector: 'app-amcsalesforcehome',
   templateUrl: './amcsalesforcehome.component.html',
@@ -19,8 +21,10 @@ export class AMCSalesforceHomeComponent extends Application implements OnInit {
   subject: string;
   currentInteraction: api.IInteraction;
   ActivityMap: Map<string, IActivity>;
+  interaction: boolean;
   constructor() {
     super();
+    this.interaction = false;
     this.flag = true;
     this.interactions = new Map();
     this.whoList = [];
@@ -210,8 +214,22 @@ export class AMCSalesforceHomeComponent extends Application implements OnInit {
     if (activity.Status === 'Completed') {
       this.whoList = [];
       this.whatList = [];
+      activity.ActivityDate = this.formatDate(activity.TimeStamp);
     }
     return Promise.resolve(this.bridgeEventsService.sendEvent('saveActivity', activity));
+  }
+  protected formatDate(date: Date): string {
+        let month = '' + (date.getMonth() + 1);
+        let day = '' + date.getDate();
+        const year = '' + date.getFullYear();
+        if (month.length < 2) {
+          month = '0' + month;
+        }
+        if (day.length < 2) {
+          day = '0' + day;
+        }
+
+    return year + '-' + month + '-' + day;
   }
   @bind
   protected saveActivityResponse(activity: IActivity) {
@@ -237,13 +255,14 @@ export class AMCSalesforceHomeComponent extends Application implements OnInit {
 
 
       if (this.shouldPreformScreenpop(interaction, isNewScenarioId)) {
-        let searchRecord = null;
-        searchRecord = await this.preformScreenpop(interaction);
+        this.interaction = true;
+        const searchRecord = await this.preformScreenpop(interaction);
         this.currentInteraction = interaction;
         this.subject = 'Call [' + interaction.details.fields.Phone.Value + ']';
         this.saveActivity(this.createActivity(searchRecord, interaction));
         return searchRecord;
       } else if (interaction.state === api.InteractionStates.Disconnected) {
+        this.interaction = false;
         delete this.scenarioInteractionMappings[scenarioIdInt][interactionId];
         this.interactionDisconnected.next(!this.flag);
         if (Object.keys(this.scenarioInteractionMappings[scenarioIdInt]).length === 0) {
@@ -283,7 +302,8 @@ export class AMCSalesforceHomeComponent extends Application implements OnInit {
       CallDurationInSeconds: '0',
       Description: '',
       Status: 'Open',
-      ActivityDate: date,
+      ActivityDate: '',
+      TimeStamp: date,
       ActivityId: '',
       InteractionId: interaction.interactionId
     };
@@ -321,7 +341,15 @@ protected setActivityDetails(eventObject) {
 }
 @bind
 protected createNewEntity(type) {
-  const params = this.buildParams(type);
+  let params: IParams = {
+     entityName: type
+  };
+  if (this.currentInteraction) {
+    if (this.ActivityMap.has(this.currentInteraction.interactionId)) {
+      params = this.buildParams(type);
+    }
+  }
+
   this.bridgeEventsService.sendEvent('createNewEntity', params);
 }
 
@@ -329,36 +357,16 @@ protected buildParams(type) {
   const params: IParams = {
     entityName: type,
     defaultFieldValues: {
-      Phone: this.currentInteraction.details.fields.Phone.Value
+      // Phone: this.currentInteraction.details.fields.Phone.Value,
+      ContactName: 'Tim Barr',
+      AccountName: 'Grand Hotels Resorts Ltd',
+      Subject: 'Call [4042024631]'
     }
   };
   return params;
 }
 
 }
-interface IActivityDetails  {
-  objectType: string;
-  displayName: string;
-  objectName: string;
-  objectId: string;
-  url: string;
-}
 
-interface IActivity {
-  WhoId: string;
-  WhatId: string;
-  CallType: string;
-  CallDurationInSeconds: string;
-  Subject: string;
-  Description: string;
-  Status: string;
-  ActivityDate: Date;
-  ActivityId: string;
-  InteractionId: string;
-}
-interface IParams {
-  entityName: string;
-  defaultFieldValues?: {
-    Phone: string
-  };
-}
+
+

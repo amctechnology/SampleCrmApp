@@ -1,11 +1,11 @@
 
-<div class="callDisplay">
+<div class="callDisplay" >
   <div class="editor callHeader">
       <label style="margin-left: 20px">
           <b>Activity Information</b>
       </label>
-      <img id="ViewExpandImageId6-amcCallActivityId" class="imageExpandCollapse ViewExpandImage" src="/assets/images/section_expand.png" title="Expand" >
-      <img id="ViewCollapseImageId6-amcCallActivityId" class="imageExpandCollapse" src="/assets/images/section_collapse.png" title="Collapse" >
+      <!-- <img id="ViewExpandImageId6-amcCallActivityId" class="imageExpandCollapse ViewExpandImage" src="/assets/images/section_expand.png" title="Expand" >
+      <img id="ViewCollapseImageId6-amcCallActivityId" class="imageExpandCollapse" src="/assets/images/section_collapse.png" title="Collapse" > -->
   </div>
   <div id="ViewDivId6-amcCallActivityId" class="callBody">
       <div id="ProgressDivId6-amcCallActivityId" style="top: 0; left: 0; position: absolute; z-index: 1; background: white; opacity: 0.7; filter: alpha(opacity=70); width: 100%; height: 100%; display: none; ">
@@ -16,15 +16,15 @@
 
                   <div class="editor displayDiv">
                       <label class="displayLabels" for="DummyEmptyString" title="Call From">Name</label>
-                      <select id = 'nameSelect' class="dropDownListStyle displayData" data-resetperactivity="false" (change) = 'onNameChange($event)' >
-                          <option *ngFor="let who of whoList" id="{{who.objectId}}" value = "{{who.objectId}}">{{who.objectName}}</option>
+                      <select id = 'nameSelect' class="dropDownListStyle displayData" data-resetperactivity="false" (change) = 'onNameSelectChange($event)' >
+                          <option *ngFor="let who of whoList" id="{{who.objectId}}" value = "{{who.objectName}}">{{who.objectName}}</option>
                         </select>
                   </div>
 
               <div class="editor displayDiv">
                   <label class="displayLabels" for="DummyEmptyString" id="LabelCallActivityRelatedToElementID" title="Regarding" style="display: inline;">Related To</label>
                   <select id = "relateToSelect" class="dropDownListStyle displayData" (change) = 'onRelatedToChange($event)' data-resetperactivity="false" >
-                    <option *ngFor="let what of whatList" id="what.objectId" value = "{{what.objectId}}" style="background-image:url(/assets/images/Create_Case.png );" >{{parseWhat(what)}}</option>
+                    <option *ngFor="let what of whatList" id="what.objectId" value = "{{what.objectName}}" style="background-image:url(/assets/images/Create_Case.png );" >{{parseWhat(what)}}</option>
                   </select>
               </div>
 
@@ -50,7 +50,7 @@
                           <input class = "quickNotesBotton" type="button"  value="4" onclick="loadText(this)" onmouseover="loadText(this, true)">
                           <input class = "quickNotesBotton" type="button"  value="5" onclick="loadText(this)" onmouseover="loadText(this, true)">
                           <input class = "quickNotesBotton" type="button"  value="6" onclick="loadText(this)" onmouseover="loadText(this, true)">
-                          <input id="call-activity-submit-button" class = "submitButton" type="button" value="SUBMIT" (click)="activitySave(true)">
+                          <input id="call-activity-submit-button" class = "submitButton" type="button" value="SUBMIT" (click)="activitySave(false)">
                       </div>
                   </div>
 
@@ -70,6 +70,7 @@
 
 
           </form>
+
       </div>
   </div>
 </div>

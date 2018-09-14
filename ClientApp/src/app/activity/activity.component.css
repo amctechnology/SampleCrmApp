@@ -80,7 +80,6 @@
 .callDisplay {
   display:grid;
 }
-
 .editor {
   font-size: 0.9em;
   width: 70%;
@@ -173,3 +172,4 @@ body {
   background-color: #fff;
   font-family: Arial;
 }
+

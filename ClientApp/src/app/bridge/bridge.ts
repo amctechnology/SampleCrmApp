@@ -4,6 +4,9 @@ import { bind } from 'bind-decorator';
 import { safeJSONParse } from '../utils';
 import { Subject } from 'rxjs/Subject';
 import { OnInit } from '@angular/core';
+import { IActivity } from './../Model/IActivity';
+import { IActivityDetails } from './../Model/IActivityDetails';
+import { IParams } from './../Model/IParams';
 
 declare var sforce: any;
 
@@ -11,6 +14,7 @@ class SalesforceBridge extends Bridge {
   private isLightning = false;
   private currentEvent: any;
   activity: IActivity = null;
+
 
   constructor() {
     super();
@@ -82,8 +86,7 @@ class SalesforceBridge extends Bridge {
   async onFocusListener(event) {
     if ( event !== this.currentEvent) {
       this.currentEvent = event;
-      const temp = JSON.parse(event.result);
-      if (temp.objectId !== '') {
+
     const entity = {
       objectType: '',
       displayName: '',
@@ -97,16 +100,23 @@ class SalesforceBridge extends Bridge {
       entity.objectId = event.recordId;
       entity.objectName = event.recordName;
       entity.url = event.url;
+      if ( entity.objectId === '') {
+        return 1;
+      }
     } else {
+      const temp = JSON.parse(event.result);
       entity.objectType = temp.object;
       entity.displayName = temp.displayName;
       entity.objectId = temp.objectId;
       entity.objectName = temp.objectName;
       entity.url = temp.url;
+      if ( entity.objectId === '') {
+        return 1;
+      }
     }
     this.eventService.sendEvent('setActivityDetails', entity);
     }
-  }
+
 
   }
 
@@ -221,7 +231,6 @@ class SalesforceBridge extends Bridge {
             screenPopObject.callType = sforce.opencti.CALL_TYPE.INTERNAL;
             break;
         }
-
         sforce.opencti.searchAndScreenPop(screenPopObject);
       } else {
         let salesforceCallDirection = '';
@@ -248,7 +257,13 @@ class SalesforceBridge extends Bridge {
       }
     });
   }
-
+  callback(response) {
+    if (response.success) {
+       console.log('API method call executed successfully! returnValue:', response.returnValue);
+    } else {
+       console.error('Something went wrong! Errors:', response.errors);
+    }
+   }
   private VerifyMode() {
     const fullUrl = document.location.href;
     const parameters = fullUrl.split('&');
@@ -352,6 +367,7 @@ class SalesforceBridge extends Bridge {
       }
       sforce.interaction.saveLog('Task', activityString, result => {
         activity.ActivityId = result.result;
+        console.log('Activity ID = ' + result.result);
         resolve(this.eventService.sendEvent('saveActivityResponse', activity));
       });
     });
@@ -361,7 +377,8 @@ class SalesforceBridge extends Bridge {
   protected createNewEntity(param) {
     let URL = '';
     if (param.entityName === 'Case') {
-      URL = '/500/e';
+      URL = '/500/e?&cas3=' + param.defaultFieldValues.ContactName + '&cas4=' + param.defaultFieldValues.AccountName + '&cas14=' +
+       param.defaultFieldValues.Subject;
     } else if (param.entityName === 'Lead') {
       URL = '/00Q/e';
     } else if (param.entityName === 'Account') {
@@ -377,16 +394,3 @@ class SalesforceBridge extends Bridge {
 }
 
 const bridge = new SalesforceBridge();
-
-interface IActivity {
-  WhoId: string;
-  WhatId: string;
-  CallType: string;
-  CallDurationInSeconds: string;
-  Subject: string;
-  Description: string;
-  Status: string;
-  ActivityDate: string;
-  ActivityId: string;
-  InteractionId: string;
-}

@@ -18,6 +18,7 @@ export class AppComponent implements OnInit, AfterViewChecked {
 
   ngAfterViewChecked(): void {
     this.setHeight();
+
   }
   private setHeight(): void {
     const newHeight = this.getHeight();

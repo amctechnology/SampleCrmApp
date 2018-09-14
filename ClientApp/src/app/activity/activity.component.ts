@@ -3,6 +3,9 @@ import * as api from '@amc/application-api';
 import { Observable } from 'rxjs/Observable';
 import { Subject } from 'rxjs/Subject';
 import * as channelApi from '@amc/channel-api/';
+import { IActivity } from './../Model/IActivity';
+import { IActivityDetails } from './../Model/IActivityDetails';
+import { IParams } from './../Model/IParams';
 
 @Component({
   selector: 'app-activity',
@@ -18,12 +21,15 @@ export class ActivityComponent implements OnInit {
   @Input() subject: string;
   @Output() ActivitySave: EventEmitter<IActivity> = new EventEmitter<IActivity>();
   whatId: string;
+  whatName: string;
   whoId: string;
+  whoName: string;
   callNotes: string;
-
 
   constructor() {
     this.whatId = null;
+    this.whoName = null;
+    this.whatName = null;
     this.whoId = null;
     this.subject = null;
     this. callNotes = null;
@@ -32,9 +38,10 @@ export class ActivityComponent implements OnInit {
 
   ngOnInit() {
     this.interactionDisconnected.subscribe(event => {
-      this.activitySave(false);
+      this.activitySave(true);
     });
   }
+
   setSelectedInteraction(interactionList) {
     console.log('interaction ' + interactionList.srcElement[0].id );
    // this.selectedInteraction = this.getInteraction(interactionList.srcElement[0].id);
@@ -45,10 +52,10 @@ export class ActivityComponent implements OnInit {
     }
     return whatObject.objectName;
   }
-  protected activitySave(event) {
-    if (this.currentInteraction) {
+  protected activitySave(clear_activity_fields) {
+    if (this.currentInteraction && this.whoList[0].objectId && this.whatList[0].objectId) {
     let activity = this.ActivityMap.get(this.currentInteraction.interactionId);
-    activity.CallDurationInSeconds = this.getSecondsElapsed(activity.ActivityDate).toString();
+    activity.CallDurationInSeconds = this.getSecondsElapsed(activity.TimeStamp).toString();
 
     if (this.whatId === null) {
       activity.WhatId = this.whatList[0].objectId;
@@ -64,7 +71,7 @@ export class ActivityComponent implements OnInit {
     activity.Description = this.callNotes;
     activity.CallType = this.getInteractionDirection(this.currentInteraction.direction);
     activity.Subject = this.subject;
-    if (event) {
+    if (clear_activity_fields) {
       activity.Status = 'Completed';
       this.clearActivityDetails();
       this.ActivitySave.emit(activity);
@@ -82,7 +89,8 @@ export class ActivityComponent implements OnInit {
     this.whoId = event.srcElement[0].value;
   }
   protected onRelatedToChange(event) {
-    this.whatId = event.srcElement[0].value;
+    this.whatId = event.srcElement[0].id;
+    this.whatName = event.srcElement[0].value;
   }
   protected onSubjectChange(event) {
     this.subject = event.srcElement.value;
@@ -107,24 +115,3 @@ export class ActivityComponent implements OnInit {
 
 
   }
-
-  interface IActivityDetails  {
-    objectType: string;
-    displayName: string;
-    objectName: string;
-    objectId: string;
-    url: string;
-  }
-
-interface IActivity {
-  WhoId: string;
-  WhatId: string;
-  CallType: string;
-  CallDurationInSeconds: string;
-  Subject: string;
-  Description: string;
-  Status: string;
-  ActivityDate: string;
-  ActivityId: string;
-  InteractionId: string;
-}
