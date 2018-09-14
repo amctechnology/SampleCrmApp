@@ -356,8 +356,33 @@ class SalesforceBridge extends Bridge {
   }
   @bind
   protected saveActivity(activity: IActivity): Promise<any> {
+    if (this.isLightning) {
+      return new Promise((resolve, reject) => {
+        const activityObject: object = {
+          value: {
+            entityApiName: 'Task',
+            WhoId: activity.WhoId,
+            WhatId: activity.WhatId,
+            CallType: activity.CallType,
+            CallDurationInSeconds: activity.CallDurationInSeconds,
+            Subject: activity.Subject,
+            Description: activity.Description,
+            Status: activity.Status,
+            ActivityDate: activity.ActivityDate
+          },
+          callback: result => {
+            activity.ActivityId = result.returnValue.recordId;
+            resolve(this.eventService.sendEvent('saveActivityResponse', activity));
+          }
+        };
+        if (activity.ActivityId) {
+          activityObject['value']['Id'] = activity.ActivityId;
+        }
+        sforce.opencti.saveLog(activityObject);
+      });
+    }
     return new Promise((resolve, reject) => {
-      let activityString = JSON.stringify(activity);
+      let activityString = '';
       activityString = 'WhoId=' + activity.WhoId + '&WhatId=' + activity.WhatId + '&CallType=' +
       activity.CallType + '&CallDurationInSeconds=' + activity.CallDurationInSeconds + '&Subject=' +
       activity.Subject + '&Description=' + activity.Description + '&Status=' + activity.Status +
