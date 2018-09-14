@@ -20,17 +20,13 @@ export class ActivityComponent implements OnInit {
   @Input() interactionDisconnected: Subject<boolean>;
   @Input() subject: string;
   @Output() ActivitySave: EventEmitter<IActivity> = new EventEmitter<IActivity>();
-  whatId: string;
-  whatName: string;
-  whoId: string;
-  whoName: string;
+  curWho: IActivityDetails;
+  curWhat: IActivityDetails;
   callNotes: string;
 
   constructor() {
-    this.whatId = null;
-    this.whoName = null;
-    this.whatName = null;
-    this.whoId = null;
+    this.curWhat = null;
+    this.curWho = null;
     this.subject = '';
     this. callNotes = 'Click to add a comment';
     this.ActivityMap = new Map();
@@ -46,30 +42,25 @@ export class ActivityComponent implements OnInit {
     console.log('interaction ' + interactionList.srcElement[0].id );
    // this.selectedInteraction = this.getInteraction(interactionList.srcElement[0].id);
   }
-  protected parseWhat(whatObject): string {
-    if (whatObject.objectType === 'Case') {
-      return 'Case ' + whatObject.objectName;
-    }
-    return whatObject.objectName;
-  }
+
   protected activitySave(clear_activity_fields) {
     if (this.currentInteraction && this.whoList.length !== 0 && this.whatList.length !== 0) {
     let activity = this.ActivityMap.get(this.currentInteraction.interactionId);
     activity.CallDurationInSeconds = this.getSecondsElapsed(activity.TimeStamp).toString();
 
-    if (this.whatId === null) {
+    if (this.curWhat === null) {
       activity.WhatId = this.whatList[0].objectId;
       activity.WhatName = this.whatList[0].objectName;
     } else {
-      activity.WhatId = this.whatId ;
-      activity.WhatName = this.whatName ;
+      activity.WhatId = this.curWhat.objectId ;
+      activity.WhatName = this.curWhat.objectName ;
     }
-    if (this.whoId === null) {
+    if (this.curWho === null) {
       activity.WhoId = this.whoList[0].objectId;
       activity.WhoName = this.whoList[0].objectName;
     } else {
-      activity.WhoId = this.whoId;
-      activity.WhoName = this.whoName;
+      activity.WhoId = this.curWho.objectId;
+      activity.WhoName = this.curWho.objectName;
     }
     activity.Description = this.callNotes;
     activity.CallType = this.getInteractionDirection(this.currentInteraction.direction);
@@ -88,12 +79,11 @@ export class ActivityComponent implements OnInit {
     this.callNotes = null;
   }
   protected onNameSelectChange(event) {
-    this.whoId = event.srcElement[0].id;
-    this.whoName = event.srcElement[0].value;
+    this.curWhat = this.getWhat(event.currentTarget.value);
   }
   protected onRelatedToChange(event) {
-    this.whatId = event.srcElement[0].id;
-    this.whatName = event.srcElement[0].value;
+    this. curWho = this.getWho(event.currentTarget.value);
+
   }
   protected onSubjectChange(event) {
     this.subject = event.srcElement.value;
@@ -119,6 +109,20 @@ export class ActivityComponent implements OnInit {
     return Math.round((EndDate.getTime() - startDate.getTime()) / 1000);
   }
 
+  protected getWho(id): IActivityDetails {
+    for (let i = 0; i < this.whoList.length; i++) {
+      if (this.whoList[i].objectId === id) {
+        return this.whoList[i];
+      }
+    }
+  }
+  protected getWhat(id): IActivityDetails {
+    for (let i = 0; i < this.whoList.length; i++) {
+      if (this.whatList[i].objectId === id) {
+        return this.whatList[i];
+      }
+    }
+  }
 
 
 

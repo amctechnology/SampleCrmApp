@@ -114,10 +114,16 @@ class SalesforceBridge extends Bridge {
         return 1;
       }
     }
+    entity.objectName = this.parseWhat(entity)
     this.eventService.sendEvent('setActivityDetails', entity);
     }
+  }
 
-
+  protected parseWhat(entity): string {
+    if (entity.objectType === 'Case') {
+      return 'Case ' + entity.objectName;
+    }
+    return entity.objectName;
   }
 
   @bind
@@ -371,7 +377,11 @@ class SalesforceBridge extends Bridge {
             ActivityDate: activity.ActivityDate
           },
           callback: result => {
-            activity.ActivityId = result.returnValue.recordId;
+            try {
+              activity.ActivityId = result.returnValue.recordId;
+            } catch (e) {
+              console.log('Save could not complete: ' + JSON.stringify(result.errors['0'].details.fieldErrors));
+            }
             resolve(this.eventService.sendEvent('saveActivityResponse', activity));
           }
         };

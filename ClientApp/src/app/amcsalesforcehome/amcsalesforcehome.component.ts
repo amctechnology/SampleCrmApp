@@ -245,20 +245,19 @@ export class AMCSalesforceHomeComponent extends Application implements OnInit {
       const scenarioIdInt = interaction.scenarioId;
       let isNewScenarioId = false;
       if (!this.scenarioInteractionMappings.hasOwnProperty(scenarioIdInt)) {
-
         this.scenarioInteractionMappings[scenarioIdInt] = {};
-
         isNewScenarioId = true;
       }
       this.scenarioInteractionMappings[scenarioIdInt][interactionId] = true;
-
-
+      // this.activityInit(interaction);
       if (this.shouldPreformScreenpop(interaction, isNewScenarioId)) {
-        this.interaction = true;
         const searchRecord = await this.preformScreenpop(interaction);
+
+        this.interaction = true;
         this.currentInteraction = interaction;
         this.subject = 'Call [' + interaction.details.fields.Phone.Value + ']';
         this.saveActivity(this.createActivity(searchRecord, interaction));
+
         return searchRecord;
       } else if (interaction.state === api.InteractionStates.Disconnected) {
         delete this.scenarioInteractionMappings[scenarioIdInt][interactionId];
@@ -277,7 +276,9 @@ export class AMCSalesforceHomeComponent extends Application implements OnInit {
     this.logger.logVerbose('onInteraction END');
     return;
   }
+  protected activityInit(interaction) {
 
+  }
 
   // Add the current interaction to the interaction map
   protected mapInteraction(interaction: api.IInteraction) {
@@ -334,7 +335,7 @@ protected setActivityDetails(eventObject) {
     if (!this.whoListContains(eventObject)) {
       this.whoList.push(eventObject);
     }
-  } else {
+  } else if ( eventObject.objectId !== undefined) {
     if (!this.whatListContains(eventObject)) {
       this.whatList.push(eventObject);
     }
