@@ -18,6 +18,7 @@ export class ActivityComponent implements OnInit {
   @Input() currentInteraction: api.IInteraction;
   @Input() ActivityMap: Map<string, IActivity>;
   @Input() interactionDisconnected: Subject<boolean>;
+  @Input() autoSave: Subject<void>;
   @Input() subject: string;
   @Output() ActivitySave: EventEmitter<IActivity> = new EventEmitter<IActivity>();
   curWho: IActivityDetails;
@@ -35,6 +36,9 @@ export class ActivityComponent implements OnInit {
   ngOnInit() {
     this.interactionDisconnected.subscribe(event => {
       this.activitySave(true);
+    });
+    this.autoSave.subscribe(event => {
+      this.activitySave(false);
     });
   }
 
@@ -75,17 +79,20 @@ export class ActivityComponent implements OnInit {
     this.callNotes = null;
   }
   protected onNameSelectChange(event) {
-    this.curWhat = this.getWhat(event.currentTarget.value);
+    this.curWho = this.getWho(event.currentTarget.value);
+    this.activitySave(false);
   }
   protected onRelatedToChange(event) {
-    this. curWho = this.getWho(event.currentTarget.value);
-
+    this. curWhat = this.getWhat(event.currentTarget.value);
+    this.activitySave(false);
   }
   protected onSubjectChange(event) {
     this.subject = event.srcElement.value;
+    this.activitySave(false);
   }
   protected onCallNotesChange(event) {
     this.callNotes = event.srcElement.value.trim();
+    this.activitySave(false);
   }
   protected removeDefaultCallNote() {
     if (this.callNotes === 'Click to add a comment') {
@@ -113,7 +120,7 @@ export class ActivityComponent implements OnInit {
     }
   }
   protected getWhat(id): IActivityDetails {
-    for (let i = 0; i < this.whoList.length; i++) {
+    for (let i = 0; i < this.whatList.length; i++) {
       if (this.whatList[i].objectId === id) {
         return this.whatList[i];
       }

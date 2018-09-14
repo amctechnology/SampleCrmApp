@@ -22,6 +22,7 @@ export class AMCSalesforceHomeComponent extends Application implements OnInit {
   currentInteraction: api.IInteraction;
   ActivityMap: Map<string, IActivity>;
   interaction: boolean;
+  autoSave: Subject<boolean> = new Subject();
   constructor() {
     super();
     this.interaction = false;
@@ -296,8 +297,20 @@ export class AMCSalesforceHomeComponent extends Application implements OnInit {
   protected createActivity(searchRecord: any, interaction: api.IInteraction): IActivity {
     const date = new Date();
     const activity: IActivity = {
-      WhoObject: null,
-      WhatObject: null,
+      WhoObject: {
+        objectType: '',
+        displayName: '',
+        objectName: '',
+        objectId: '',
+        url: ''
+      },
+      WhatObject: {
+        objectType: '',
+        displayName: '',
+        objectName: '',
+        objectId: '',
+        url: ''
+      },
       Subject: '',
       CallType: '',
       CallDurationInSeconds: '0',
@@ -332,10 +345,12 @@ protected setActivityDetails(eventObject) {
   if (eventObject.objectType === 'Contact' || eventObject.objectType === 'Lead') {
     if (!this.whoListContains(eventObject)) {
       this.whoList.push(eventObject);
+      this.autoSave.next(true);
     }
   } else if ( eventObject.objectId !== undefined) {
     if (!this.whatListContains(eventObject)) {
       this.whatList.push(eventObject);
+      this.autoSave.next(true);
     }
   }
 
@@ -370,20 +385,16 @@ protected buildParams(entityType, activity) {
     }
   };
   if (entityType === 'Case') {
-    if (activity.whatObject.objectType === 'Account') {
-      if (activity.WhatObject) {
+    if (activity.WhatObject.objectType === 'Account') {
         params.caseFields.AccountId = activity.WhatId;
-      }
     }
-    if (activity.whoObject) {
-      params.caseFields.ContactId = activity.whoObject.objectId;
+    if (activity.WhoObject.objectId !== '') {
+      params.caseFields.ContactId = activity.WhoObject.objectId;
     }
     params.caseFields.Description = activity.Description;
   } else if ( entityType === 'Opportunity') {
-    if (activity.whatObject.objectType === 'Account') {
-      if (activity.WhatObject) {
+    if (activity.WhatObject.objectType === 'Account') {
         params.opportunityFields.AccountId = activity.WhatId;
-      }
     }
     params.opportunityFields.CloseDate = activity.ActivityDate;
   }

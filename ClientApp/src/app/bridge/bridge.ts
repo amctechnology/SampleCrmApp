@@ -407,21 +407,31 @@ class SalesforceBridge extends Bridge {
       });
     });
   }
-
-
-  protected createNewEntity(param) {
+  protected createNewEntity(params: IParams) {
     let URL = '';
-    if (this.isLightning) {
+    if (true) {
+      const screenPopObject: object = {
+        type: sforce.opencti.SCREENPOP_TYPE.NEW_RECORD_MODAL,
+        params: {
+          entityName: params.entityName,
+          defaultFieldValues: {
+            ContactId: params.caseFields.ContactId
+          }
 
+        },
+        callback: result => {
+          console.log(result);
+        }
+
+      };
+      sforce.opencti.screenPop(screenPopObject);
     } else {
-    if (param.entityName === 'Case') {
-      URL = '/500/e?&cas3=' + param.defaultFieldValues.ContactName + '&cas4=' + param.defaultFieldValues.AccountName + '&cas14=' +
-       param.defaultFieldValues.Subject;
-    } else if (param.entityName === 'Lead') {
+    if (params.entityName === 'Case') {
+    } else if (params.entityName === 'Lead') {
       URL = '/00Q/e';
-    } else if (param.entityName === 'Account') {
+    } else if (params.entityName === 'Account') {
         URL = '/001/e';
-    } else if (param.entityName === 'Contact') {
+    } else if (params.entityName === 'Contact') {
         URL = '/003/e';
     }
     sforce.interaction.screenPop(URL, true, function(result)  {
@@ -430,6 +440,8 @@ class SalesforceBridge extends Bridge {
   }
 
   }
+
+
 
 }
 
