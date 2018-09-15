@@ -409,7 +409,7 @@ class SalesforceBridge extends Bridge {
   }
   protected createNewEntity(params: IParams) {
     let URL = '';
-    if (this.isLightning) {
+    if (true) {
       const screenPopObject: object = {
         type: sforce.opencti.SCREENPOP_TYPE.NEW_RECORD_MODAL,
         params: {
@@ -425,7 +425,7 @@ class SalesforceBridge extends Bridge {
 
       };
       sforce.opencti.screenPop(screenPopObject);
-    } else {
+    } /*else {
     if (params.entityName === 'Case') {
     } else if (params.entityName === 'Lead') {
       URL = '/00Q/e';
@@ -437,7 +437,7 @@ class SalesforceBridge extends Bridge {
     sforce.interaction.screenPop(URL, true, function(result)  {
       console.log(result);
     });
-  }
+    }*/
 
   }
 
