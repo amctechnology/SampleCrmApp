@@ -12,6 +12,10 @@ export interface IParams {
     StageName?: string;
     CloseDate?: string;
   };
-
+  leadFields?: {
+    AccountId?: string;
+    ContactId?: string;
+    Phone?: string;
+  };
 }
 

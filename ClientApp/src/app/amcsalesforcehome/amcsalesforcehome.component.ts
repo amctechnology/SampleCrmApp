@@ -371,10 +371,6 @@ protected createNewEntity(entityType) {
 protected buildParams(entityType, activity) {
   let params: IParams = {
     entityName: entityType,
-    caseFields: {
-    },
-    opportunityFields: {
-    }
   };
   if (entityType === 'Case') {
     if (activity.WhatObject.objectType === 'Account') {
@@ -389,6 +385,8 @@ protected buildParams(entityType, activity) {
         params.opportunityFields.AccountId = activity.WhatObject.objectId;
     }
     params.opportunityFields.CloseDate = activity.ActivityDate;
+  } else if (entityType === 'Lead') {
+
   }
   return params;
 }

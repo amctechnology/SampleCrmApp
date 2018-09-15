@@ -424,7 +424,8 @@ class SalesforceBridge extends Bridge {
         screenPopObject.params.defaultFieldValues = params.caseFields;
       } else if ( params.entityName === 'Opportunity') {
         screenPopObject.params.defaultFieldValues = params.opportunityFields;
-      }
+      } else if ( params.entityName === 'Lead') {
+        // screenPopObject.params.defaultFieldValues = params.leadFields;
       sforce.opencti.screenPop(screenPopObject);
     } else {
     if (params.entityName === 'Case') {
