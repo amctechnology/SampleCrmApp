@@ -62,7 +62,11 @@ export class ActivityComponent implements OnInit {
     } else {
       activity.WhoObject = this.curWho;
     }
-    activity.Description = this.callNotes;
+    if (this.callNotes !== 'Click to add a comment'){
+      activity.Description = this.callNotes;
+    } else {
+      activity.Description = '';
+    }
     activity.CallType = this.getInteractionDirection(this.currentInteraction.direction);
     activity.Subject = this.subject;
     if (clear_activity_fields) {
