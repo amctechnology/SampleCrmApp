@@ -416,15 +416,15 @@ class SalesforceBridge extends Bridge {
         params: {
           entityName: params.entityName,
           defaultFieldValues: {
-            ContactId: params.caseFields.ContactId
           }
-
         },
         callback: result => {
           console.log(result);
         }
-
       };
+      if (params.entityName === 'Case') {
+        screenPopObject['params'].defaultFieldValues = params.caseFields;
+      }
       sforce.opencti.screenPop(screenPopObject);
     } else {
     if (params.entityName === 'Case') {

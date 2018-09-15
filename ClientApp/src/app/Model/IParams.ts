@@ -5,7 +5,7 @@ export interface IParams {
     ContactId?: string;
     Origin?: string;
     Status?: string;
-    Description?: string;
+    Comments?: string;
   };
   opportunityFields?: {
     AccountId?: string;

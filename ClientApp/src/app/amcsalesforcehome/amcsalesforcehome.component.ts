@@ -257,7 +257,8 @@ export class AMCSalesforceHomeComponent extends Application implements OnInit {
         this.interaction = true;
         this.currentInteraction = interaction;
         this.subject = 'Call [' + interaction.details.fields.Phone.Value + ']';
-        this.saveActivity(this.createActivity(searchRecord, interaction));
+        this.ActivityMap.set(interaction.interactionId, this.createActivity(searchRecord, interaction));
+        this.autoSave.next(false);
 
         return searchRecord;
       } else if (interaction.state === api.InteractionStates.Disconnected) {
@@ -372,16 +373,8 @@ protected buildParams(entityType, activity) {
   let params: IParams = {
     entityName: entityType,
     caseFields: {
-      AccountId: '',
-      ContactId: '',
-      Origin: '',
-      Status: '',
-      Description: '',
     },
     opportunityFields: {
-      AccountId: '',
-      StageName: '',
-      CloseDate: '',
     }
   };
   if (entityType === 'Case') {
@@ -391,7 +384,7 @@ protected buildParams(entityType, activity) {
     if (activity.WhoObject.objectId !== '') {
       params.caseFields.ContactId = activity.WhoObject.objectId;
     }
-    params.caseFields.Description = activity.Description;
+    params.caseFields.Comments = activity.Description;
   } else if ( entityType === 'Opportunity') {
     if (activity.WhatObject.objectType === 'Account') {
         params.opportunityFields.AccountId = activity.WhatId;
