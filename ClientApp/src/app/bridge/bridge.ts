@@ -409,7 +409,7 @@ class SalesforceBridge extends Bridge {
   }
   protected createNewEntity(params: IParams) {
     let URL = '';
-    if (true) {
+    if (this.isLightning) {
       const screenPopObject: object = {
         type: sforce.opencti.SCREENPOP_TYPE.NEW_RECORD_MODAL,
         params: {
