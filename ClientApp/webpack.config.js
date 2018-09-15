@@ -117,6 +117,9 @@ const postcssPlugins = function (loader) {
 };
 
 const outputPath = path.join(process.cwd(), "../wwwroot");
+console.log('****************************************************************************************');
+console.log(outputPath);
+console.log('****************************************************************************************');
 const publicPath = "/";
 
 module.exports = (env) => {
