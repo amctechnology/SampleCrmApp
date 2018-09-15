@@ -407,6 +407,7 @@ class SalesforceBridge extends Bridge {
       });
     });
   }
+  @bind
   protected createNewEntity(params: IParams) {
     let URL = '';
     if (this.isLightning) {
