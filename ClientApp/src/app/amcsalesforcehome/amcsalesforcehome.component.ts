@@ -214,7 +214,6 @@ export class AMCSalesforceHomeComponent extends Application implements OnInit {
     if (activity.Status === 'Completed') {
       this.whoList = [];
       this.whatList = [];
-      activity.ActivityDate = this.formatDate(activity.TimeStamp);
     }
     return Promise.resolve(this.bridgeEventsService.sendEvent('saveActivity', activity));
   }
@@ -319,7 +318,7 @@ export class AMCSalesforceHomeComponent extends Application implements OnInit {
       Status: 'Open',
       ActivityDate: '',
       TimeStamp: date,
-      ActivityId: '',
+      ActivityId: this.formatDate(date),
       InteractionId: interaction.interactionId
     };
 
