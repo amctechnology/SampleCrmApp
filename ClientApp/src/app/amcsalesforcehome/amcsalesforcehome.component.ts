@@ -379,7 +379,7 @@ protected buildParams(entityType, activity) {
   };
   if (entityType === 'Case') {
     if (activity.WhatObject.objectType === 'Account') {
-        params.caseFields.AccountId = activity.WhatId;
+        params.caseFields.AccountId = activity.WhatObject.objectId;
     }
     if (activity.WhoObject.objectId !== '') {
       params.caseFields.ContactId = activity.WhoObject.objectId;
@@ -387,7 +387,7 @@ protected buildParams(entityType, activity) {
     params.caseFields.Comments = activity.Description;
   } else if ( entityType === 'Opportunity') {
     if (activity.WhatObject.objectType === 'Account') {
-        params.opportunityFields.AccountId = activity.WhatId;
+        params.opportunityFields.AccountId = activity.WhatObject.objectId;
     }
     params.opportunityFields.CloseDate = activity.ActivityDate;
   }

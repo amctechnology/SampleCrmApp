@@ -411,19 +411,19 @@ class SalesforceBridge extends Bridge {
   protected createNewEntity(params: IParams) {
     let URL = '';
     if (this.isLightning) {
-      const screenPopObject: object = {
+      const screenPopObject: IScreenPopObject = {
         type: sforce.opencti.SCREENPOP_TYPE.NEW_RECORD_MODAL,
         params: {
-          entityName: params.entityName,
-          defaultFieldValues: {
-          }
+          entityName: params.entityName
         },
         callback: result => {
           console.log(result);
         }
       };
       if (params.entityName === 'Case') {
-        screenPopObject['params'].defaultFieldValues = params.caseFields;
+        screenPopObject.params.defaultFieldValues = params.caseFields;
+      } else if ( params.entityName === 'Opportunity') {
+        screenPopObject.params.defaultFieldValues = params.opportunityFields;
       }
       sforce.opencti.screenPop(screenPopObject);
     } else {
@@ -447,3 +447,13 @@ class SalesforceBridge extends Bridge {
 }
 
 const bridge = new SalesforceBridge();
+
+interface IScreenPopObject {
+  type: string;
+  params: {
+          entityName: string;
+          defaultFieldValues?: Object;
+        };
+  callback: any;
+}
+
