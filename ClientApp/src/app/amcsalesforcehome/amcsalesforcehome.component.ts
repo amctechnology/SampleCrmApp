@@ -316,9 +316,9 @@ export class AMCSalesforceHomeComponent extends Application implements OnInit {
       CallDurationInSeconds: '0',
       Description: '',
       Status: 'Open',
-      ActivityDate: '',
+      ActivityDate: this.formatDate(date),
       TimeStamp: date,
-      ActivityId: this.formatDate(date),
+      ActivityId: '',
       InteractionId: interaction.interactionId
     };
 
