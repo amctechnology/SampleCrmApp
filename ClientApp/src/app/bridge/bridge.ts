@@ -414,7 +414,8 @@ class SalesforceBridge extends Bridge {
       const screenPopObject: IScreenPopObject = {
         type: sforce.opencti.SCREENPOP_TYPE.NEW_RECORD_MODAL,
         params: {
-          entityName: params.entityName
+          entityName: params.entityName,
+          defaultFieldValues: {}
         },
         callback: result => {
           console.log(result);
@@ -425,26 +426,23 @@ class SalesforceBridge extends Bridge {
       } else if ( params.entityName === 'Opportunity') {
         screenPopObject.params.defaultFieldValues = params.opportunityFields;
       } else if ( params.entityName === 'Lead') {
-        // screenPopObject.params.defaultFieldValues = params.leadFields;
+          screenPopObject.params.defaultFieldValues = params.leadFields;
+      }
       sforce.opencti.screenPop(screenPopObject);
     } else {
-    if (params.entityName === 'Case') {
-    } else if (params.entityName === 'Lead') {
-      URL = '/00Q/e';
-    } else if (params.entityName === 'Account') {
-        URL = '/001/e';
-    } else if (params.entityName === 'Contact') {
-        URL = '/003/e';
-    }
-    sforce.interaction.screenPop(URL, true, function(result)  {
-      console.log(result);
-    });
+      if (params.entityName === 'Case') {
+      } else if (params.entityName === 'Lead') {
+        URL = '/00Q/e';
+      } else if (params.entityName === 'Account') {
+          URL = '/001/e';
+      } else if (params.entityName === 'Contact') {
+          URL = '/003/e';
+      }
+      sforce.interaction.screenPop(URL, true, function(result)  {
+        console.log(result);
+      });
+   }
   }
-
-  }
-
-
-
 }
 
 const bridge = new SalesforceBridge();

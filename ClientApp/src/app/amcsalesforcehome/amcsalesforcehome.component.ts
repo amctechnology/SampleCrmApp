@@ -363,30 +363,36 @@ protected createNewEntity(entityType) {
       const activity = this.ActivityMap.get(this.currentInteraction.interactionId);
       params = this.buildParams(entityType, activity);
     }
+  } else {
+    params = this.buildParams(entityType, null);
   }
-
   this.bridgeEventsService.sendEvent('createNewEntity', params);
 }
 
 protected buildParams(entityType, activity) {
   let params: IParams = {
     entityName: entityType,
+    caseFields: {},
+    opportunityFields: {},
+    leadFields: {}
   };
-  if (entityType === 'Case') {
-    if (activity.WhatObject.objectType === 'Account') {
-        params.caseFields.AccountId = activity.WhatObject.objectId;
+  if (this.currentInteraction) {
+    if (entityType === 'Case') {
+      if (activity.WhatObject.objectType === 'Account') {
+          params.caseFields.AccountId = activity.WhatObject.objectId;
+      }
+      if (activity.WhoObject.objectId !== '') {
+        params.caseFields.ContactId = activity.WhoObject.objectId;
+      }
+      params.caseFields.Comments = activity.Description;
+    } else if ( entityType === 'Opportunity') {
+      if (activity.WhatObject.objectType === 'Account') {
+          params.opportunityFields.AccountId = activity.WhatObject.objectId;
+      }
+      params.opportunityFields.CloseDate = activity.ActivityDate;
+    } else if (entityType === 'Lead') {
+      params.leadFields.Phone = this.currentInteraction.details.fields.Phone.Value;
     }
-    if (activity.WhoObject.objectId !== '') {
-      params.caseFields.ContactId = activity.WhoObject.objectId;
-    }
-    params.caseFields.Comments = activity.Description;
-  } else if ( entityType === 'Opportunity') {
-    if (activity.WhatObject.objectType === 'Account') {
-        params.opportunityFields.AccountId = activity.WhatObject.objectId;
-    }
-    params.opportunityFields.CloseDate = activity.ActivityDate;
-  } else if (entityType === 'Lead') {
-
   }
   return params;
 }
