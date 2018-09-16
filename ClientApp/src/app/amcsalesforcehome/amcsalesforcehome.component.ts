@@ -342,15 +342,17 @@ protected whoListContains(whoObject) {
 }
 @bind
 protected setActivityDetails(eventObject) {
-  if (eventObject.objectType === 'Contact' || eventObject.objectType === 'Lead') {
-    if (!this.whoListContains(eventObject)) {
-      this.whoList.push(eventObject);
-      this.autoSave.next(true);
-    }
-  } else if ( eventObject.objectId !== undefined) {
-    if (!this.whatListContains(eventObject)) {
-      this.whatList.push(eventObject);
-      this.autoSave.next(true);
+  if ( this.currentInteraction) {
+    if (eventObject.objectType === 'Contact' || eventObject.objectType === 'Lead') {
+      if (!this.whoListContains(eventObject)) {
+        this.whoList.push(eventObject);
+        this.autoSave.next(true);
+      }
+    } else if ( eventObject.objectId !== undefined) {
+      if (!this.whatListContains(eventObject)) {
+        this.whatList.push(eventObject);
+        this.autoSave.next(true);
+      }
     }
   }
 
