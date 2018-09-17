@@ -21,6 +21,7 @@ export class ActivityComponent implements OnInit {
   @Input() autoSave: Subject<void>;
   @Input() subject: string;
   @Output() ActivitySave: EventEmitter<IActivity> = new EventEmitter<IActivity>();
+
   curWho: IActivityDetails;
   curWhat: IActivityDetails;
   callNotes: string;

@@ -30,6 +30,7 @@ class SalesforceBridge extends Bridge {
     // create new entity
     this.eventService.subscribe('createNewEntity', this.createNewEntity);
 
+    this.eventService.subscribe('screenPopSelectedSearchResult', this. tryScreenpop);
 
   }
 
@@ -191,6 +192,7 @@ class SalesforceBridge extends Bridge {
     }
   }
 
+  @bind
   private tryScreenpop(id: string): Promise<any> {
     return new Promise((resolve, reject) => {
       if (this.isLightning) {
@@ -443,6 +445,7 @@ class SalesforceBridge extends Bridge {
       });
    }
   }
+
 }
 
 const bridge = new SalesforceBridge();

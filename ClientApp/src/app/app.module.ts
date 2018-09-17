@@ -9,6 +9,7 @@ import { AMCSalesforceHomeComponent } from './amcsalesforcehome/amcsalesforcehom
 import { ActivityComponent } from './activity/activity.component';
 import { CreateComponent } from './create/create.component';
 import { RecentComponent } from './recent/recent.component';
+import { SearchInformationComponent } from './search-information/search-information.component';
 
 
 @NgModule({
@@ -18,6 +19,7 @@ import { RecentComponent } from './recent/recent.component';
     ActivityComponent,
     CreateComponent,
     RecentComponent,
+    SearchInformationComponent,
 
   ],
   imports: [

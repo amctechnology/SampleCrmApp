@@ -1,0 +1,19 @@
+<div id="SearchInformation" class="callDisplay" style="display: grid;" >
+    <div class="editor callHeader">
+        <label style="margin-left: 20px">
+            <b>Search Information</b>
+          </label>
+        </div>
+        <div id="ViewDivId-CreateNewSection" class="callBody">
+            <div style = "text-align: right; margin-right: 8px">
+                <!-- <img src="/assets/images/Create_Opportunity2.png" > -->
+                <div *ngIf="!singleResult">
+                <select id = 'searchRecordSelect' class="searchResultSelect" data-resetperactivity="false" (change) = 'onSearchSelectChange($event)' >
+                    <option *ngFor="let searchRecord of searchRecordList"  id="{{searchRecord.id}}" value = "{{searchRecord.id}}">{{searchRecord.fields.FullName.Value}}</option>
+                  </select>
+                </div>
+                <div *ngIf="singleResult">
+                <input readonly class="searchResultInput" *ngFor="let searchRecord of searchRecordList"  id="{{searchRecord.id}}" value = "{{searchRecord.fields.FullName.Value}}">
+                </div>
+            </div>
+          </div>

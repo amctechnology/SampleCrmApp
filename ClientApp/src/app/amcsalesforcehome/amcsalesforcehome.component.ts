@@ -22,7 +22,9 @@ export class AMCSalesforceHomeComponent extends Application implements OnInit {
   currentInteraction: api.IInteraction;
   ActivityMap: Map<string, IActivity>;
   interaction: boolean;
-  autoSave: Subject<boolean> = new Subject();
+  autoSave: Subject<void> = new Subject();
+  searchRecordList: Array<api.IRecordItem>;
+  singleResult: boolean;
   constructor() {
     super();
     this.interaction = false;
@@ -30,6 +32,8 @@ export class AMCSalesforceHomeComponent extends Application implements OnInit {
     this.whoList = [];
     this.whatList = [];
     this.ActivityMap = new Map();
+    this.searchRecordList = [];
+
     this.appName = 'Salesforce';
     this.bridgeScripts = this.bridgeScripts.concat([
       window.location.origin + '/bridge.bundle.js',
@@ -249,15 +253,19 @@ export class AMCSalesforceHomeComponent extends Application implements OnInit {
         isNewScenarioId = true;
       }
       this.scenarioInteractionMappings[scenarioIdInt][interactionId] = true;
-      // this.activityInit(interaction);
       if (this.shouldPreformScreenpop(interaction, isNewScenarioId)) {
         const searchRecord = await this.preformScreenpop(interaction);
-
+        this.searchRecordList = searchRecord.records;
+        if (this.searchRecordList.length > 1) {
+          this.singleResult = false;
+        } else {
+          this.singleResult = true;
+        }
         this.interaction = true;
         this.currentInteraction = interaction;
         this.subject = 'Call [' + interaction.details.fields.Phone.Value + ']';
-        this.ActivityMap.set(interaction.interactionId, this.createActivity(searchRecord, interaction));
-        this.autoSave.next(false);
+        this.ActivityMap.set(interaction.interactionId, this.createActivity(interaction));
+        this.autoSave.next();
 
         return searchRecord;
       } else if (interaction.state === api.InteractionStates.Disconnected) {
@@ -277,6 +285,7 @@ export class AMCSalesforceHomeComponent extends Application implements OnInit {
     this.logger.logVerbose('onInteraction END');
     return;
   }
+
   protected activityInit(interaction) {
 
   }
@@ -294,7 +303,7 @@ export class AMCSalesforceHomeComponent extends Application implements OnInit {
 
   }
 
-  protected createActivity(searchRecord: any, interaction: api.IInteraction): IActivity {
+  protected createActivity(interaction: api.IInteraction): IActivity {
     const date = new Date();
     const activity: IActivity = {
       WhoObject: {
@@ -346,12 +355,12 @@ protected setActivityDetails(eventObject) {
     if (eventObject.objectType === 'Contact' || eventObject.objectType === 'Lead') {
       if (!this.whoListContains(eventObject)) {
         this.whoList.push(eventObject);
-        this.autoSave.next(true);
+        this.autoSave.next();
       }
     } else if ( eventObject.objectId !== undefined) {
       if (!this.whatListContains(eventObject)) {
         this.whatList.push(eventObject);
-        this.autoSave.next(true);
+        this.autoSave.next();
       }
     }
   }
@@ -372,6 +381,7 @@ protected createNewEntity(entityType) {
 }
 
 protected buildParams(entityType, activity) {
+  // tslint:disable-next-line:prefer-const
   let params: IParams = {
     entityName: entityType,
     caseFields: {},
@@ -400,6 +410,9 @@ protected buildParams(entityType, activity) {
     }
   }
   return params;
+}
+protected screenPopSelectedSearchResult(id) {
+  this.bridgeEventsService.sendEvent('screenPopSelectedSearchResult', id);
 }
 
 }

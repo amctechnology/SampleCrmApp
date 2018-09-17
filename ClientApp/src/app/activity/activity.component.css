@@ -85,6 +85,7 @@
 
 .callDisplay {
   display:grid;
+  padding-top: 8px;
 }
 .editor {
   font-size: 0.9em;
@@ -185,4 +186,5 @@ body {
   height:120px;
   width:71%
 }
+
 
