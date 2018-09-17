@@ -8,20 +8,22 @@
       <img id="ViewCollapseImageId-CreateNewSection" class="imageExpandCollapse" src="/assets/images/section_collapse.png" title="Collaps" onclick="amcUI.onViewCollapseClick(this, 'ViewCollapseImageId-CreateNewSection', 'ViewExpandImageId-CreateNewSection', 'ViewDivId-CreateNewSection')"> -->
   </div>
   <div id="ViewDivId-CreateNewSection" class="callBody">
-    <div class = "createNewLabel">
-          <div (click) = 'createNewEntity("Case")' title="Case">
+    <div class = "container">
+    <div class = "centerwrapper">
+          <div class = "createNewLabel" (click) = 'createNewEntity("Case")' title="Case">
           <img class="createEntityImages"  src="/assets/images/Create_Case2.png" >
           <label for="Case"  >Case</label>
         </div>
-        <div (click) = 'createNewEntity("Lead")' title="Lead">
+        <div class = "createNewLabel" (click) = 'createNewEntity("Lead")' title="Lead">
           <img class="createEntityImages" title="Lead" src="/assets/images/Create_Lead2.png" (click) = 'createNewEntity("Lead")'>
           <label for="Lead" title="Lead" >Lead</label>
         </div>
-        <div (click) = 'createNewEntity("Opportunity")' title="Opportunity">
+        <div class = "createNewLabel" (click) = 'createNewEntity("Opportunity")' title="Opportunity">
           <img class="createEntityImages"  src="/assets/images/Create_Opportunity2.png" >
           <label  for="Opportunity"  >Opportunity</label>
         </div>
 
+    </div>
     </div>
   </div>
 </div>

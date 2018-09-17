@@ -1,56 +1,8 @@
-.imageExpandCollapse {
-  float: right;
-  width: 20px;
-  height: 20px;
-}
-
-.callSection {
-  margin-left: 5px;
-  font-family: Arial;
-  position: relative;
-  margin-top: 10px;
-  background-color: #FFFFFF;
-}
-
-.miscSection {
-  position: relative;
-  margin-top: 20px;
-  background-color: #E5E6F2
-}
-
 .callHeader {
   border: 1px solid #939598 !important;
   background-color: #F4F5FB !important;
   width: 100% !important;
   margin-top: 0px !important;
-}
-
-.callBody {
-  border: 1px solid #939598;
-  border-top: 0;
-  position: relative;
-
-}
-
-.miscIcons {
-  width: 20px;
-  height: 20px;
-  float: right;
-  margin-top: 4px;
-  margin-right: 5px;
-  margin-left:5px;
-}
-
-.amcIcon {
-  width: 50%;
-  height: 20px;
-  margin-top: 5px;
-  margin-left: 10px
-}
-
-.callDisplay {
-  padding-top: 8px;
-  display:grid;
 }
 
 .editor {
@@ -69,67 +21,6 @@
   -moz-box-sizing: border-box;
 }
 
-.AnswerCallImages {
-  width: 28px;
-  height: 20px;
-  margin: 6px 0 0 5px;
-}
-
-.dropDownListStyle {
-  border: 1px solid #939598 !IMPORTANT;
-  border-radius: 3px !IMPORTANT;
-  width: 70% !IMPORTANT;
-  height: 20px !IMPORTANT;
-  text-align: left !IMPORTANT;
-  white-space: nowrap !IMPORTANT;
-  text-overflow: ellipsis !IMPORTANT;
-  margin: 0 5% 0 0;
-}
-
-.activitySubjectTextBoxStyle {
-  border: 1px solid #939598 !IMPORTANT;
-  border-radius: 3px !IMPORTANT;
-  width: 70% !IMPORTANT;
-  height: 20px !IMPORTANT;
-  text-align: left !IMPORTANT;
-  box-sizing: border-box;
-  -webkit-box-sizing: border-box;
-  -moz-box-sizing: border-box;
-  margin: 0 5% 0 0;
-  padding-left:2px;
-}
-
-.activityCommentsTextBoxStyle {
-  border: 1px solid #939598 !IMPORTANT;
-  border-radius: 3px !IMPORTANT;
-  color: #333333 !IMPORTANT;
-  text-align: left !IMPORTANT;
-  margin: 0px 5% 0px 0px;
-  box-sizing: border-box;
-  -webkit-box-sizing: border-box;
-  -moz-box-sizing: border-box;
-}
-
-.displayDiv {
-  width: 100%;
-  display: flex;
-}
-
-.displayLabels {
-  margin-left: 5px;
-  width: 25%;
-}
-
-.displayData {
-  width: 70%;
-}
-
-.container {
-  width:90%;
-  display: flex;
-  align-items: center;
-}
-
 .createEntityImages {
   width: 35px;
   height: 25px;
@@ -139,21 +30,31 @@
   padding-left:5px;
 }
 
-
-
-body {
-
-  font-size: .85em;
-  font-family: "Segoe UI", Verdana, Helvetica, Sans-Serif;
-  color: #232323;
-  background-color: #fff;
-  font-family: Arial;
-}
-
 .createNewLabel
  {
-  margin-right: 5%;
-  padding-bottom:3px;
+  float: left;
+ }
+
+ .centerwrapper
+ {
+    margin-left: 10%;
+ }
+
+ .container {
+  margin-right: 7%;
+  /* padding-bottom:3px; */
   font-size: 10px;
   text-align: center;
  }
+
+ .callBody {
+  border: 1px solid #939598;
+  border-top: 0;
+  position: relative;
+}
+
+.callDisplay {
+  padding-top: 8px;
+  display:grid;
+}
+
