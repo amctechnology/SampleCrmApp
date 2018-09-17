@@ -129,15 +129,31 @@
   align-items: center;
 }
 
-.newEntityImages {
-  width: 25px;
+.leadEntityImage {
+  width: 35px;
   height: 25px;
+  margin-bottom: 9px;
   margin-top: 2px;
   cursor: pointer;
   padding-left:5px;
 
 }
-
+.caseEntityImage {
+  width: 35px;
+  height: 25px;
+  margin-bottom: 9px;
+  margin-top: 2px;
+  cursor: pointer;
+  padding-left:5px;
+}
+.opportunityEntityImage {
+  width: 35px;
+  height: 25px;
+  margin-bottom: 9px;
+  margin-top: 2px;
+  cursor: pointer;
+  padding-left:5px;
+}
 
 
 body {

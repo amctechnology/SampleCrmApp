@@ -44,7 +44,7 @@
                       </div>
                       <div class = "notesBottonBorder" >
                           <input *ngFor="let quickComment of quickCommentList; let i = index;" class = "quickNotesBotton" type="button"  value="{{i+1}}" (click)="loadQuickComment(i)" title="{{quickComment}}">
-                          <input id="call-activity-submit-button" class = "submitButton" type="button" value="SUBMIT" (click)="activitySave(false)">
+                          <input id="call-activity-submit-button" class = "submitButton" type="button" value="Submit" (click)="activitySave(false)">
                       </div>
                   </div>
 

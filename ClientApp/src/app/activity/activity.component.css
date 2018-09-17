@@ -25,35 +25,41 @@
   margin-top: 0px !important;
 }
 .notesBottonBorder {
-  background-color: #F6F7FB;
-  border-left: 1px solid #d1c7ac;
-  border-bottom: 1px solid #d1c7ac;
-  border-right: 1px solid #d1c7ac;
+  background-color: #ffffff;
+  border-left: 1px solid #939598;
+  border-bottom: 1px solid #939598;
+  border-right: 1px solid #939598;
+  border-bottom-left-radius: 3px !IMPORTANT;
+  border-bottom-right-radius: 3px !IMPORTANT;
   height:25px
 }
 .quickNotesBotton {
-  background-color: #838488;
+  background-color: #1e72ba;
   border: 0;
   color: white;
-  height: 80%;
+  height: 70%;
   width: 15px;
-  font-weight:bold;
   padding-left: 4px;
   margin-left: 3px;
-  margin-top:3px;
+  margin-top:4px;
   outline:none;
+  font-size: 70%;
+
+
 }
 .submitButton {
   border: 0;
-  font-weight:bold;
   float:right;
-  margin-top:3px;
+  margin-top:2px;
   outline:none;
   cursor:pointer;
-  background-color: #F6F7FB;
-  color: #476B9B;
+  background-color: #6cb047;
+  color: #ffffff;
   padding-right: 5px;
-  margin-bottom: 5px;
+  margin-bottom: 3px;
+  margin-right: 2px;
+  border-radius: 4px;
+  font-size: 98%;
 }
 .callBody {
   border: 1px solid #939598;
@@ -128,7 +134,8 @@
 
 .activityCommentsTextBoxStyle {
   border: 1px solid #939598 !IMPORTANT;
-  border-radius: 3px !IMPORTANT;
+  border-top-left-radius: 3px !IMPORTANT;
+  border-top-right-radius: 3px !IMPORTANT;
   color: #333333 !IMPORTANT;
   text-align: left !IMPORTANT;
   margin: 0px 5% 0px 0px;
