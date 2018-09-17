@@ -340,7 +340,7 @@ class SalesforceBridge extends Bridge {
     return new Promise<void>((resolve, reject) => {
       resolve();
       // DO NOT set width
-      if (this.isLightning) {
+      // if (this.isLightning) {
         // sforce.opencti.setSoftphonePanelWidth({
         //   widthPX: widthInPixels,
         //   callback: response => {
@@ -351,7 +351,7 @@ class SalesforceBridge extends Bridge {
         //     }
         //   }
         // });
-      } else {
+      // } else {
         // sforce.interaction.cti.setSoftphoneWidth(widthInPixels, response => {
         //   if (response.error) {
         //     reject(response.error);
@@ -359,7 +359,7 @@ class SalesforceBridge extends Bridge {
         //     resolve();
         //   }
         // });
-      }
+      // }
     });
   }
   @bind

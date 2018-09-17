@@ -5,17 +5,19 @@ export interface IParams {
     ContactId?: string;
     Origin?: string;
     Status?: string;
-    Comments?: string;
+    Description?: string;
   };
   opportunityFields?: {
     AccountId?: string;
     StageName?: string;
     CloseDate?: string;
+    Description?: string;
   };
   leadFields?: {
     AccountId?: string;
     ContactId?: string;
     Phone?: string;
+    Description?: string;
   };
 }
 

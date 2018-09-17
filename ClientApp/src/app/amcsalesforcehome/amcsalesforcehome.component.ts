@@ -386,14 +386,17 @@ protected buildParams(entityType, activity) {
       if (activity.WhoObject.objectId !== '') {
         params.caseFields.ContactId = activity.WhoObject.objectId;
       }
-      params.caseFields.Comments = activity.Description;
+      params.caseFields.Description = activity.Description;
     } else if ( entityType === 'Opportunity') {
       if (activity.WhatObject.objectType === 'Account') {
           params.opportunityFields.AccountId = activity.WhatObject.objectId;
       }
       params.opportunityFields.CloseDate = activity.ActivityDate;
+      params.opportunityFields.Description = activity.Description;
+      params.opportunityFields.StageName = 'Prospecting';
     } else if (entityType === 'Lead') {
       params.leadFields.Phone = this.currentInteraction.details.fields.Phone.Value;
+      params.leadFields.Description = activity.Description;
     }
   }
   return params;

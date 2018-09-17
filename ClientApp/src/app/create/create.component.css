@@ -152,7 +152,8 @@ body {
 
 .createNewLabel
  {
-  margin-left:2px;
+  margin-right: 5%;
   padding-bottom:3px;
   font-size: 10px;
+  text-align: center;
  }
