@@ -51,21 +51,25 @@ export class ActivityComponent implements OnInit {
   }
 
   protected activitySave(clear_activity_fields) {
-    if (this.currentInteraction && this.whoList.length !== 0 && this.whatList.length !== 0) {
+    if (this.currentInteraction) {
     let activity = this.ActivityMap.get(this.currentInteraction.interactionId);
     activity.CallDurationInSeconds = this.getSecondsElapsed(activity.TimeStamp).toString();
 
     if (this.curWhat === null) {
-      activity.WhatObject = this.whatList[0];
+      if (this.whatList.length !== 0) {
+        activity.WhatObject = this.whatList[0];
+      }
     } else {
       activity.WhatObject = this.curWhat;
     }
     if (this.curWho === null) {
-      activity.WhoObject = this.whoList[0];
+      if (this.whoList.length !== 0 ) {
+        activity.WhoObject = this.whoList[0];
+      }
     } else {
       activity.WhoObject = this.curWho;
     }
-    if (this.callNotes !== 'Click to add a comment'){
+    if (this.callNotes !== 'Click to add a comment') {
       activity.Description = this.callNotes;
     } else {
       activity.Description = '';
