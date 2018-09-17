@@ -24,8 +24,10 @@ export class ActivityComponent implements OnInit {
   curWho: IActivityDetails;
   curWhat: IActivityDetails;
   callNotes: string;
+  quickCommentList: Array<string>;
 
   constructor() {
+    this.InitializeQuickComments();
     this.curWhat = null;
     this.curWho = null;
     this.subject = '';
@@ -131,6 +133,18 @@ export class ActivityComponent implements OnInit {
     }
   }
 
+  protected InitializeQuickComments() {
+    this.quickCommentList = [];
+    this.quickCommentList.push('left voicemail: ');
+    this.quickCommentList.push('scheduled follow up: ');
+    this.quickCommentList.push('transferred to: ');
+    this.quickCommentList.push('sent email ');
+    this.quickCommentList.push('number of agents: ');
+    this.quickCommentList.push('selling points: ');
+  }
 
+  protected loadQuickComment(value) {
+    this.callNotes = this.quickCommentList[value];
+  }
 
   }
