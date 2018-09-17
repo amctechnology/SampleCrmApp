@@ -338,25 +338,27 @@ class SalesforceBridge extends Bridge {
 
   protected setSoftphoneWidth(widthInPixels: number) {
     return new Promise<void>((resolve, reject) => {
+      resolve();
+      // DO NOT set width
       if (this.isLightning) {
-        sforce.opencti.setSoftphonePanelWidth({
-          widthPX: widthInPixels,
-          callback: response => {
-            if (response.errors) {
-              reject(response.errors);
-            } else {
-              resolve();
-            }
-          }
-        });
+        // sforce.opencti.setSoftphonePanelWidth({
+        //   widthPX: widthInPixels,
+        //   callback: response => {
+        //     if (response.errors) {
+        //       reject(response.errors);
+        //     } else {
+        //       resolve();
+        //     }
+        //   }
+        // });
       } else {
-        sforce.interaction.cti.setSoftphoneWidth(widthInPixels, response => {
-          if (response.error) {
-            reject(response.error);
-          } else {
-            resolve();
-          }
-        });
+        // sforce.interaction.cti.setSoftphoneWidth(widthInPixels, response => {
+        //   if (response.error) {
+        //     reject(response.error);
+        //   } else {
+        //     resolve();
+        //   }
+        // });
       }
     });
   }
