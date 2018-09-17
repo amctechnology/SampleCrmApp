@@ -9,16 +9,18 @@
   </div>
   <div id="ViewDivId-CreateNewSection" class="callBody">
     <div class = "createNewLabel">
-
-          <img class="createEntityImages" src="/assets/images/Create_Case2.png" (click) = 'createNewEntity("Case")'>
-          <label for="Case" title="Case" >Case</label>
-
-          <img class="createEntityImages" src="/assets/images/Create_Lead2.png" (click) = 'createNewEntity("Lead")'>
+          <div (click) = 'createNewEntity("Case")' title="Case">
+          <img class="createEntityImages"  src="/assets/images/Create_Case2.png" >
+          <label for="Case"  >Case</label>
+        </div>
+        <div (click) = 'createNewEntity("Lead")' title="Lead">
+          <img class="createEntityImages" title="Lead" src="/assets/images/Create_Lead2.png" (click) = 'createNewEntity("Lead")'>
           <label for="Lead" title="Lead" >Lead</label>
-
-          <img class="createEntityImages" src="/assets/images/Create_Opportunity2.png" (click) = 'createNewEntity("Opportunity")'>
-          <label  for="Opportunity" title="Opportunity" >Opportunity</label>
-
+        </div>
+        <div (click) = 'createNewEntity("Opportunity")' title="Opportunity">
+          <img class="createEntityImages"  src="/assets/images/Create_Opportunity2.png" >
+          <label  for="Opportunity"  >Opportunity</label>
+        </div>
 
     </div>
   </div>
