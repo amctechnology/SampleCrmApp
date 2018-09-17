@@ -1,5 +1,5 @@
 .callHeader {
-  border: 1px solid #939598 !important;
+  /* border: 1px solid #939598 !important; */
   background-color: #F4F5FB !important;
   width: 100% !important;
   margin-top: 0px !important;
@@ -26,7 +26,7 @@
   -moz-box-sizing: border-box;
 }
  .callBody {
-  border: 1px solid #939598;
+  /* border: 1px solid #939598; */
   border-top: 0;
   position: relative;
 }
@@ -34,6 +34,7 @@
 .callDisplay {
   /* padding-top: 8px; */
   display:grid;
+  background-color: #ffffff;
 }
 
 .searchResultSelect {

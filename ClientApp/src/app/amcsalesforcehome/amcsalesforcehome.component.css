@@ -49,6 +49,7 @@
 
 .callDisplay {
   display:grid;
+  background-color: #aec2de;
 }
 
 .editor {

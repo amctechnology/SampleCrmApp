@@ -19,7 +19,7 @@
 }
 
 .callHeader {
-  border: 1px solid #939598 !important;
+  /* border: 1px solid #939598 !important; */
   background-color: #F4F5FB !important;
   width: 100% !important;
   margin-top: 0px !important;
@@ -62,7 +62,7 @@
   font-size: 98%;
 }
 .callBody {
-  border: 1px solid #939598;
+  /* border: 1px solid #939598; */
   border-top: 0;
   position: relative;
 }
@@ -85,7 +85,8 @@
 
 .callDisplay {
   display:grid;
-  padding-top: 8px;
+  margin-top: 8px;
+  background-color: #ffffff;
 }
 .editor {
   font-size: 0.9em;
