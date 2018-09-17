@@ -5,6 +5,11 @@
   margin-top: 0px !important;
 }
 
+.displayDiv {
+  width: 100%;
+  display: flex;
+}
+
 .editor {
   font-size: 0.9em;
   width: 70%;
@@ -34,26 +39,44 @@
 .searchResultSelect {
   border: 1px solid #939598 !IMPORTANT;
   border-radius: 3px !IMPORTANT;
-  width: 80% !IMPORTANT;
+  width: 96% !IMPORTANT;
   height: 20px !IMPORTANT;
   text-align: left !IMPORTANT;
   white-space: nowrap !IMPORTANT;
-
- text-overflow: ellipsis !IMPORTANT;
-  margin: 5px 0% 5px 0;
+  text-overflow: ellipsis !IMPORTANT;
+  margin: 5px 0% 5px 6px;
 }
 
 .searchResultInput {
   border: 1px solid #939598 !IMPORTANT;
   border-radius: 3px !IMPORTANT;
-  width: 80% !IMPORTANT;
+  width: 96% !IMPORTANT;
   height: 20px !IMPORTANT;
   text-align: left !IMPORTANT;
   box-sizing: border-box;
   -webkit-box-sizing: border-box;
   -moz-box-sizing: border-box;
-  margin: 5px 0% 5px 0;
+  margin: 5px 0% 5px 6px;
   padding-left:2px;
 }
 
+.displayLabels {
+  margin-left: 5px;
+  width: 25%;
+}
 
+.editor {
+  font-size: 0.9em;
+  width: 70%;
+  text-align: left;
+  margin: 4px 5% 0 0px;
+  font-family: Arial;
+  white-space: nowrap;
+  /*overflow: hidden;*/
+  text-overflow: ellipsis;
+  border: 0;
+  padding-top: 2px;
+  box-sizing: border-box;
+  -webkit-box-sizing: border-box;
+  -moz-box-sizing: border-box;
+}

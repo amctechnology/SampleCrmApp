@@ -2,7 +2,7 @@ import { Component, OnInit, Output, EventEmitter } from '@angular/core';
 import * as api from '@amc/application-api';
 import { Application, BridgeEventsService } from '@amc/applicationangularframework';
 import { bind } from 'bind-decorator';
-import { search, RecordItem } from '@amc/channel-api';
+import { search, RecordItem, SearchRecords } from '@amc/channel-api';
 import { InteractionDirectionTypes } from '@amc/application-api';
 import { Subject } from 'rxjs/Subject';
 import { IActivity } from './../Model/IActivity';
@@ -255,7 +255,7 @@ export class AMCSalesforceHomeComponent extends Application implements OnInit {
       this.scenarioInteractionMappings[scenarioIdInt][interactionId] = true;
       if (this.shouldPreformScreenpop(interaction, isNewScenarioId)) {
         const searchRecord = await this.preformScreenpop(interaction);
-        this.searchRecordList = searchRecord.records;
+        this.searchRecordList = searchRecord.toJSON();
         if (this.searchRecordList.length > 1) {
           this.singleResult = false;
         } else {
@@ -273,6 +273,7 @@ export class AMCSalesforceHomeComponent extends Application implements OnInit {
         this.currentInteraction = null;
         this.interaction = false;
         this.interactionDisconnected.next(true);
+        this.searchRecordList = [];
         if (Object.keys(this.scenarioInteractionMappings[scenarioIdInt]).length === 0) {
           delete this.scenarioInteractionMappings[scenarioIdInt];
         }

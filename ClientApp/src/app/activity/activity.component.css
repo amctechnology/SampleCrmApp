@@ -184,7 +184,9 @@ body {
 .callNotesContainer {
   float:left;
   height:120px;
-  width:71%
+  width:100%;
+  margin-right: 5px;
+  margin-left: 5px;
 }
 
 
