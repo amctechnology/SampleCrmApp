@@ -317,7 +317,7 @@ class SalesforceBridge extends Bridge {
     return new Promise<void>((resolve, reject) => {
       if (this.isLightning) {
         sforce.opencti.setSoftphonePanelHeight({
-          heightPX: heightInPixels,
+          heightPX: ((heightInPixels > 700)? 700 : heightInPixels),
           callback: response => {
             if (response.errors) {
               reject(response.errors);
