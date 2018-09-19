@@ -14,12 +14,13 @@ class SalesforceBridge extends Bridge {
   private isLightning = false;
   private currentEvent: any;
   activity: IActivity = null;
-
+  layoutObjectList: Array<string>;
 
   constructor() {
     super();
     this.currentEvent = null;
     this.appName = 'Salesforce';
+    this.layoutObjectList = [];
     this.VerifyMode();
     this.initialize();
     this.eventService.subscribe('getUserInfo', this.getUserInfo);
@@ -39,12 +40,19 @@ class SalesforceBridge extends Bridge {
     if (this.isLightning) {
       sforce.opencti.onClickToDial({ listener: this.clickToDialListener });
       sforce.opencti.onNavigationChange({ listener: this.onFocusListener });
+      sforce.opencti.getSoftphoneLayout({
+        callback: this.buildLayoutObjectList
+      });
     } else {
       sforce.interaction.cti.onClickToDial(this.clickToDialListener);
       sforce.interaction.onFocus(this.onFocusListener);
+      sforce.interaction.cti.getSoftphoneLayout(this.buildLayoutObjectList);
     }
   }
-
+  @bind
+  protected buildLayoutObjectList(result)  {
+    this.layoutObjectList = Object.keys(result.returnValue.Inbound.objects);
+  }
   @bind
   isToolbarVisible() {
     return new Promise((resolve, reject) => {
@@ -115,16 +123,10 @@ class SalesforceBridge extends Bridge {
         return 1;
       }
     }
-    entity.objectName = this.parseWhat(entity);
-    this.eventService.sendEvent('setActivityDetails', entity);
+    if (this.layoutObjectList.includes(entity.objectType)) {
+      this.eventService.sendEvent('setActivityDetails', entity);
     }
-  }
-
-  protected parseWhat(entity): string {
-    if (entity.objectType === 'Case') {
-      return 'Case ' + entity.objectName;
     }
-    return entity.objectName;
   }
 
   @bind
