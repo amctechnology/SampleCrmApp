@@ -32,7 +32,7 @@
 }
 
 .callDisplay {
-  /* padding-top: 8px; */
+  margin-bottom: 8px;
   display:grid;
   background-color: #ffffff;
 }

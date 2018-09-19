@@ -25,9 +25,11 @@ export class AMCSalesforceHomeComponent extends Application implements OnInit {
   autoSave: Subject<void> = new Subject();
   searchRecordList: Array<api.IRecordItem>;
   singleResult: boolean;
+  result: boolean;
   constructor() {
     super();
     this.interaction = false;
+    this.result = false;
     this.interactions = new Map();
     this.whoList = [];
     this.whatList = [];
@@ -251,6 +253,17 @@ export class AMCSalesforceHomeComponent extends Application implements OnInit {
       if (!this.scenarioInteractionMappings.hasOwnProperty(scenarioIdInt)) {
         this.scenarioInteractionMappings[scenarioIdInt] = {};
         isNewScenarioId = true;
+        if (interaction.details.id === '' && interaction.details.type === '') {
+          this.interaction = true;
+          this.currentInteraction = interaction;
+          this.subject = 'Call [' + interaction.details.fields.Phone.Value + ']';
+          this.ActivityMap.set(interaction.interactionId, this.createActivity(interaction));
+          this.autoSave.next();
+        }
+
+
+
+
       }
       this.scenarioInteractionMappings[scenarioIdInt][interactionId] = true;
       if (this.shouldPreformScreenpop(interaction, isNewScenarioId)) {
@@ -258,8 +271,10 @@ export class AMCSalesforceHomeComponent extends Application implements OnInit {
         this.searchRecordList = searchRecord.toJSON();
         if (this.searchRecordList.length > 1) {
           this.singleResult = false;
-        } else {
+          this.result = true;
+        } else if (this.searchRecordList.length === 1) {
           this.singleResult = true;
+          this.result = true;
         }
         this.interaction = true;
         this.currentInteraction = interaction;
@@ -272,6 +287,7 @@ export class AMCSalesforceHomeComponent extends Application implements OnInit {
         delete this.scenarioInteractionMappings[scenarioIdInt][interactionId];
         this.currentInteraction = null;
         this.interaction = false;
+        this.result = false;
         this.interactionDisconnected.next(true);
         this.searchRecordList = [];
         if (Object.keys(this.scenarioInteractionMappings[scenarioIdInt]).length === 0) {

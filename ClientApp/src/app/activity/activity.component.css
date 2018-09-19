@@ -85,7 +85,7 @@
 
 .callDisplay {
   display:grid;
-  margin-top: 8px;
+  margin-bottom: 8px;
   background-color: #ffffff;
 }
 .editor {

@@ -10,6 +10,7 @@ export class SearchInformationComponent implements OnInit {
   @Input() singleResult: boolean;
   @Input() searchRecordList: Array<api.IRecordItem>;
   @Output() screenPopSelectedSearchResult: EventEmitter<string> = new EventEmitter();
+
   imageLocation: string;
   constructor() { }
 
