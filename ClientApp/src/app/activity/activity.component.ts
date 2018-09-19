@@ -146,10 +146,11 @@ export class ActivityComponent implements OnInit {
     this.quickCommentList.push('Sent email ');
     this.quickCommentList.push('Number of agents: ');
     this.quickCommentList.push('Selling points: ');
-    this.quickCommentList.push('Left voicemail: ');
-    this.quickCommentList.push('Scheduled follow up: ');
-    this.quickCommentList.push('Transferred to: ');
-    this.quickCommentList.push('Sent email ');
+    this.quickCommentList.push('Call Back: ');
+    this.quickCommentList.push('Do not disturb: ');
+    this.quickCommentList.push('Requires more information: ');
+    this.quickCommentList.push('Escalation: ');
+
   }
 
   protected loadQuickComment(value) {
