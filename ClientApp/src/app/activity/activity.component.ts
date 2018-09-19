@@ -32,7 +32,7 @@ export class ActivityComponent implements OnInit {
     this.curWhat = null;
     this.curWho = null;
     this.subject = '';
-    this. callNotes = 'Click to add a comment';
+    this. callNotes = '';
     this.ActivityMap = new Map();
   }
 
@@ -47,11 +47,11 @@ export class ActivityComponent implements OnInit {
 
   setSelectedInteraction(interactionList) {
     console.log('interaction ' + interactionList.srcElement[0].id );
-   // this.selectedInteraction = this.getInteraction(interactionList.srcElement[0].id);
   }
 
   protected activitySave(clear_activity_fields) {
     if (this.currentInteraction) {
+    // tslint:disable-next-line:prefer-const
     let activity = this.ActivityMap.get(this.currentInteraction.interactionId);
     activity.CallDurationInSeconds = this.getSecondsElapsed(activity.TimeStamp).toString();
 
@@ -69,11 +69,7 @@ export class ActivityComponent implements OnInit {
     } else {
       activity.WhoObject = this.curWho;
     }
-    if (this.callNotes !== 'Click to add a comment') {
-      activity.Description = this.callNotes;
-    } else {
-      activity.Description = '';
-    }
+    activity.Description = this.callNotes;
     activity.CallType = this.getInteractionDirection(this.currentInteraction.direction);
     activity.Subject = this.subject;
     if (clear_activity_fields) {
@@ -104,11 +100,6 @@ export class ActivityComponent implements OnInit {
   protected onCallNotesChange(event) {
     this.callNotes = event.srcElement.value.trim();
     this.activitySave(false);
-  }
-  protected removeDefaultCallNote() {
-    if (this.callNotes === 'Click to add a comment') {
-      this.callNotes = '';
-    }
   }
   protected getInteractionDirection(directionNumber) {
     if (directionNumber === 0 ) {
