@@ -22,7 +22,7 @@
 }
 
 .createEntityImages {
-  width: 35px;
+  width: 30px;
   height: 25px;
   margin-bottom: 8px;
   margin-top: 2px;
@@ -32,13 +32,13 @@
 
 .createNewLabel
  {
-  float: left;
+  display: inline-block;
  }
 
 
  .container {
-  /* margin-left: 7%; */
-  /* padding-bottom:3px; */
+  padding-right: 0px;
+  padding-left: 0px;
   font-size: 10px;
   text-align: center;
  }
@@ -46,7 +46,7 @@
  .callBody {
   /* border: 1px solid #939598; */
   border-top: 0;
-  position: relative;
+
 }
 
 .callDisplay {
