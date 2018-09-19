@@ -152,4 +152,11 @@ export class ActivityComponent implements OnInit {
     this.callNotes = this.quickCommentList[value];
   }
 
+  protected parseWhoObject(whoObject: IActivityDetails): string {
+    return whoObject.objectType + ': ' + whoObject.objectName;
+  }
+
+  protected parseWhatObject(whatObject: IActivityDetails): string {
+    return whatObject.objectType + ': ' + whatObject.objectName;
+  }
   }
