@@ -1,9 +1,10 @@
 
-<div  class="callDisplay" style="display: grid;" >
+<div *ngIf = "maximizeCreate" class="callDisplay" style="display: grid;" >
   <div class="editor callHeader">
       <label style="margin-left: 10px">
           <b>Create New</b>
       </label>
+      <img class="ViewResizeImage" src="assets/images/section_expand.png" (click)="resizeCreate('collapse')"title = "Collapse">
     </div>
   <div  class="callBody">
     <div class = "container">
@@ -23,3 +24,10 @@
   </div>
 </div>
 
+<div *ngIf = "!maximizeCreate" class="callDisplay" >
+  <div class="editor callHeader">
+      <label style="margin-left: 10px">
+          <b>Create New</b>
+      </label>
+      <img class="ViewResizeImage" src="assets/images/section_expand.png" (click)="resizeCreate('expand')" title = "Expand">
+  </div>

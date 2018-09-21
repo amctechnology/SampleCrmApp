@@ -81,3 +81,9 @@
   -webkit-box-sizing: border-box;
   -moz-box-sizing: border-box;
 }
+
+.ViewResizeImage {
+  width: 20px;
+  height: 20px;
+  float: right;
+}

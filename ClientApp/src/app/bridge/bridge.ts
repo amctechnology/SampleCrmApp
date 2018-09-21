@@ -51,7 +51,11 @@ class SalesforceBridge extends Bridge {
   }
   @bind
   protected buildLayoutObjectList(result)  {
-    this.layoutObjectList = Object.keys(result.returnValue.Inbound.objects);
+    if (this.isLightning) {
+      this.layoutObjectList = Object.keys(result.returnValue.Inbound.objects);
+    } else {
+      this.layoutObjectList = Object.keys(JSON.parse(result.result).Inbound.objects);
+    }
   }
   @bind
   isToolbarVisible() {
@@ -345,16 +349,6 @@ class SalesforceBridge extends Bridge {
   protected setSoftphoneWidth(widthInPixels: number) {
     return new Promise<void>((resolve, reject) => {
       if (this.isLightning) {
-        // sforce.opencti.setSoftphonePanelWidth({
-        //   widthPX: widthInPixels,
-        //   callback: response => {
-        //     if (response.errors) {
-        //       reject(response.errors);
-        //     } else {
-        //       resolve();
-        //     }
-        //   }
-        // });
       } else {
         sforce.interaction.cti.setSoftphoneWidth(widthInPixels, response => {
           if (response.error) {
@@ -415,7 +409,7 @@ class SalesforceBridge extends Bridge {
   }
   @bind
   protected createNewEntity(params: IParams) {
-    let URL = '';
+    let  URL = '';
     if (this.isLightning) {
       const screenPopObject: IScreenPopObject = {
         type: sforce.opencti.SCREENPOP_TYPE.NEW_RECORD_MODAL,
@@ -437,12 +431,11 @@ class SalesforceBridge extends Bridge {
       sforce.opencti.screenPop(screenPopObject);
     } else {
       if (params.entityName === 'Case') {
+        URL = '/500/e?';
       } else if (params.entityName === 'Lead') {
-        URL = '/00Q/e';
-      } else if (params.entityName === 'Account') {
-          URL = '/001/e';
-      } else if (params.entityName === 'Contact') {
-          URL = '/003/e';
+        URL = '/00Q/e?';
+      } else if (params.entityName === 'Opportunity') {
+        URL = '/006/e';
       }
       sforce.interaction.screenPop(URL, true, function(result)  {
         console.log(result);

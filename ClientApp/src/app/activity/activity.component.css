@@ -190,4 +190,8 @@ body {
   margin-left: 5px;
 }
 
-
+.ViewResizeImage {
+  width: 20px;
+  height: 20px;
+  float: right;
+}
