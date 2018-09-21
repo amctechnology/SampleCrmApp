@@ -322,7 +322,7 @@ class SalesforceBridge extends Bridge {
   protected setSoftphoneHeight(heightInPixels: number) {
     return new Promise<void>((resolve, reject) => {
       // Salesforce allows a MAX of 700 pixels height
-      let AdjustedheightInPixels = ((heightInPixels > 700)? 700 : heightInPixels);
+      const AdjustedheightInPixels = ((heightInPixels > 700) ? 700 : heightInPixels);
       if (this.isLightning) {
         sforce.opencti.setSoftphonePanelHeight({
           heightPX: AdjustedheightInPixels,
