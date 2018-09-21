@@ -2,7 +2,6 @@ import { Component, OnInit, Output, EventEmitter } from '@angular/core';
 import * as api from '@amc/application-api';
 import { Application, BridgeEventsService } from '@amc/applicationangularframework';
 import { bind } from 'bind-decorator';
-import { search, RecordItem, SearchRecords } from '@amc/channel-api';
 import { InteractionDirectionTypes } from '@amc/application-api';
 import { Subject } from 'rxjs/Subject';
 import { IActivity } from './../Model/IActivity';
@@ -247,7 +246,6 @@ export class AMCSalesforceHomeComponent extends Application implements OnInit {
    */
   protected async onInteraction(interaction: api.IInteraction): Promise<api.SearchRecords> {
     try {
-      this.logger.logVerbose('onInteraction START: ' + interaction);
       const interactionId = interaction.interactionId;
       const scenarioIdInt = interaction.scenarioId;
       let isNewScenarioId = false;
@@ -300,7 +298,6 @@ export class AMCSalesforceHomeComponent extends Application implements OnInit {
       this.logger.logError(msg);
       throw msg;
     }
-    this.logger.logVerbose('onInteraction END');
     return;
   }
 
