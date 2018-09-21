@@ -7,6 +7,7 @@ import { Subject } from 'rxjs/Subject';
 import { IActivity } from './../Model/IActivity';
 import { IActivityDetails } from './../Model/IActivityDetails';
 import { IParams } from './../Model/IParams';
+import { LoggerService } from './../logger.service';
 @Component({
   selector: 'app-amcsalesforcehome',
   templateUrl: './amcsalesforcehome.component.html',
@@ -25,7 +26,7 @@ export class AMCSalesforceHomeComponent extends Application implements OnInit {
   searchRecordList: Array<api.IRecordItem>;
   singleResult: boolean;
   result: boolean;
-  constructor() {
+  constructor(private loggerService: LoggerService) {
     super();
     this.interaction = false;
     this.result = false;

@@ -7,7 +7,7 @@ import { OnInit } from '@angular/core';
 import { IActivity } from './../Model/IActivity';
 import { IActivityDetails } from './../Model/IActivityDetails';
 import { IParams } from './../Model/IParams';
-
+import { LoggerService } from './../logger.service';
 declare var sforce: any;
 
 class SalesforceBridge extends Bridge {
@@ -16,8 +16,9 @@ class SalesforceBridge extends Bridge {
   activity: IActivity = null;
   layoutObjectList: string[];
 
-  constructor() {
+  constructor(private loggerService: LoggerService) {
     super();
+    this.loggerService.logger.logDebug('start:constructor of the bridge');
     this.currentOnFocusEvent = null;
     this.appName = 'Salesforce';
     this.layoutObjectList = [];
@@ -32,10 +33,13 @@ class SalesforceBridge extends Bridge {
     this.eventService.subscribe('createNewEntity', this.createNewEntity);
 
     this.eventService.subscribe('screenPopSelectedSearchResult', this.tryScreenpop);
+    this.loggerService.logger.logDebug('completed:constructor of the bridge');
 
   }
 
   async afterScriptsLoad(): Promise<any> {
+    this.loggerService.logger.logDebug('start:constructor of the bridge');
+
     await super.afterScriptsLoad();
     if (this.isLightning) {
       sforce.opencti.onClickToDial({ listener: this.clickToDialListener });
@@ -48,6 +52,11 @@ class SalesforceBridge extends Bridge {
       sforce.interaction.onFocus(this.onFocusListener);
       sforce.interaction.cti.getSoftphoneLayout(this.buildLayoutObjectList);
     }
+    if (this.isLightning) {
+      this.loggerService.logger.logInformation('App running in lightning');
+    } else {
+      this.loggerService.logger.logInformation('App running in classic');
+    }
   }
   @bind
   protected buildLayoutObjectList(result) {
@@ -56,6 +65,7 @@ class SalesforceBridge extends Bridge {
     } else {
       this.layoutObjectList = Object.keys(JSON.parse(result.result).Inbound.objects);
     }
+    this.loggerService.logger.logInformation('Sofphone layout: ' + this.layoutObjectList);
   }
   @bind
   isToolbarVisible() {
@@ -99,7 +109,7 @@ class SalesforceBridge extends Bridge {
   async onFocusListener(event) {
     if (event !== this.currentOnFocusEvent) {
       this.currentOnFocusEvent = event;
-
+      this.loggerService.logger.logDebug('onFocus event: ' + JSON.stringify(event));
       const entity = {
         objectType: '',
         displayName: '',
@@ -129,6 +139,7 @@ class SalesforceBridge extends Bridge {
       }
       if (this.layoutObjectList.includes(entity.objectType)) {
         this.eventService.sendEvent('setActivityDetails', entity);
+        this.loggerService.logger.logDebug('onFocus event sent to home');
       }
     }
   }
@@ -445,7 +456,8 @@ class SalesforceBridge extends Bridge {
 
 }
 
-const bridge = new SalesforceBridge();
+const logservice = new LoggerService();
+const bridge = new SalesforceBridge(logservice);
 
 interface IScreenPopObject {
   type: string;

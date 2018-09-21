@@ -5,7 +5,7 @@ import { Subject } from 'rxjs/Subject';
 import { IActivity } from './../Model/IActivity';
 import { IActivityDetails } from './../Model/IActivityDetails';
 import { IParams } from './../Model/IParams';
-
+import { LoggerService } from './../logger.service';
 @Component({
   selector: 'app-activity',
   templateUrl: './activity.component.html',
@@ -20,13 +20,13 @@ export class ActivityComponent implements OnInit {
   @Input() autoSave: Subject<void>;
   @Input() subject: string;
   @Output() ActivitySave: EventEmitter<IActivity> = new EventEmitter<IActivity>();
-
+  maximizeActivity: boolean;
   curWho: IActivityDetails;
   curWhat: IActivityDetails;
   callNotes: string;
   quickCommentList: Array<string>;
-  maximizeActivity: boolean;
-  constructor() {
+
+  constructor(private loggerService: LoggerService) {
     this.InitializeQuickComments();
     this.curWhat = null;
     this.curWho = null;

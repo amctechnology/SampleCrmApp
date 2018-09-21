@@ -1,5 +1,5 @@
 import { Component, OnInit, EventEmitter, Output } from '@angular/core';
-
+import { LoggerService } from './../logger.service';
 @Component({
   selector: 'app-create',
   templateUrl: './create.component.html',
@@ -8,7 +8,7 @@ import { Component, OnInit, EventEmitter, Output } from '@angular/core';
 export class CreateComponent implements OnInit {
   @Output() CreateNewEntity: EventEmitter<any> = new EventEmitter<any>();
   maximizeCreate: boolean;
-  constructor() {
+  constructor(private loggerService: LoggerService) {
     this.maximizeCreate = true;
   }
   ngOnInit() {
