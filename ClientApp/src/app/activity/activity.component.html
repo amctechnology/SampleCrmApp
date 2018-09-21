@@ -4,31 +4,31 @@
           <b>Activity Information</b>
       </label>
   </div>
-  <div id="ViewDivId6-amcCallActivityId" class="callBody">
-      <div id="ProgressDivId6-amcCallActivityId" style="top: 0; left: 0; position: absolute; z-index: 1; background: white; opacity: 0.7; filter: alpha(opacity=70); width: 100%; height: 100%; display: none; ">
-          <input id="ProgressImageDivId6-amcCallActivityId" style="position: absolute; top: 30%; left: 40%;" title="" type="image" src="/assets/images/view_progress.gif">
+  <div class="callBody">
+      <div style="top: 0; left: 0; position: absolute; z-index: 1; background: white; opacity: 0.7; filter: alpha(opacity=70); width: 100%; height: 100%; display: none; ">
+          <input style="position: absolute; top: 30%; left: 40%;" title="" type="image" src="/assets/images/view_progress.gif">
       </div>
-      <div id="DetailViewDivId6-amcCallActivityId" style="position: relative; z-index: 0">
-          <form id="current-call-activity-form">
+      <div style="position: relative; z-index: 0">
+          <form >
 
                   <div class="editor displayDiv">
                       <label class="displayLabels" for="DummyEmptyString" title="Call From">Name</label>
-                      <select id = 'nameSelect' class="dropDownListStyle displayData" data-resetperactivity="false" (change) = 'onNameSelectChange($event)' >
-                          <option *ngFor="let who of whoList"  id="{{who.objectId}}" value = "{{who.objectId}}">{{parseWhoObject(who)}}</option>
+                      <select class="dropDownListStyle displayData" data-resetperactivity="false" (change) = 'onNameSelectChange($event)' >
+                          <option *ngFor="let who of whoList" value = "{{who.objectId}}">{{parseWhoObject(who)}}</option>
                         </select>
                   </div>
 
               <div class="editor displayDiv">
-                  <label class="displayLabels" for="DummyEmptyString" id="LabelCallActivityRelatedToElementID" title="Regarding" style="display: inline;">Related To</label>
-                  <select id = "relateToSelect" class="dropDownListStyle displayData" (change) = 'onRelatedToChange($event)' data-resetperactivity="false" >
-                    <option *ngFor="let what of whatList" id="{{what.objectId}}" value = "{{what.objectId}}" style="background-image:url(/assets/images/Create_Case.png );" >{{parseWhatObject(what)}}</option>
+                  <label class="displayLabels" for="DummyEmptyString" title="Regarding" style="display: inline;">Related To</label>
+                  <select class="dropDownListStyle displayData" (change) = 'onRelatedToChange($event)' data-resetperactivity="false" >
+                    <option *ngFor="let what of whatList" value = "{{what.objectId}}" style="background-image:url(/assets/images/Create_Case.png );" >{{parseWhatObject(what)}}</option>
                   </select>
               </div>
 
 
               <div class="editor displayDiv">
                   <label class="displayLabels" for="DummyEmptyString" title="Subject">Subject</label>
-                  <input id = "subject" class="activitySubjectTextBoxStyle displayData" (change) = 'onSubjectChange($event)'data-activityfield="Subject" data-resetperactivity="false" title="{{subject}}" type="text" value="{{subject}}">
+                  <input class="activitySubjectTextBoxStyle displayData" (change) = 'onSubjectChange($event)'data-activityfield="Subject" data-resetperactivity="false" title="{{subject}}" type="text" value="{{subject}}">
               </div>
 
 
@@ -36,28 +36,28 @@
               <div class="editor displayDiv">
                   <div class = "callNotesContainer">
                       <div style="height:80px">
-                          <textarea id = "callNotes" value = "{{callNotes}}" placeholder = "Click to add a comment" class="activityCommentsTextBoxStyle" (change) = 'onCallNotesChange($event)' cols="20" data-activityfield="Description" data-resetperactivity="true" id="CallActivityCommentsElementID" name="DummyEmptyString"  rows="2" style="width:100%;height:100%;resize: none" title=""></textarea>
+                          <textarea value = "{{callNotes}}" placeholder = "Click to add a comment" class="activityCommentsTextBoxStyle" (change) = 'onCallNotesChange($event)' cols="20" data-activityfield="Description" data-resetperactivity="true" name="DummyEmptyString"  rows="2" style="width:100%;height:100%;resize: none" title=""></textarea>
 
                       </div>
                       <div class = "notesBottonBorder" >
                           <input *ngFor="let quickComment of quickCommentList; let i = index;" class = "quickNotesBotton" type="button"  value="{{i+1}}" (click)="loadQuickComment(i)" title="{{quickComment}}">
-                          <input id="call-activity-submit-button" class = "submitButton" type="button" value="Submit" (click)="activitySave(false)">
+                          <input class = "submitButton" type="button" value="Submit" (click)="activitySave(false)">
                       </div>
                   </div>
 
               </div>
 
-              <input id="call-activity-disposition-reason-code-textual" type="hidden" data-activityfield="CallDispositionTextual" data-resetperactivity="false">
+              <input type="hidden" data-activityfield="CallDispositionTextual" data-resetperactivity="false">
 
-              <input id="call-activity-disposition-reason-code-numeric" type="hidden" data-activityfield="CallDispositionNumeric" data-resetperactivity="false">
+              <input type="hidden" data-activityfield="CallDispositionNumeric" data-resetperactivity="false">
 
-              <input id="call-activity-preview-disposition-reason-code-numeric" type="hidden" data-activityfield="CallPreviewDispositionNumeric" data-resetperactivity="false">
+              <input type="hidden" data-activityfield="CallPreviewDispositionNumeric" data-resetperactivity="false">
 
-              <input id="call-activity-preview-disposition-reason-code-textual" type="hidden" data-activityfield="CallPreviewDispositionTextual" data-resetperactivity="false">
+              <input  type="hidden" data-activityfield="CallPreviewDispositionTextual" data-resetperactivity="false">
 
-              <input id="call-activity-preview-direct-disposition-reason-code-numeric" type="hidden" data-activityfield="CallPreviewDirectDispositionNumeric" data-resetperactivity="false">
+              <input  type="hidden" data-activityfield="CallPreviewDirectDispositionNumeric" data-resetperactivity="false">
 
-              <input id="call-activity-preview-direct-disposition-reason-code-textual" type="hidden" data-activityfield="CallPreviewDirectDispositionTextual" data-resetperactivity="false">
+              <input type="hidden" data-activityfield="CallPreviewDirectDispositionTextual" data-resetperactivity="false">
 
 
           </form>
