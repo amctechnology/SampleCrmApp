@@ -27,7 +27,7 @@ export class AMCSalesforceHomeComponent extends Application implements OnInit {
   searchRecordList: Array<api.IRecordItem>;
   singleResult: boolean;
   result: boolean;
-  constructor() {
+  constructor(private loggerService: LoggerService) {
     super();
     this.interaction = false;
     this.result = false;

@@ -17,7 +17,7 @@ export class SearchInformationComponent implements OnInit {
   }
   ngOnInit() {
   }
- protected resizeSearchInformation(size){
+ protected resizeSearchInformation(size) {
   if (size === 'collapse') {
     this.maximizeSearchInformation = false;
   } else {

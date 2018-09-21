@@ -1,5 +1,5 @@
 import { Component, AfterViewChecked, OnInit, ElementRef } from '@angular/core';
-import * as channelApi from '@amc/channel-api/';
+import * as applicationAPI from '@amc/application-api';
 @Component({
   selector: 'app-root',
   templateUrl: './app.component.html',
@@ -24,7 +24,7 @@ export class AppComponent implements OnInit, AfterViewChecked {
     const newHeight = this.getHeight();
     if (newHeight !== this.height) {
       this.height = newHeight;
-      channelApi.setSoftphoneHeight(this.height);
+      applicationAPI.setSoftphoneHeight(this.height);
     }
   }
 

@@ -8,7 +8,7 @@ import { LoggerService } from './../logger.service';
 export class CreateComponent implements OnInit {
   @Output() CreateNewEntity: EventEmitter<any> = new EventEmitter<any>();
   maximizeCreate: boolean;
-  constructor() {
+  constructor(private loggerService: LoggerService) {
     this.maximizeCreate = true;
   }
   ngOnInit() {

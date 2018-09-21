@@ -16,8 +16,9 @@ class SalesforceBridge extends Bridge {
   activity: IActivity = null;
   layoutObjectList: Array<string>;
 
-  constructor() {
+  constructor(private loggerService: LoggerService) {
     super();
+    this.loggerService.logger.logDebug('start:constructor of the bridge');
     this.currentEvent = null;
     this.appName = 'Salesforce';
     this.layoutObjectList = [];
@@ -32,10 +33,13 @@ class SalesforceBridge extends Bridge {
     this.eventService.subscribe('createNewEntity', this.createNewEntity);
 
     this.eventService.subscribe('screenPopSelectedSearchResult', this. tryScreenpop);
+    this.loggerService.logger.logDebug('completed:constructor of the bridge');
 
   }
 
   async afterScriptsLoad(): Promise<any> {
+    this.loggerService.logger.logDebug('start:constructor of the bridge');
+
     await super.afterScriptsLoad();
     if (this.isLightning) {
       sforce.opencti.onClickToDial({ listener: this.clickToDialListener });
@@ -48,6 +52,11 @@ class SalesforceBridge extends Bridge {
       sforce.interaction.onFocus(this.onFocusListener);
       sforce.interaction.cti.getSoftphoneLayout(this.buildLayoutObjectList);
     }
+    if (this.isLightning) {
+      this.loggerService.logger.logInformation('App running in lightning');
+    } else {
+      this.loggerService.logger.logInformation('App running in classic');
+    }
   }
   @bind
   protected buildLayoutObjectList(result)  {
@@ -56,6 +65,7 @@ class SalesforceBridge extends Bridge {
     } else {
       this.layoutObjectList = Object.keys(JSON.parse(result.result).Inbound.objects);
     }
+    this.loggerService.logger.logInformation('Sofphone layout: ' + this.layoutObjectList);
   }
   @bind
   isToolbarVisible() {
@@ -99,37 +109,37 @@ class SalesforceBridge extends Bridge {
   async onFocusListener(event) {
     if ( event !== this.currentEvent) {
       this.currentEvent = event;
-
-    const entity = {
-      objectType: '',
-      displayName: '',
-      objectName: '',
-      objectId: '',
-      url: ''
-    };
-    if (this.isLightning) {
-      entity.objectType = event.objectType;
-      entity.displayName = event.objectType;
-      entity.objectId = event.recordId;
-      entity.objectName = event.recordName;
-      entity.url = event.url;
-      if ( entity.objectId === '') {
-        return 1;
+      this.loggerService.logger.logDebug('Sofphone layout: ' + this.layoutObjectList);
+      const entity = {
+        objectType: '',
+        displayName: '',
+        objectName: '',
+        objectId: '',
+        url: ''
+      };
+      if (this.isLightning) {
+        entity.objectType = event.objectType;
+        entity.displayName = event.objectType;
+        entity.objectId = event.recordId;
+        entity.objectName = event.recordName;
+        entity.url = event.url;
+        if ( entity.objectId === '') {
+          return 1;
+        }
+      } else {
+        const temp = JSON.parse(event.result);
+        entity.objectType = temp.object;
+        entity.displayName = temp.displayName;
+        entity.objectId = temp.objectId;
+        entity.objectName = temp.objectName;
+        entity.url = temp.url;
+        if ( entity.objectId === '') {
+          return 1;
+        }
       }
-    } else {
-      const temp = JSON.parse(event.result);
-      entity.objectType = temp.object;
-      entity.displayName = temp.displayName;
-      entity.objectId = temp.objectId;
-      entity.objectName = temp.objectName;
-      entity.url = temp.url;
-      if ( entity.objectId === '') {
-        return 1;
+      if (this.layoutObjectList.includes(entity.objectType)) {
+        this.eventService.sendEvent('setActivityDetails', entity);
       }
-    }
-    if (this.layoutObjectList.includes(entity.objectType)) {
-      this.eventService.sendEvent('setActivityDetails', entity);
-    }
     }
   }
 
