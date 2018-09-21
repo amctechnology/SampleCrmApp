@@ -2,20 +2,37 @@ import { Bridge, BridgeEventsService } from '@amc/applicationangularframework';
 import { InteractionDirectionTypes } from '@amc/application-api';
 import { bind } from 'bind-decorator';
 import { safeJSONParse } from '../utils';
+import { Subject } from 'rxjs/Subject';
+import { OnInit } from '@angular/core';
+import { IActivity } from './../Model/IActivity';
+import { IActivityDetails } from './../Model/IActivityDetails';
+import { IParams } from './../Model/IParams';
 
 declare var sforce: any;
 
 class SalesforceBridge extends Bridge {
   private isLightning = false;
+  private currentEvent: any;
+  activity: IActivity = null;
+  layoutObjectList: Array<string>;
 
   constructor() {
     super();
+    this.currentEvent = null;
     this.appName = 'Salesforce';
+    this.layoutObjectList = [];
     this.VerifyMode();
     this.initialize();
     this.eventService.subscribe('getUserInfo', this.getUserInfo);
     this.eventService.subscribe('getSearchLayout', this.getSearchLayout);
     this.eventService.subscribe('isToolbarVisible', this.isToolbarVisible);
+    // subscribe for activities to be saved
+    this.eventService.subscribe('saveActivity', this.saveActivity);
+    // create new entity
+    this.eventService.subscribe('createNewEntity', this.createNewEntity);
+
+    this.eventService.subscribe('screenPopSelectedSearchResult', this. tryScreenpop);
+
   }
 
   async afterScriptsLoad(): Promise<any> {
@@ -23,12 +40,19 @@ class SalesforceBridge extends Bridge {
     if (this.isLightning) {
       sforce.opencti.onClickToDial({ listener: this.clickToDialListener });
       sforce.opencti.onNavigationChange({ listener: this.onFocusListener });
+      sforce.opencti.getSoftphoneLayout({
+        callback: this.buildLayoutObjectList
+      });
     } else {
       sforce.interaction.cti.onClickToDial(this.clickToDialListener);
       sforce.interaction.onFocus(this.onFocusListener);
+      sforce.interaction.cti.getSoftphoneLayout(this.buildLayoutObjectList);
     }
   }
-
+  @bind
+  protected buildLayoutObjectList(result)  {
+    this.layoutObjectList = Object.keys(result.returnValue.Inbound.objects);
+  }
   @bind
   isToolbarVisible() {
     return new Promise((resolve, reject) => {
@@ -66,29 +90,43 @@ class SalesforceBridge extends Bridge {
       }
     });
   }
-
+// Use for registering changes on screen within CRM
   @bind
   async onFocusListener(event) {
-    let id = '';
+    if ( event !== this.currentEvent) {
+      this.currentEvent = event;
+
     const entity = {
-      object: '',
+      objectType: '',
       displayName: '',
-      Name: ''
+      objectName: '',
+      objectId: '',
+      url: ''
     };
     if (this.isLightning) {
-      entity.object = event.objectType;
+      entity.objectType = event.objectType;
       entity.displayName = event.objectType;
-      id = event.recordId;
-      entity.Name = event.recordName;
+      entity.objectId = event.recordId;
+      entity.objectName = event.recordName;
+      entity.url = event.url;
+      if ( entity.objectId === '') {
+        return 1;
+      }
     } else {
       const temp = JSON.parse(event.result);
-      entity.object = temp.object;
+      entity.objectType = temp.object;
       entity.displayName = temp.displayName;
-      id = temp.objectId;
-      entity.Name = temp.objectName;
+      entity.objectId = temp.objectId;
+      entity.objectName = temp.objectName;
+      entity.url = temp.url;
+      if ( entity.objectId === '') {
+        return 1;
+      }
     }
-
-    this.eventService.sendEvent('onFocus', { [id]: entity });
+    if (this.layoutObjectList.includes(entity.objectType)) {
+      this.eventService.sendEvent('setActivityDetails', entity);
+    }
+    }
   }
 
   @bind
@@ -156,6 +194,7 @@ class SalesforceBridge extends Bridge {
     }
   }
 
+  @bind
   private tryScreenpop(id: string): Promise<any> {
     return new Promise((resolve, reject) => {
       if (this.isLightning) {
@@ -202,7 +241,6 @@ class SalesforceBridge extends Bridge {
             screenPopObject.callType = sforce.opencti.CALL_TYPE.INTERNAL;
             break;
         }
-
         sforce.opencti.searchAndScreenPop(screenPopObject);
       } else {
         let salesforceCallDirection = '';
@@ -229,7 +267,13 @@ class SalesforceBridge extends Bridge {
       }
     });
   }
-
+  callback(response) {
+    if (response.success) {
+       console.log('API method call executed successfully! returnValue:', response.returnValue);
+    } else {
+       console.error('Something went wrong! Errors:', response.errors);
+    }
+   }
   private VerifyMode() {
     const fullUrl = document.location.href;
     const parameters = fullUrl.split('&');
@@ -273,9 +317,11 @@ class SalesforceBridge extends Bridge {
 
   protected setSoftphoneHeight(heightInPixels: number) {
     return new Promise<void>((resolve, reject) => {
+      // Salesforce allows a MAX of 700 pixels height
+      const AdjustedheightInPixels = ((heightInPixels > 700) ? 700 : heightInPixels);
       if (this.isLightning) {
         sforce.opencti.setSoftphonePanelHeight({
-          heightPX: heightInPixels,
+          heightPX: AdjustedheightInPixels,
           callback: response => {
             if (response.errors) {
               reject(response.errors);
@@ -285,7 +331,7 @@ class SalesforceBridge extends Bridge {
           }
         });
       } else {
-        sforce.interaction.cti.setSoftphoneHeight(heightInPixels, response => {
+        sforce.interaction.cti.setSoftphoneHeight(AdjustedheightInPixels, response => {
           if (response.error) {
             reject(response.error);
           } else {
@@ -299,16 +345,16 @@ class SalesforceBridge extends Bridge {
   protected setSoftphoneWidth(widthInPixels: number) {
     return new Promise<void>((resolve, reject) => {
       if (this.isLightning) {
-        sforce.opencti.setSoftphonePanelWidth({
-          widthPX: widthInPixels,
-          callback: response => {
-            if (response.errors) {
-              reject(response.errors);
-            } else {
-              resolve();
-            }
-          }
-        });
+        // sforce.opencti.setSoftphonePanelWidth({
+        //   widthPX: widthInPixels,
+        //   callback: response => {
+        //     if (response.errors) {
+        //       reject(response.errors);
+        //     } else {
+        //       resolve();
+        //     }
+        //   }
+        // });
       } else {
         sforce.interaction.cti.setSoftphoneWidth(widthInPixels, response => {
           if (response.error) {
@@ -320,7 +366,100 @@ class SalesforceBridge extends Bridge {
       }
     });
   }
+  @bind
+  protected saveActivity(activity: IActivity): Promise<any> {
+    if (this.isLightning) {
+      return new Promise((resolve, reject) => {
+        const activityObject: object = {
+          value: {
+            entityApiName: 'Task',
+            WhoId: activity.WhoObject.objectId,
+            WhatId: activity.WhatObject.objectId,
+            CallType: activity.CallType,
+            CallDurationInSeconds: activity.CallDurationInSeconds,
+            Subject: activity.Subject,
+            Description: activity.Description,
+            Status: activity.Status,
+            ActivityDate: activity.ActivityDate
+          },
+          callback: result => {
+            try {
+              activity.ActivityId = result.returnValue.recordId;
+            } catch (e) {
+              console.log('Save could not complete: ' + JSON.stringify(result.errors['0'].details.fieldErrors));
+            }
+            resolve(this.eventService.sendEvent('saveActivityResponse', activity));
+          }
+        };
+        if (activity.ActivityId) {
+          activityObject['value']['Id'] = activity.ActivityId;
+        }
+        sforce.opencti.saveLog(activityObject);
+      });
+    }
+    return new Promise((resolve, reject) => {
+      let activityString = '';
+      activityString = 'WhoId=' + activity.WhoObject.objectId + '&WhatId=' + activity.WhatObject.objectId + '&CallType=' +
+      activity.CallType + '&CallDurationInSeconds=' + activity.CallDurationInSeconds + '&Subject=' +
+      activity.Subject + '&Description=' + activity.Description + '&Status=' + activity.Status +
+      '&ActivityDate=' + activity.ActivityDate;
+      if (activity.ActivityId) {
+        activityString = activityString + '&Id=' + activity.ActivityId;
+      }
+      sforce.interaction.saveLog('Task', activityString, result => {
+        activity.ActivityId = result.result;
+        console.log('Activity ID = ' + result.result);
+        resolve(this.eventService.sendEvent('saveActivityResponse', activity));
+      });
+    });
+  }
+  @bind
+  protected createNewEntity(params: IParams) {
+    let URL = '';
+    if (this.isLightning) {
+      const screenPopObject: IScreenPopObject = {
+        type: sforce.opencti.SCREENPOP_TYPE.NEW_RECORD_MODAL,
+        params: {
+          entityName: params.entityName,
+          defaultFieldValues: {}
+        },
+        callback: result => {
+          console.log(result);
+        }
+      };
+      if (params.entityName === 'Case') {
+        screenPopObject.params.defaultFieldValues = params.caseFields;
+      } else if ( params.entityName === 'Opportunity') {
+        screenPopObject.params.defaultFieldValues = params.opportunityFields;
+      } else if ( params.entityName === 'Lead') {
+          screenPopObject.params.defaultFieldValues = params.leadFields;
+      }
+      sforce.opencti.screenPop(screenPopObject);
+    } else {
+      if (params.entityName === 'Case') {
+      } else if (params.entityName === 'Lead') {
+        URL = '/00Q/e';
+      } else if (params.entityName === 'Account') {
+          URL = '/001/e';
+      } else if (params.entityName === 'Contact') {
+          URL = '/003/e';
+      }
+      sforce.interaction.screenPop(URL, true, function(result)  {
+        console.log(result);
+      });
+   }
+  }
 
 }
 
 const bridge = new SalesforceBridge();
+
+interface IScreenPopObject {
+  type: string;
+  params: {
+          entityName: string;
+          defaultFieldValues?: Object;
+        };
+  callback: any;
+}
+

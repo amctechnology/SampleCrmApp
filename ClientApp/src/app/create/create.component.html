@@ -1,0 +1,25 @@
+
+<div  class="callDisplay" style="display: grid;" >
+  <div class="editor callHeader">
+      <label style="margin-left: 10px">
+          <b>Create New</b>
+      </label>
+    </div>
+  <div  class="callBody">
+    <div class = "container">
+          <div class = "createNewLabel" (click) = 'createNewEntity("Case")' title="Case">
+          <img class="createEntityImages"  src="/assets/images/Create_Case2.png" >
+          <label for="Case"  >Case</label>
+        </div>
+        <div class = "createNewLabel" (click) = 'createNewEntity("Lead")' title="Lead">
+          <img class="createEntityImages" title="Lead" src="/assets/images/Create_Lead2.png" (click) = 'createNewEntity("Lead")'>
+          <label for="Lead" title="Lead" >Lead</label>
+        </div>
+        <div class = "createNewLabel" (click) = 'createNewEntity("Opportunity")' title="Opportunity">
+          <img class="createEntityImages"  src="/assets/images/Create_Opportunity2.png" >
+          <label  for="Opportunity"  >Opportunity</label>
+        </div>
+    </div>
+  </div>
+</div>
+

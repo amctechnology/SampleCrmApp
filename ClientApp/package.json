@@ -16,6 +16,7 @@
   "private": true,
   "dependencies": {
     "@amc/applicationangularframework": "^1.0.23",
+    "@amc/channel-api": "0.0.19",
     "@angular/animations": "^5.2.0",
     "@angular/common": "^5.2.0",
     "@angular/compiler": "^5.2.0",

@@ -1,0 +1,56 @@
+.callHeader {
+  /* border: 1px solid #939598 !important; */
+  background-color: #F4F5FB !important;
+  width: 100% !important;
+  margin-top: 0px !important;
+}
+
+.editor {
+  font-size: 0.9em;
+  width: 70%;
+  text-align: left;
+  margin: 4px 5% 0 0px;
+  font-family: Arial;
+  white-space: nowrap;
+  /*overflow: hidden;*/
+  text-overflow: ellipsis;
+  border: 0;
+  padding-top: 2px;
+  box-sizing: border-box;
+  -webkit-box-sizing: border-box;
+  -moz-box-sizing: border-box;
+}
+
+.createEntityImages {
+  width: 30px;
+  height: 25px;
+  margin-bottom: 8px;
+  margin-top: 2px;
+  cursor: pointer;
+  padding-left:5px;
+}
+
+.createNewLabel
+ {
+  display: inline-block;
+ }
+
+
+ .container {
+  padding-right: 0px;
+  padding-left: 0px;
+  font-size: 10px;
+  text-align: center;
+ }
+
+ .callBody {
+  /* border: 1px solid #939598; */
+  border-top: 0;
+
+}
+
+.callDisplay {
+  display:grid;
+  background-color: #ffffff;
+}
+
