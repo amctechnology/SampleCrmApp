@@ -32,8 +32,8 @@
             "env": {
                 "ASPNETCORE_ENVIRONMENT": "Development",
                 "USE_AUTH": "true",
-                "AUTH_PROVIDER_URL": "https://auth.cloud.contactcanvas.com",
-                "AUTH_COOKIE_DOMAIN": "cloud.contactcanvas.com",
+                "AUTH_PROVIDER_URL": "https://api-dev.contactcanvas.com",
+                "AUTH_COOKIE_DOMAIN": "contactcanvas.com",
             },
             "sourceFileMap": {
                 "/Views": "${workspaceFolder}/Views"

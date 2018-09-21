@@ -5,19 +5,29 @@ import { HttpClientModule } from '@angular/common/http';
 import { RouterModule } from '@angular/router';
 
 import { AppComponent } from './app.component';
-import { HomeComponent } from './home/home.component';
+import { AMCSalesforceHomeComponent } from './amcsalesforcehome/amcsalesforcehome.component';
+import { ActivityComponent } from './activity/activity.component';
+import { CreateComponent } from './create/create.component';
+import { RecentComponent } from './recent/recent.component';
+import { SearchInformationComponent } from './search-information/search-information.component';
+
 
 @NgModule({
   declarations: [
     AppComponent,
-    HomeComponent
+    AMCSalesforceHomeComponent,
+    ActivityComponent,
+    CreateComponent,
+    RecentComponent,
+    SearchInformationComponent,
+
   ],
   imports: [
     BrowserModule.withServerTransition({ appId: 'ng-cli-universal' }),
     HttpClientModule,
     FormsModule,
     RouterModule.forRoot([
-      { path: '', component: HomeComponent, pathMatch: 'full' }
+      { path: '', component: AMCSalesforceHomeComponent, pathMatch: 'full' }
     ])
   ],
   bootstrap: [AppComponent]

@@ -34,7 +34,7 @@ namespace Salesforce
                        options.Listen(IPAddress.Loopback, 5006);
                        options.Listen(IPAddress.Loopback, 5007, listenOptions =>
                        {
-                           listenOptions.UseHttps(@"Certificates\localhost.pfx", "password");
+                           listenOptions.UseHttps(@"C:\tmp\localhost.pfx", "password");
                        });
                    }
                })
