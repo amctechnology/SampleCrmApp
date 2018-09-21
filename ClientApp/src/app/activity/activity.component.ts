@@ -26,7 +26,7 @@ export class ActivityComponent implements OnInit {
   curWhat: IActivityDetails;
   callNotes: string;
   quickCommentList: Array<string>;
-
+  maximizeActivity: boolean;
   constructor() {
     this.InitializeQuickComments();
     this.curWhat = null;
@@ -34,6 +34,7 @@ export class ActivityComponent implements OnInit {
     this.subject = '';
     this. callNotes = '';
     this.ActivityMap = new Map();
+    this.maximizeActivity = true;
   }
 
   ngOnInit() {
@@ -49,6 +50,13 @@ export class ActivityComponent implements OnInit {
     console.log('interaction ' + interactionList.srcElement[0].id );
   }
 
+  protected resizeActivity(size) {
+    if (size === 'collapse') {
+      this.maximizeActivity = false;
+    } else {
+      this.maximizeActivity = true;
+    }
+  }
   protected activitySave(clear_activity_fields) {
     if (this.currentInteraction) {
     // tslint:disable-next-line:prefer-const

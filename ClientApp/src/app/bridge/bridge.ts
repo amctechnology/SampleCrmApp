@@ -51,7 +51,11 @@ class SalesforceBridge extends Bridge {
   }
   @bind
   protected buildLayoutObjectList(result)  {
-    this.layoutObjectList = Object.keys(result.returnValue.Inbound.objects);
+    if (this.isLightning) {
+      this.layoutObjectList = Object.keys(result.returnValue.Inbound.objects);
+    } else {
+      this.layoutObjectList = Object.keys(JSON.parse(result.result).Inbound.objects);
+    }
   }
   @bind
   isToolbarVisible() {
@@ -436,13 +440,13 @@ class SalesforceBridge extends Bridge {
       }
       sforce.opencti.screenPop(screenPopObject);
     } else {
+      let URL = '';
       if (params.entityName === 'Case') {
+        URL = '/500/e?';
       } else if (params.entityName === 'Lead') {
-        URL = '/00Q/e';
-      } else if (params.entityName === 'Account') {
-          URL = '/001/e';
-      } else if (params.entityName === 'Contact') {
-          URL = '/003/e';
+        URL = '/00Q/e?';
+      } else if (params.entityName === 'Opportunity') {
+          URL = '/006/e';
       }
       sforce.interaction.screenPop(URL, true, function(result)  {
         console.log(result);
