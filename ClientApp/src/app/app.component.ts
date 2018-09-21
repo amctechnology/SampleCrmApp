@@ -1,5 +1,5 @@
 import { Component, AfterViewChecked, OnInit, ElementRef } from '@angular/core';
-import * as channelApi from '@amc/channel-api/';
+import * as applicationAPI from 
 @Component({
   selector: 'app-root',
   templateUrl: './app.component.html',
@@ -28,7 +28,7 @@ export class AppComponent implements OnInit, AfterViewChecked {
     }
   }
 
-    private getHeight(): number {
-      return this.el.nativeElement.children[0].scrollHeight + 5;
-    }
+  private getHeight(): number {
+    return this.el.nativeElement.children[0].scrollHeight + 5;
+  }
 }
