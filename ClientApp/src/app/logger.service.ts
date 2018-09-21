@@ -1,5 +1,5 @@
 import { Injectable, isDevMode } from '@angular/core';
-import { Logger, LogSource } from '@amc/global-api';
+import { Logger, LogSource } from '@amc/application-api';
 import { environment } from '../environments/environment';
 
 @Injectable()

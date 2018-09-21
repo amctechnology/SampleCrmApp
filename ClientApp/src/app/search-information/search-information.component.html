@@ -1,17 +1,27 @@
-<div id="SearchInformation" class="callDisplay" style="display: grid;" >
-    <div class="editor callHeader">
-        <label style="margin-left: 10px">
-            <b>Caller Information</b>
-          </label>
-        </div>
-        <div id="ViewDivId-CreateNewSection" class="callBody">
-                <div *ngIf="!singleResult">
-                <select id = 'searchRecordSelect' class="searchResultSelect" data-resetperactivity="false" (change) = 'onSearchSelectChange($event)' >
-                    <option *ngFor="let searchRecord of searchRecordList"  id="{{searchRecord.id}}" value = "{{searchRecord.id}}">{{parseSearchRecordForName(searchRecord)}}</option>
-                  </select>
-                </div>
-                <div *ngIf="singleResult">
-                <input readonly class="searchResultInput" *ngFor="let searchRecord of searchRecordList"  id="{{searchRecord.id}}" value = "{{parseSearchRecordForName(searchRecord)}}">
-                </div>
-            </div>
-          </div>
+<div *ngIf = "maximizeSearchInformation" class="callDisplay" style="display: grid;">
+  <div class="editor callHeader">
+    <label style="margin-left: 10px">
+      <b>Caller Information</b>
+    </label>
+    <img class="ViewResizeImage" src="assets/images/section_expand.png" (click)="resizeSearchInformation('collapse')" title = "Collapse">
+  </div>
+  <div class="callBody">
+    <div *ngIf="!singleResult">
+      <select class="searchResultSelect" data-resetperactivity="false" (change)='onSearchSelectChange($event)'>
+        <option *ngFor="let searchRecord of searchRecordList" id="{{searchRecord.id}}" value="{{searchRecord.id}}">{{parseSearchRecordForName(searchRecord)}}</option>
+      </select>
+    </div>
+    <div *ngIf="singleResult">
+      <input readonly class="searchResultInput" *ngFor="let searchRecord of searchRecordList" id="{{searchRecord.id}}"
+        value="{{parseSearchRecordForName(searchRecord)}}">
+    </div>
+  </div>
+</div>
+
+<div *ngIf = "!maximizeSearchInformation" class="callDisplay" >
+  <div class="editor callHeader">
+      <label style="margin-left: 10px">
+          <b>Create New</b>
+      </label>
+      <img class="ViewResizeImage" src="assets/images/section_expand.png" (click)="resizeSearchInformation('expand')" title = "Expand">
+  </div>

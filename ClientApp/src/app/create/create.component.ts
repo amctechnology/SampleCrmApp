@@ -7,12 +7,21 @@ import { LoggerService } from './../logger.service';
 })
 export class CreateComponent implements OnInit {
   @Output() CreateNewEntity: EventEmitter<any> = new EventEmitter<any>();
-  constructor() { }
-
+  maximizeCreate: boolean;
+  constructor() {
+    this.maximizeCreate = true;
+  }
   ngOnInit() {
   }
-
   protected createNewEntity(type) {
     this.CreateNewEntity.emit(type);
   }
+  protected resizeCreate(size) {
+    if (size === 'collapse') {
+      this.maximizeCreate = false;
+    } else {
+      this.maximizeCreate = true;
+    }
+  }
+
 }
