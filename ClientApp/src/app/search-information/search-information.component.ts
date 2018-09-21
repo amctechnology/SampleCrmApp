@@ -1,6 +1,6 @@
 import { Component, OnInit, Input, Output, EventEmitter } from '@angular/core';
 import * as api from '@amc/application-api';
-
+import { LoggerService } from './../logger.service';
 @Component({
   selector: 'app-search-information',
   templateUrl: './search-information.component.html',

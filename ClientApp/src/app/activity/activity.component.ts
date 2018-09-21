@@ -6,7 +6,7 @@ import * as channelApi from '@amc/channel-api/';
 import { IActivity } from './../Model/IActivity';
 import { IActivityDetails } from './../Model/IActivityDetails';
 import { IParams } from './../Model/IParams';
-
+import { LoggerService } from './../logger.service';
 @Component({
   selector: 'app-activity',
   templateUrl: './activity.component.html',
@@ -27,7 +27,7 @@ export class ActivityComponent implements OnInit {
   callNotes: string;
   quickCommentList: Array<string>;
 
-  constructor() {
+  constructor(private loggerService: LoggerService) {
     this.InitializeQuickComments();
     this.curWhat = null;
     this.curWho = null;

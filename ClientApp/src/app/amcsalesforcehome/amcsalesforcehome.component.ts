@@ -8,6 +8,7 @@ import { Subject } from 'rxjs/Subject';
 import { IActivity } from './../Model/IActivity';
 import { IActivityDetails } from './../Model/IActivityDetails';
 import { IParams } from './../Model/IParams';
+import { LoggerService } from './../logger.service';
 @Component({
   selector: 'app-amcsalesforcehome',
   templateUrl: './amcsalesforcehome.component.html',

@@ -7,7 +7,7 @@ import { OnInit } from '@angular/core';
 import { IActivity } from './../Model/IActivity';
 import { IActivityDetails } from './../Model/IActivityDetails';
 import { IParams } from './../Model/IParams';
-
+import { LoggerService } from './../logger.service';
 declare var sforce: any;
 
 class SalesforceBridge extends Bridge {
@@ -51,6 +51,9 @@ class SalesforceBridge extends Bridge {
   }
   @bind
   protected buildLayoutObjectList(result)  {
+    if (!this.isLightning) {
+      result = JSON.parse(result.result);
+    }
     this.layoutObjectList = Object.keys(result.returnValue.Inbound.objects);
   }
   @bind
@@ -318,7 +321,8 @@ class SalesforceBridge extends Bridge {
   protected setSoftphoneHeight(heightInPixels: number) {
     return new Promise<void>((resolve, reject) => {
       // Salesforce allows a MAX of 700 pixels height
-      let AdjustedheightInPixels = ((heightInPixels > 700)? 700 : heightInPixels);
+      // tslint:disable-next-line:prefer-const
+      let AdjustedheightInPixels = ((heightInPixels > 700) ? 700 : heightInPixels);
       if (this.isLightning) {
         sforce.opencti.setSoftphonePanelHeight({
           heightPX: AdjustedheightInPixels,
