@@ -10,13 +10,20 @@ export class SearchInformationComponent implements OnInit {
   @Input() singleResult: boolean;
   @Input() searchRecordList: Array<api.IRecordItem>;
   @Output() screenPopSelectedSearchResult: EventEmitter<string> = new EventEmitter();
-
+  maximizeSearchInformation: boolean;
   imageLocation: string;
-  constructor() { }
-
+  constructor() {
+    this.maximizeSearchInformation = true;
+  }
   ngOnInit() {
   }
-
+ protected resizeSearchInformation(size) {
+  if (size === 'collapse') {
+    this.maximizeSearchInformation = false;
+  } else {
+    this.maximizeSearchInformation = true;
+  }
+}
   protected onSearchSelectChange(event) {
     this.screenPopSelectedSearchResult.emit(event.currentTarget.value);
   }
