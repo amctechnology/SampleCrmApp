@@ -75,16 +75,13 @@ export class ActivityComponent implements OnInit {
       activity.Subject = this.currentWhatObjectcurrentSubject;
       if (clearActivityFields) {
         activity.Status = 'Completed';
-        this.clearActivityDetails();
+        this.currentWhatObjectcurrentSubject = null;
+        this.currentCallNotes = null;
         this.ActivitySave.emit(activity);
       } else {
         this.ActivitySave.emit(activity);
       }
     }
-  }
-  protected clearActivityDetails() {
-    this.currentWhatObjectcurrentSubject = null;
-    this.currentCallNotes = null;
   }
   protected onNameSelectChange(event) {
     this.currentWhoObject = this.getWho(event.currentTarget.value);
