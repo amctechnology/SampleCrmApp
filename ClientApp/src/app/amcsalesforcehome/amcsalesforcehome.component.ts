@@ -6,7 +6,7 @@ import { InteractionDirectionTypes } from '@amc/application-api';
 import { Subject } from 'rxjs/Subject';
 import { IActivity } from './../Model/IActivity';
 import { IActivityDetails } from './../Model/IActivityDetails';
-import { IParams } from './../Model/IParams';
+import { ICreateNewParams } from './../Model/ICreateNewParams';
 import { LoggerService } from './../logger.service';
 @Component({
   selector: 'app-amcsalesforcehome',
@@ -368,7 +368,7 @@ export class AMCSalesforceHomeComponent extends Application implements OnInit {
   }
   @bind
   protected createNewEntity(entityType) {
-    let params: IParams;
+    let params: ICreateNewParams;
     if (this.currentInteraction) {
       if (this.ActivityMap.has(this.currentInteraction.interactionId)) {
         const activity = this.ActivityMap.get(this.currentInteraction.interactionId);
@@ -381,7 +381,7 @@ export class AMCSalesforceHomeComponent extends Application implements OnInit {
   }
 
   protected buildParams(entityType, activity) {
-    const params: IParams = {
+    const params: ICreateNewParams = {
       entityName: entityType,
       caseFields: {},
       opportunityFields: {},

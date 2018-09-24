@@ -1,4 +1,4 @@
-export interface IParams {
+export interface ICreateNewParams {
   entityName: string;
   caseFields?: {
     AccountId?: string;
