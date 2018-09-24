@@ -24,6 +24,7 @@
   width: 100% !important;
   margin-top: 0px !important;
 }
+
 .notesBottonBorder {
   background-color: #ffffff;
   border-left: 1px solid #939598;
@@ -31,8 +32,9 @@
   border-right: 1px solid #939598;
   border-bottom-left-radius: 3px !IMPORTANT;
   border-bottom-right-radius: 3px !IMPORTANT;
-  height:25px
+  height: 25px
 }
+
 .quickNotesBotton {
   background-color: #1e72ba;
   border: 0;
@@ -41,18 +43,19 @@
   width: 20px;
   padding-left: 4px;
   margin-left: 1%;
-  margin-top:4px;
-  outline:none;
+  margin-top: 4px;
+  outline: none;
   font-size: 70%;
 
 
 }
+
 .submitButton {
   border: 0;
-  float:right;
-  margin-top:2px;
-  outline:none;
-  cursor:pointer;
+  float: right;
+  margin-top: 2px;
+  outline: none;
+  cursor: pointer;
   background-color: #6cb047;
   color: #ffffff;
   padding-right: 5px;
@@ -61,6 +64,7 @@
   border-radius: 4px;
   font-size: 98%;
 }
+
 .callBody {
   /* border: 1px solid #939598; */
   border-top: 0;
@@ -73,7 +77,7 @@
   float: right;
   margin-top: 4px;
   margin-right: 5px;
-  margin-left:5px;
+  margin-left: 5px;
 }
 
 .amcIcon {
@@ -84,10 +88,11 @@
 }
 
 .callDisplay {
-  display:grid;
+  display: grid;
   margin-bottom: 8px;
   background-color: #ffffff;
 }
+
 .editor {
   font-size: 0.9em;
   width: 70%;
@@ -131,7 +136,7 @@
   -webkit-box-sizing: border-box;
   -moz-box-sizing: border-box;
   margin: 0 0% 0 0;
-  padding-left:2px;
+  padding-left: 2px;
 }
 
 .activityCommentsTextBoxStyle {
@@ -161,7 +166,7 @@
 }
 
 .container {
-  width:90%;
+  width: 90%;
   display: flex;
   align-items: center;
 }
@@ -171,7 +176,7 @@
   height: 25px;
   margin-top: 2px;
   cursor: pointer;
-  padding-left:5px;
+  padding-left: 5px;
 }
 
 body {
@@ -183,9 +188,9 @@ body {
 }
 
 .callNotesContainer {
-  float:left;
-  height:120px;
-  width:100%;
+  float: left;
+  height: 120px;
+  width: 100%;
   margin-right: 5px;
   margin-left: 5px;
 }
@@ -194,4 +199,8 @@ body {
   width: 20px;
   height: 20px;
   float: right;
+}
+
+.headerLabel {
+  margin-left: 10px
 }
