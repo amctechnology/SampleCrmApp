@@ -100,7 +100,6 @@ class SalesforceBridge extends Bridge {
       }
     });
   }
-  // Use for registering changes on screen within CRM
   @bind
   async onFocusListener(event) {
     if (event !== this.currentOnFocusEvent) {
