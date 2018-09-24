@@ -20,21 +20,19 @@ export class AMCSalesforceHomeComponent extends Application implements OnInit {
   subject: string;
   currentInteraction: api.IInteraction;
   ActivityMap: Map<string, IActivity>;
-  interaction: boolean;
   autoSave: Subject<void> = new Subject();
-  searchRecordList: Array<api.IRecordItem>;
-  singleResult: boolean;
+  searchRecordList: api.IRecordItem[];
+  searchReturnedSingleResult: boolean;
   result: boolean;
   constructor(private loggerService: LoggerService) {
     super();
-    this.interaction = false;
     this.result = false;
     this.interactions = new Map();
     this.whoList = [];
     this.whatList = [];
     this.ActivityMap = new Map();
     this.searchRecordList = [];
-
+    this.currentInteraction = null;
     this.appName = 'Salesforce';
     this.bridgeScripts = this.bridgeScripts.concat([
       window.location.origin + '/bridge.bundle.js',
@@ -252,7 +250,6 @@ export class AMCSalesforceHomeComponent extends Application implements OnInit {
         this.scenarioInteractionMappings[scenarioIdInt] = {};
         isNewScenarioId = true;
         if (interaction.details.id === '' && interaction.details.type === '') {
-          this.interaction = true;
           this.currentInteraction = interaction;
           this.subject = 'Call [' + interaction.details.fields.Phone.Value + ']';
           this.ActivityMap.set(interaction.interactionId, this.createActivity(interaction));
@@ -274,7 +271,6 @@ export class AMCSalesforceHomeComponent extends Application implements OnInit {
           this.singleResult = true;
           this.result = true;
         }
-        this.interaction = true;
         this.currentInteraction = interaction;
         this.subject = 'Call [' + interaction.details.fields.Phone.Value + ']';
         this.ActivityMap.set(interaction.interactionId, this.createActivity(interaction));
@@ -284,7 +280,6 @@ export class AMCSalesforceHomeComponent extends Application implements OnInit {
       } else if (interaction.state === api.InteractionStates.Disconnected) {
         delete this.scenarioInteractionMappings[scenarioIdInt][interactionId];
         this.currentInteraction = null;
-        this.interaction = false;
         this.result = false;
         this.interactionDisconnected.next(true);
         this.searchRecordList = [];

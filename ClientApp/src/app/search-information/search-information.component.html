@@ -7,12 +7,12 @@
       title="Collapse">
   </div>
   <div class="callBody">
-    <div *ngIf="!singleResult">
+    <div *ngIf="!searchReturnedSingleResult">
       <select class="searchResultSelect" data-resetperactivity="false" (change)='onSearchSelectChange($event)'>
         <option *ngFor="let searchRecord of searchRecordList" id="{{searchRecord.id}}" value="{{searchRecord.id}}">{{parseSearchRecordForName(searchRecord)}}</option>
       </select>
     </div>
-    <div *ngIf="singleResult">
+    <div *ngIf="searchReturnedSingleResult">
       <input readonly class="searchResultInput" *ngFor="let searchRecord of searchRecordList" id="{{searchRecord.id}}"
         value="{{parseSearchRecordForName(searchRecord)}}">
     </div>

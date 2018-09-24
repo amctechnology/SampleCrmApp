@@ -7,7 +7,7 @@ import { LoggerService } from './../logger.service';
   styleUrls: ['./search-information.component.css']
 })
 export class SearchInformationComponent implements OnInit {
-  @Input() singleResult: boolean;
+  @Input() searchReturnedSingleResult: boolean;
   @Input() searchRecordList: Array<api.IRecordItem>;
   @Output() screenPopSelectedSearchResult: EventEmitter<string> = new EventEmitter();
   maximizeSearchInformation: boolean;
