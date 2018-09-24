@@ -27,14 +27,10 @@ class SalesforceBridge extends Bridge {
     this.eventService.subscribe('getUserInfo', this.getUserInfo);
     this.eventService.subscribe('getSearchLayout', this.getSearchLayout);
     this.eventService.subscribe('isToolbarVisible', this.isToolbarVisible);
-    // subscribe for activities to be saved
     this.eventService.subscribe('saveActivity', this.saveActivity);
-    // create new entity
     this.eventService.subscribe('createNewEntity', this.createNewEntity);
-
     this.eventService.subscribe('screenPopSelectedSearchResult', this.tryScreenpop);
     this.loggerService.logger.logDebug('completed:constructor of the bridge');
-
   }
 
   async afterScriptsLoad(): Promise<any> {
@@ -456,8 +452,7 @@ class SalesforceBridge extends Bridge {
 
 }
 
-const logservice = new LoggerService();
-const bridge = new SalesforceBridge(logservice);
+const bridge = new SalesforceBridge(new LoggerService());
 
 interface IScreenPopObject {
   type: string;

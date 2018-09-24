@@ -7,7 +7,7 @@ export class LoggerService {
 
   public logger: Logger;
   constructor() {
-    this.logger = new Logger(LogSource.SalesforceApp, false);
+    this.logger = new Logger(LogSource.SalesforceApp, false, environment.apiUrl);
   }
 
 }
