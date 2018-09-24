@@ -15,8 +15,8 @@ import { LoggerService } from './../logger.service';
 export class AMCSalesforceHomeComponent extends Application implements OnInit {
   interactionDisconnected: Subject<boolean> = new Subject();
   interactions: Map<String, api.IInteraction>;
-  whoList: Array<IActivityDetails>;
-  whatList: Array<IActivityDetails>;
+  whoList: IActivityDetails[];
+  whatList: IActivityDetails[];
   subject: string;
   currentInteraction: api.IInteraction;
   ActivityMap: Map<string, IActivity>;
@@ -223,15 +223,15 @@ export class AMCSalesforceHomeComponent extends Application implements OnInit {
     return Promise.resolve(this.bridgeEventsService.sendEvent('saveActivity', activity));
   }
   protected formatDate(date: Date): string {
-        let month = '' + (date.getMonth() + 1);
-        let day = '' + date.getDate();
-        const year = '' + date.getFullYear();
-        if (month.length < 2) {
-          month = '0' + month;
-        }
-        if (day.length < 2) {
-          day = '0' + day;
-        }
+    let month = '' + (date.getMonth() + 1);
+    let day = '' + date.getDate();
+    const year = '' + date.getFullYear();
+    if (month.length < 2) {
+      month = '0' + month;
+    }
+    if (day.length < 2) {
+      day = '0' + day;
+    }
 
     return year + '-' + month + '-' + day;
   }
@@ -239,10 +239,10 @@ export class AMCSalesforceHomeComponent extends Application implements OnInit {
   protected saveActivityResponse(activity: IActivity) {
     this.ActivityMap.set(activity.InteractionId, activity);
   }
-    /**
-   * This listens for onInteraction events. It will call preformScreenpop if needed.
-   * Note: if overridden you do not need to bind the new method
-   */
+  /**
+ * This listens for onInteraction events. It will call preformScreenpop if needed.
+ * Note: if overridden you do not need to bind the new method
+ */
   protected async onInteraction(interaction: api.IInteraction): Promise<api.SearchRecords> {
     try {
       const interactionId = interaction.interactionId;
@@ -309,7 +309,7 @@ export class AMCSalesforceHomeComponent extends Application implements OnInit {
     if (this.interactions.has(interaction.interactionId)) {
       if (interaction.state === api.InteractionStates.Disconnected) {
         this.interactions.delete(interaction.interactionId);
-       // this.saveActivity(this.createActivity(interaction));
+        // this.saveActivity(this.createActivity(interaction));
       }
     } else {
       this.interactions.set(interaction.interactionId, interaction);
@@ -347,87 +347,87 @@ export class AMCSalesforceHomeComponent extends Application implements OnInit {
 
     return activity;
   }
-protected whatListContains(whatObject: IActivityDetails): boolean {
-  for ( let i = 0; i < this.whatList.length; i++) {
-    if (this.whatList[i].objectId === whatObject.objectId) {
-      return true;
-    }
-  }
-  return false;
-}
-protected whoListContains(whoObject) {
-  for ( let i = 0; i < this.whoList.length; i++) {
-    if (this.whoList[i].objectId === whoObject.objectId) {
-      return true;
-    }
-  }
-  return false;
-}
-@bind
-protected setActivityDetails(eventObject) {
-  if ( this.currentInteraction) {
-    if (eventObject.objectType === 'Contact' || eventObject.objectType === 'Lead') {
-      if (!this.whoListContains(eventObject)) {
-        this.whoList.push(eventObject);
-        this.autoSave.next();
-      }
-    } else if ( eventObject.objectId !== undefined) {
-      if (!this.whatListContains(eventObject)) {
-        this.whatList.push(eventObject);
-        this.autoSave.next();
+  protected whatListContains(whatObject: IActivityDetails): boolean {
+    for (let i = 0; i < this.whatList.length; i++) {
+      if (this.whatList[i].objectId === whatObject.objectId) {
+        return true;
       }
     }
+    return false;
   }
-
-}
-@bind
-protected createNewEntity(entityType) {
-  let params: IParams;
-  if (this.currentInteraction) {
-    if (this.ActivityMap.has(this.currentInteraction.interactionId)) {
-      const activity = this.ActivityMap.get(this.currentInteraction.interactionId);
-      params = this.buildParams(entityType, activity);
+  protected whoListContains(whoObject) {
+    for (let i = 0; i < this.whoList.length; i++) {
+      if (this.whoList[i].objectId === whoObject.objectId) {
+        return true;
+      }
     }
-  } else {
-    params = this.buildParams(entityType, null);
+    return false;
   }
-  this.bridgeEventsService.sendEvent('createNewEntity', params);
-}
+  @bind
+  protected setActivityDetails(eventObject) {
+    if (this.currentInteraction) {
+      if (eventObject.objectType === 'Contact' || eventObject.objectType === 'Lead') {
+        if (!this.whoListContains(eventObject)) {
+          this.whoList.push(eventObject);
+          this.autoSave.next();
+        }
+      } else if (eventObject.objectId !== undefined) {
+        if (!this.whatListContains(eventObject)) {
+          this.whatList.push(eventObject);
+          this.autoSave.next();
+        }
+      }
+    }
 
-protected buildParams(entityType, activity) {
-  // tslint:disable-next-line:prefer-const
-  let params: IParams = {
-    entityName: entityType,
-    caseFields: {},
-    opportunityFields: {},
-    leadFields: {}
-  };
-  if (this.currentInteraction) {
-    if (entityType === 'Case') {
-      if (activity.WhatObject.objectType === 'Account') {
+  }
+  @bind
+  protected createNewEntity(entityType) {
+    let params: IParams;
+    if (this.currentInteraction) {
+      if (this.ActivityMap.has(this.currentInteraction.interactionId)) {
+        const activity = this.ActivityMap.get(this.currentInteraction.interactionId);
+        params = this.buildParams(entityType, activity);
+      }
+    } else {
+      params = this.buildParams(entityType, null);
+    }
+    this.bridgeEventsService.sendEvent('createNewEntity', params);
+  }
+
+  protected buildParams(entityType, activity) {
+    // tslint:disable-next-line:prefer-const
+    let params: IParams = {
+      entityName: entityType,
+      caseFields: {},
+      opportunityFields: {},
+      leadFields: {}
+    };
+    if (this.currentInteraction) {
+      if (entityType === 'Case') {
+        if (activity.WhatObject.objectType === 'Account') {
           params.caseFields.AccountId = activity.WhatObject.objectId;
-      }
-      if (activity.WhoObject.objectId !== '') {
-        params.caseFields.ContactId = activity.WhoObject.objectId;
-      }
-      params.caseFields.Description = activity.Description;
-    } else if ( entityType === 'Opportunity') {
-      if (activity.WhatObject.objectType === 'Account') {
+        }
+        if (activity.WhoObject.objectId !== '') {
+          params.caseFields.ContactId = activity.WhoObject.objectId;
+        }
+        params.caseFields.Description = activity.Description;
+      } else if (entityType === 'Opportunity') {
+        if (activity.WhatObject.objectType === 'Account') {
           params.opportunityFields.AccountId = activity.WhatObject.objectId;
+        }
+        params.opportunityFields.CloseDate = activity.ActivityDate;
+        params.opportunityFields.Description = activity.Description;
+        params.opportunityFields.StageName = 'Prospecting';
+      } else if (entityType === 'Lead') {
+        params.leadFields.Phone = this.currentInteraction.details.fields.Phone.Value;
+        params.leadFields.Description = activity.Description;
       }
-      params.opportunityFields.CloseDate = activity.ActivityDate;
-      params.opportunityFields.Description = activity.Description;
-      params.opportunityFields.StageName = 'Prospecting';
-    } else if (entityType === 'Lead') {
-      params.leadFields.Phone = this.currentInteraction.details.fields.Phone.Value;
-      params.leadFields.Description = activity.Description;
     }
+    return params;
   }
-  return params;
-}
-protected screenPopSelectedSearchResult(id) {
-  this.bridgeEventsService.sendEvent('screenPopSelectedSearchResult', id);
-}
+  protected screenPopSelectedSearchResult(id) {
+    this.bridgeEventsService.sendEvent('screenPopSelectedSearchResult', id);
+  }
 
 }
 
