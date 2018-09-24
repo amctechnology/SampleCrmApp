@@ -27,7 +27,17 @@ export class ActivityComponent implements OnInit {
   quickCommentList: String[];
 
   constructor(private loggerService: LoggerService) {
-    this.InitializeQuickComments();
+    this.quickCommentList = [];
+    this.quickCommentList.push('Left voicemail: ');
+    this.quickCommentList.push('Scheduled follow up: ');
+    this.quickCommentList.push('Transferred to: ');
+    this.quickCommentList.push('Sent email ');
+    this.quickCommentList.push('Number of agents: ');
+    this.quickCommentList.push('Selling points: ');
+    this.quickCommentList.push('Call Back: ');
+    this.quickCommentList.push('Do not disturb: ');
+    this.quickCommentList.push('Requires more information: ');
+    this.quickCommentList.push('Escalation: ');
     this.currentWhatObject = null;
     this.currentWhoObject = null;
     this.currentWhatObjectcurrentSubject = '';
@@ -35,7 +45,6 @@ export class ActivityComponent implements OnInit {
     this.ActivityMap = new Map();
     this.maximizeActivity = true;
   }
-
   ngOnInit() {
     this.interactionDisconnected.subscribe(event => {
       this.activitySave(true);
@@ -125,21 +134,6 @@ export class ActivityComponent implements OnInit {
       }
     }
   }
-  protected InitializeQuickComments() {
-    this.quickCommentList = [];
-    this.quickCommentList.push('Left voicemail: ');
-    this.quickCommentList.push('Scheduled follow up: ');
-    this.quickCommentList.push('Transferred to: ');
-    this.quickCommentList.push('Sent email ');
-    this.quickCommentList.push('Number of agents: ');
-    this.quickCommentList.push('Selling points: ');
-    this.quickCommentList.push('Call Back: ');
-    this.quickCommentList.push('Do not disturb: ');
-    this.quickCommentList.push('Requires more information: ');
-    this.quickCommentList.push('Escalation: ');
-
-  }
-
   protected loadQuickComment(value) {
     this.currentCallNotes = this.quickCommentList[value];
   }
