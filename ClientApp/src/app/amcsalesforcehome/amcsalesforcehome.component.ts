@@ -294,17 +294,10 @@ export class AMCSalesforceHomeComponent extends Application implements OnInit {
     }
     return;
   }
-
-  protected activityInit(interaction) {
-
-  }
-
-  // Add the current interaction to the interaction map
   protected mapInteraction(interaction: api.IInteraction) {
     if (this.interactions.has(interaction.interactionId)) {
       if (interaction.state === api.InteractionStates.Disconnected) {
         this.interactions.delete(interaction.interactionId);
-        // this.saveActivity(this.createActivity(interaction));
       }
     } else {
       this.interactions.set(interaction.interactionId, interaction);
