@@ -51,37 +51,36 @@ export class ActivityComponent implements OnInit {
       this.maximizeActivity = true;
     }
   }
-  protected activitySave(clear_activity_fields) {
+  protected activitySave(clearActivityFields) {
     if (this.currentInteraction) {
-    // tslint:disable-next-line:prefer-const
-    let activity = this.ActivityMap.get(this.currentInteraction.interactionId);
-    activity.CallDurationInSeconds = this.getSecondsElapsed(activity.TimeStamp).toString();
+      const activity = this.ActivityMap.get(this.currentInteraction.interactionId);
+      activity.CallDurationInSeconds = this.getSecondsElapsed(activity.TimeStamp).toString();
 
-    if (this.currentWhatObject === null) {
-      if (this.whatList.length !== 0) {
-        activity.WhatObject = this.whatList[0];
+      if (this.currentWhatObject === null) {
+        if (this.whatList.length !== 0) {
+          activity.WhatObject = this.whatList[0];
+        }
+      } else {
+        activity.WhatObject = this.currentWhatObject;
       }
-    } else {
-      activity.WhatObject = this.currentWhatObject;
-    }
-    if (this.currentWhoObject === null) {
-      if (this.whoList.length !== 0 ) {
-        activity.WhoObject = this.whoList[0];
+      if (this.currentWhoObject === null) {
+        if (this.whoList.length !== 0) {
+          activity.WhoObject = this.whoList[0];
+        }
+      } else {
+        activity.WhoObject = this.currentWhoObject;
       }
-    } else {
-      activity.WhoObject = this.currentWhoObject;
+      activity.Description = this.currentCallNotes;
+      activity.CallType = this.getInteractionDirection(this.currentInteraction.direction);
+      activity.Subject = this.currentWhatObjectcurrentSubject;
+      if (clearActivityFields) {
+        activity.Status = 'Completed';
+        this.clearActivityDetails();
+        this.ActivitySave.emit(activity);
+      } else {
+        this.ActivitySave.emit(activity);
+      }
     }
-    activity.Description = this.currentCallNotes;
-    activity.CallType = this.getInteractionDirection(this.currentInteraction.direction);
-    activity.Subject = this.currentWhatObjectcurrentSubject;
-    if (clear_activity_fields) {
-      activity.Status = 'Completed';
-      this.clearActivityDetails();
-      this.ActivitySave.emit(activity);
-    } else {
-      this.ActivitySave.emit(activity);
-    }
-  }
   }
   protected clearActivityDetails() {
     this.currentWhatObjectcurrentSubject = null;
@@ -92,7 +91,7 @@ export class ActivityComponent implements OnInit {
     this.activitySave(false);
   }
   protected onRelatedToChange(event) {
-    this. currentWhatObject = this.getWhat(event.currentTarget.value);
+    this.currentWhatObject = this.getWhat(event.currentTarget.value);
     this.activitySave(false);
   }
   protected onSubjectChange(event) {
@@ -104,7 +103,7 @@ export class ActivityComponent implements OnInit {
     this.activitySave(false);
   }
   protected getInteractionDirection(directionNumber) {
-    if (directionNumber === 0 ) {
+    if (directionNumber === 0) {
       return 'Inbound';
     } else if (directionNumber === 1) {
       return 'Outbound';
@@ -155,4 +154,4 @@ export class ActivityComponent implements OnInit {
   protected parseWhatObject(whatObject: IActivityDetails): string {
     return whatObject.objectType + ': ' + whatObject.objectName;
   }
-  }
+}
