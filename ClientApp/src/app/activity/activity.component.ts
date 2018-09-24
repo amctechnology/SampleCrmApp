@@ -18,7 +18,7 @@ export class ActivityComponent implements OnInit {
   @Input() ActivityMap: Map<string, IActivity>;
   @Input() interactionDisconnected: Subject<boolean>;
   @Input() autoSave: Subject<void>;
-  @Input() currentWhatObjectcurrentSubject: string;
+  @Input() subject: string;
   @Output() ActivitySave: EventEmitter<IActivity> = new EventEmitter<IActivity>();
   maximizeActivity: boolean;
   currentWhoObject: IActivityDetails;
@@ -28,15 +28,15 @@ export class ActivityComponent implements OnInit {
 
   constructor(private loggerService: LoggerService) {
     this.quickCommentList = ['Left voicemail: ',
-    'Scheduled follow up: ', 'Transferred to: ',
-    'Sent email ' , 'Number of agents: ',
-    'Selling points: ', 'Call Back: ',
-    'Do not disturb: ', 'Requires more information: ',
-    'Escalation: '
-  ];
+      'Scheduled follow up: ', 'Transferred to: ',
+      'Sent email ', 'Number of agents: ',
+      'Selling points: ', 'Call Back: ',
+      'Do not disturb: ', 'Requires more information: ',
+      'Escalation: '
+    ];
     this.currentWhatObject = null;
     this.currentWhoObject = null;
-    this.currentWhatObjectcurrentSubject = '';
+    this.subject = '';
     this.currentCallNotes = '';
     this.ActivityMap = new Map();
     this.maximizeActivity = true;
@@ -77,10 +77,10 @@ export class ActivityComponent implements OnInit {
       }
       activity.Description = this.currentCallNotes;
       activity.CallType = this.getInteractionDirection(this.currentInteraction.direction);
-      activity.Subject = this.currentWhatObjectcurrentSubject;
+      activity.Subject = this.subject;
       if (clearActivityFields) {
         activity.Status = 'Completed';
-        this.currentWhatObjectcurrentSubject = null;
+        this.subject = null;
         this.currentCallNotes = null;
         this.ActivitySave.emit(activity);
       } else {
@@ -97,7 +97,7 @@ export class ActivityComponent implements OnInit {
     this.activitySave(false);
   }
   protected onSubjectChange(event) {
-    this.currentWhatObjectcurrentSubject = event.srcElement.value;
+    this.subject = event.srcElement.value;
     this.activitySave(false);
   }
   protected onCallNotesChange(event) {

@@ -1,8 +1,8 @@
 <div style="background-color: #aec2de;">
   <app-search-information *ngIf="result" (screenPopSelectedSearchResult)="screenPopSelectedSearchResult($event)"
-    [singleResult]="singleResult" [searchRecordList]='searchRecordList'></app-search-information>
-  <app-activity *ngIf="interaction" [subject]='subject' [autoSave]='autoSave' [interactionDisconnected]='interactionDisconnected'
-    [whoList]='whoList' [whatList]='whatList' [currentInteraction]='currentInteraction' [ActivityMap]='ActivityMap'
+    [singleResult]="singleResult" [searchRecordList]="searchRecordList"></app-search-information>
+  <app-activity *ngIf="interaction" [subject]="currentSubject" [autoSave]="autoSave" [interactionDisconnected]="interactionDisconnected"
+    [whoList]="whoList" [whatList]="whatList" [currentInteraction]="currentInteraction" [ActivityMap]="ActivityMap"
     (ActivitySave)="saveActivity($event)"></app-activity>
   <app-recent></app-recent>
   <app-create (CreateNewEntity)="createNewEntity($event)"></app-create>

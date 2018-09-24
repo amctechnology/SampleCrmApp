@@ -14,7 +14,6 @@ import { LoggerService } from './../logger.service';
 })
 export class AMCSalesforceHomeComponent extends Application implements OnInit {
   interactionDisconnected: Subject<boolean> = new Subject();
-  flag: boolean;
   interactions: Map<String, api.IInteraction>;
   whoList: Array<IActivityDetails>;
   whatList: Array<IActivityDetails>;
