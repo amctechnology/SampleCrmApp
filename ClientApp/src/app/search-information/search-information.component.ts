@@ -6,7 +6,7 @@ import { LoggerService } from './../logger.service';
   templateUrl: './search-information.component.html',
   styleUrls: ['./search-information.component.css']
 })
-export class SearchInformationComponent implements OnInit {
+export class SearchInformationComponent {
   @Input() searchReturnedSingleResult: boolean;
   @Input() searchRecordList: Array<api.IRecordItem>;
   @Output() agentSelectedCallerInformation: EventEmitter<string> = new EventEmitter();
@@ -14,8 +14,6 @@ export class SearchInformationComponent implements OnInit {
   imageLocation: string;
   constructor() {
     this.maximizeSearchInformation = true;
-  }
-  ngOnInit() {
   }
   protected resizeSearchInformation(size) {
     if (size === 'collapse') {
@@ -27,7 +25,6 @@ export class SearchInformationComponent implements OnInit {
   protected onAgentSelectedCallerInformation(event) {
     this.agentSelectedCallerInformation.emit(event.currentTarget.value);
   }
-
   protected parseSearchRecordForName(searchRecord) {
     const keys = Object.keys(searchRecord.fields);
     let nameKey;
@@ -42,7 +39,6 @@ export class SearchInformationComponent implements OnInit {
 
     return name;
   }
-
   protected getRecord(id) {
     for (let i = 0; i < this.searchRecordList.length; i++) {
       if (this.searchRecordList[i].id === id) {
