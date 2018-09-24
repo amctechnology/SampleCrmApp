@@ -9,7 +9,7 @@ import { LoggerService } from './../logger.service';
 export class SearchInformationComponent implements OnInit {
   @Input() searchReturnedSingleResult: boolean;
   @Input() searchRecordList: Array<api.IRecordItem>;
-  @Output() screenPopSelectedSearchResult: EventEmitter<string> = new EventEmitter();
+  @Output() agentSelectedCallerInformation: EventEmitter<string> = new EventEmitter();
   maximizeSearchInformation: boolean;
   imageLocation: string;
   constructor() {
@@ -17,21 +17,21 @@ export class SearchInformationComponent implements OnInit {
   }
   ngOnInit() {
   }
- protected resizeSearchInformation(size) {
-  if (size === 'collapse') {
-    this.maximizeSearchInformation = false;
-  } else {
-    this.maximizeSearchInformation = true;
+  protected resizeSearchInformation(size) {
+    if (size === 'collapse') {
+      this.maximizeSearchInformation = false;
+    } else {
+      this.maximizeSearchInformation = true;
+    }
   }
-}
-  protected onSearchSelectChange(event) {
-    this.screenPopSelectedSearchResult.emit(event.currentTarget.value);
+  protected onAgentSelectedCallerInformation(event) {
+    this.agentSelectedCallerInformation.emit(event.currentTarget.value);
   }
 
   protected parseSearchRecordForName(searchRecord) {
     const keys = Object.keys(searchRecord.fields);
     let nameKey;
-    for (let i = 0; i < keys.length; i++)  {
+    for (let i = 0; i < keys.length; i++) {
       if (keys[i].includes('Name')) {
         nameKey = keys[i];
         break;

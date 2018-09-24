@@ -302,9 +302,7 @@ export class AMCSalesforceHomeComponent extends Application implements OnInit {
     } else {
       this.interactions.set(interaction.interactionId, interaction);
     }
-
   }
-
   protected createActivity(interaction: api.IInteraction): IActivity {
     const date = new Date();
     const activity: IActivity = {
@@ -383,8 +381,7 @@ export class AMCSalesforceHomeComponent extends Application implements OnInit {
   }
 
   protected buildParams(entityType, activity) {
-    // tslint:disable-next-line:prefer-const
-    let params: IParams = {
+    const params: IParams = {
       entityName: entityType,
       caseFields: {},
       opportunityFields: {},
@@ -413,8 +410,8 @@ export class AMCSalesforceHomeComponent extends Application implements OnInit {
     }
     return params;
   }
-  protected screenPopSelectedSearchResult(id) {
-    this.bridgeEventsService.sendEvent('screenPopSelectedSearchResult', id);
+  protected agentSelectedCallerInformation(id) {
+    this.bridgeEventsService.sendEvent('agentSelectedCallerInformation', id);
   }
 
 }

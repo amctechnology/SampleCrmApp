@@ -1,5 +1,5 @@
 <div style="background-color: #aec2de;">
-  <app-search-information *ngIf="searchResultWasReturned" (screenPopSelectedSearchResult)="screenPopSelectedSearchResult($event)"
+  <app-search-information *ngIf="searchResultWasReturned" (agentSelectedCallerInformation)="agentSelectedCallerInformation($event)"
     [searchReturnedSingleResult]="searchReturnedSingleResult" [searchRecordList]="searchRecordList"></app-search-information>
   <app-activity *ngIf="currentInteraction" [subject]="subject" [autoSave]="autoSave" [interactionDisconnected]="interactionDisconnected"
     [whoList]="whoList" [whatList]="whatList" [currentInteraction]="currentInteraction" [ActivityMap]="ActivityMap"

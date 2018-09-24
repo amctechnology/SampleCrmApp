@@ -29,7 +29,7 @@ class SalesforceBridge extends Bridge {
     this.eventService.subscribe('isToolbarVisible', this.isToolbarVisible);
     this.eventService.subscribe('saveActivity', this.saveActivity);
     this.eventService.subscribe('createNewEntity', this.createNewEntity);
-    this.eventService.subscribe('screenPopSelectedSearchResult', this.tryScreenpop);
+    this.eventService.subscribe('agentSelectedCallerInformation', this.tryScreenpop);
     this.loggerService.logger.logDebug('completed:constructor of the bridge');
   }
 
