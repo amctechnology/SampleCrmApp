@@ -6,7 +6,7 @@ import { LoggerService } from './../logger.service';
   styleUrls: ['./create.component.css']
 })
 export class CreateComponent implements OnInit {
-  @Output() CreateNewEntity: EventEmitter<any> = new EventEmitter<any>();
+  @Output() CreateNewEntity: EventEmitter<string> = new EventEmitter<string>();
   maximizeCreate: boolean;
   constructor(private loggerService: LoggerService) {
     this.maximizeCreate = true;
