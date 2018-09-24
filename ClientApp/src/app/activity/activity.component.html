@@ -11,29 +11,22 @@
       </div>
       <div style="position: relative; z-index: 0">
           <form >
-
                   <div class="editor displayDiv">
                       <label class="displayLabels" title="Call From">Name</label>
                       <select class="dropDownListStyle displayData" data-resetperactivity="false" (change) = 'onNameSelectChange($event)' >
                           <option *ngFor="let who of whoList" value = "{{who.objectId}}">{{parseWhoObject(who)}}</option>
                         </select>
                   </div>
-
               <div class="editor displayDiv">
                   <label class="displayLabels" title="Regarding" style="display: inline;">Related To</label>
                   <select class="dropDownListStyle displayData" (change) = 'onRelatedToChange($event)' data-resetperactivity="false" >
                     <option *ngFor="let what of whatList" value = "{{what.objectId}}" style="background-image:url(/assets/images/Create_Case.png );" >{{parseWhatObject(what)}}</option>
                   </select>
               </div>
-
-
               <div class="editor displayDiv">
                   <label class="displayLabels" title="Subject">Subject</label>
                   <input class="activitySubjectTextBoxStyle displayData" (change) = 'onSubjectChange($event)' title="{{subject}}" type="text" value="{{subject}}">
               </div>
-
-
-
               <div class="editor displayDiv">
                   <div class = "callNotesContainer">
                       <div style="height:80px">
@@ -47,7 +40,6 @@
 
               </div>
           </form>
-
       </div>
   </div>
 </div>
