@@ -24,7 +24,7 @@ export class ActivityComponent implements OnInit {
   currentWhoObject: IActivityDetails;
   currentWhatObject: IActivityDetails;
   currentCallNotes: string;
-  quickCommentList: Array<string>;
+  quickCommentList: String[];
 
   constructor(private loggerService: LoggerService) {
     this.InitializeQuickComments();
@@ -44,11 +44,6 @@ export class ActivityComponent implements OnInit {
       this.activitySave(false);
     });
   }
-
-  setSelectedInteraction(interactionList) {
-    console.log('interaction ' + interactionList.srcElement[0].id );
-  }
-
   protected resizeActivity(size) {
     if (size === 'collapse') {
       this.maximizeActivity = false;
