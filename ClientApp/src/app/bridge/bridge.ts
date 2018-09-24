@@ -6,7 +6,7 @@ import { Subject } from 'rxjs/Subject';
 import { OnInit } from '@angular/core';
 import { IActivity } from './../Model/IActivity';
 import { IActivityDetails } from './../Model/IActivityDetails';
-import { IParams } from './../Model/IParams';
+import { ICreateNewParams } from './../Model/ICreateNewParams';
 import { LoggerService } from './../logger.service';
 declare var sforce: any;
 
@@ -16,7 +16,7 @@ class SalesforceBridge extends Bridge {
   activity: IActivity = null;
   layoutObjectList: string[];
 
-  constructor(private loggerService: LoggerService) {
+  constructor() {
     super();
     this.loggerService.logger.logDebug('start:constructor of the bridge');
     this.currentOnFocusEvent = null;
@@ -408,7 +408,7 @@ class SalesforceBridge extends Bridge {
     });
   }
   @bind
-  protected createNewEntity(params: IParams) {
+  protected createNewEntity(params: ICreateNewParams) {
     let URL = '';
     if (this.isLightning) {
       const screenPopObject: IScreenPopObject = {
@@ -445,7 +445,7 @@ class SalesforceBridge extends Bridge {
 
 }
 
-const bridge = new SalesforceBridge(new LoggerService());
+const bridge = new SalesforceBridge();
 
 interface IScreenPopObject {
   type: string;

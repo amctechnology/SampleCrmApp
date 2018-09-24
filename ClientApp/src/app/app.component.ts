@@ -15,10 +15,8 @@ export class AppComponent implements OnInit, AfterViewChecked {
   ngOnInit(): void {
     throw new Error('Method not implemented.');
   }
-
   ngAfterViewChecked(): void {
     this.setHeight();
-
   }
   private setHeight(): void {
     const newHeight = this.getHeight();
@@ -27,7 +25,6 @@ export class AppComponent implements OnInit, AfterViewChecked {
       applicationAPI.setSoftphoneHeight(this.height);
     }
   }
-
   private getHeight(): number {
     return this.el.nativeElement.children[0].scrollHeight + 5;
   }

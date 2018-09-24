@@ -25,7 +25,7 @@ export class AMCSalesforceHomeComponent extends Application implements OnInit {
   searchReturnedSingleResult: boolean;
   searchResultWasReturned: boolean;
   constructor(private loggerService: LoggerService) {
-    super();
+    super(loggerService.logger);
     this.searchResultWasReturned = false;
     this.interactions = new Map();
     this.whoList = [];
@@ -47,10 +47,9 @@ export class AMCSalesforceHomeComponent extends Application implements OnInit {
     this.bridgeEventsService.subscribe('clickToDial', event => {
       api.clickToDial(event.number, this.formatCrmResults(event.records));
     });
-
     this.bridgeEventsService.subscribe('setActivityDetails', this.setActivityDetails);
     this.bridgeEventsService.subscribe('saveActivityResponse', this.saveActivityResponse);
-
+    const config = await api.initializeComplete(this.logger);
   }
 
   formatCrmResults(crmResults: any): api.SearchRecords {
