@@ -118,9 +118,6 @@ class SalesforceBridge extends Bridge {
         entity.objectId = event.recordId;
         entity.objectName = event.recordName;
         entity.url = event.url;
-        if (entity.objectId === '') {
-          return 1;
-        }
       } else {
         const temp = JSON.parse(event.result);
         entity.objectType = temp.object;
@@ -128,11 +125,8 @@ class SalesforceBridge extends Bridge {
         entity.objectId = temp.objectId;
         entity.objectName = temp.objectName;
         entity.url = temp.url;
-        if (entity.objectId === '') {
-          return 1;
-        }
       }
-      if (this.layoutObjectList.includes(entity.objectType)) {
+      if (this.layoutObjectList.includes(entity.objectType) && entity.objectId !== '') {
         this.eventService.sendEvent('setActivityDetails', entity);
         this.loggerService.logger.logDebug('onFocus event sent to home');
       }
