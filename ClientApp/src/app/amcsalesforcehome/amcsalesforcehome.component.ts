@@ -23,10 +23,10 @@ export class AMCSalesforceHomeComponent extends Application implements OnInit {
   autoSave: Subject<void> = new Subject();
   searchRecordList: api.IRecordItem[];
   searchReturnedSingleResult: boolean;
-  result: boolean;
+  searchResultWasReturned: boolean;
   constructor(private loggerService: LoggerService) {
     super();
-    this.result = false;
+    this.searchResultWasReturned = false;
     this.interactions = new Map();
     this.whoList = [];
     this.whatList = [];
@@ -265,11 +265,11 @@ export class AMCSalesforceHomeComponent extends Application implements OnInit {
         const searchRecord = await this.preformScreenpop(interaction);
         this.searchRecordList = searchRecord.toJSON();
         if (this.searchRecordList.length > 1) {
-          this.singleResult = false;
-          this.result = true;
+          this.searchReturnedSingleResult = false;
+          this.searchResultWasReturned = true;
         } else if (this.searchRecordList.length === 1) {
-          this.singleResult = true;
-          this.result = true;
+          this.searchReturnedSingleResult = true;
+          this.searchResultWasReturned = true;
         }
         this.currentInteraction = interaction;
         this.subject = 'Call [' + interaction.details.fields.Phone.Value + ']';
@@ -280,7 +280,7 @@ export class AMCSalesforceHomeComponent extends Application implements OnInit {
       } else if (interaction.state === api.InteractionStates.Disconnected) {
         delete this.scenarioInteractionMappings[scenarioIdInt][interactionId];
         this.currentInteraction = null;
-        this.result = false;
+        this.searchResultWasReturned = false;
         this.interactionDisconnected.next(true);
         this.searchRecordList = [];
         if (Object.keys(this.scenarioInteractionMappings[scenarioIdInt]).length === 0) {
