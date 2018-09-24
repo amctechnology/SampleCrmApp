@@ -18,20 +18,20 @@ export class ActivityComponent implements OnInit {
   @Input() ActivityMap: Map<string, IActivity>;
   @Input() interactionDisconnected: Subject<boolean>;
   @Input() autoSave: Subject<void>;
-  @Input() subject: string;
+  @Input() currentWhatObjectcurrentSubject: string;
   @Output() ActivitySave: EventEmitter<IActivity> = new EventEmitter<IActivity>();
   maximizeActivity: boolean;
-  curWho: IActivityDetails;
-  curWhat: IActivityDetails;
-  callNotes: string;
+  currentWhoObject: IActivityDetails;
+  currentWhatObject: IActivityDetails;
+  currentCallNotes: string;
   quickCommentList: Array<string>;
 
   constructor(private loggerService: LoggerService) {
     this.InitializeQuickComments();
-    this.curWhat = null;
-    this.curWho = null;
-    this.subject = '';
-    this. callNotes = '';
+    this.currentWhatObject = null;
+    this.currentWhoObject = null;
+    this.currentWhatObjectcurrentSubject = '';
+    this.currentCallNotes = '';
     this.ActivityMap = new Map();
     this.maximizeActivity = true;
   }
@@ -62,23 +62,23 @@ export class ActivityComponent implements OnInit {
     let activity = this.ActivityMap.get(this.currentInteraction.interactionId);
     activity.CallDurationInSeconds = this.getSecondsElapsed(activity.TimeStamp).toString();
 
-    if (this.curWhat === null) {
+    if (this.currentWhatObject === null) {
       if (this.whatList.length !== 0) {
         activity.WhatObject = this.whatList[0];
       }
     } else {
-      activity.WhatObject = this.curWhat;
+      activity.WhatObject = this.currentWhatObject;
     }
-    if (this.curWho === null) {
+    if (this.currentWhoObject === null) {
       if (this.whoList.length !== 0 ) {
         activity.WhoObject = this.whoList[0];
       }
     } else {
-      activity.WhoObject = this.curWho;
+      activity.WhoObject = this.currentWhoObject;
     }
-    activity.Description = this.callNotes;
+    activity.Description = this.currentCallNotes;
     activity.CallType = this.getInteractionDirection(this.currentInteraction.direction);
-    activity.Subject = this.subject;
+    activity.Subject = this.currentWhatObjectcurrentSubject;
     if (clear_activity_fields) {
       activity.Status = 'Completed';
       this.clearActivityDetails();
@@ -89,23 +89,23 @@ export class ActivityComponent implements OnInit {
   }
   }
   protected clearActivityDetails() {
-    this.subject = null;
-    this.callNotes = null;
+    this.currentWhatObjectcurrentSubject = null;
+    this.currentCallNotes = null;
   }
   protected onNameSelectChange(event) {
-    this.curWho = this.getWho(event.currentTarget.value);
+    this.currentWhoObject = this.getWho(event.currentTarget.value);
     this.activitySave(false);
   }
   protected onRelatedToChange(event) {
-    this. curWhat = this.getWhat(event.currentTarget.value);
+    this. currentWhatObject = this.getWhat(event.currentTarget.value);
     this.activitySave(false);
   }
   protected onSubjectChange(event) {
-    this.subject = event.srcElement.value;
+    this.currentWhatObjectcurrentSubject = event.srcElement.value;
     this.activitySave(false);
   }
   protected onCallNotesChange(event) {
-    this.callNotes = event.srcElement.value.trim();
+    this.currentCallNotes = event.srcElement.value.trim();
     this.activitySave(false);
   }
   protected getInteractionDirection(directionNumber) {
@@ -120,7 +120,6 @@ export class ActivityComponent implements OnInit {
     const EndDate = new Date();
     return Math.round((EndDate.getTime() - startDate.getTime()) / 1000);
   }
-
   protected getWho(id): IActivityDetails {
     for (let i = 0; i < this.whoList.length; i++) {
       if (this.whoList[i].objectId === id) {
@@ -135,7 +134,6 @@ export class ActivityComponent implements OnInit {
       }
     }
   }
-
   protected InitializeQuickComments() {
     this.quickCommentList = [];
     this.quickCommentList.push('Left voicemail: ');
@@ -152,7 +150,7 @@ export class ActivityComponent implements OnInit {
   }
 
   protected loadQuickComment(value) {
-    this.callNotes = this.quickCommentList[value];
+    this.currentCallNotes = this.quickCommentList[value];
   }
 
   protected parseWhoObject(whoObject: IActivityDetails): string {
