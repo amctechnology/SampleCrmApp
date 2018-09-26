@@ -18,9 +18,9 @@
           </select>
         </div>
         <div class="editor displayDiv">
-          <label class="displayLabels" title="Regarding" style="display: inline;">Related To</label>
+          <label class="displayLabels" title="Related To">Related To</label>
           <select class="dropDownListStyle displayData" (change)="onRelatedToChange($event)" data-resetperactivity="false">
-            <option *ngFor="let what of whatList" value="{{what.objectId}}" style="background-image:url(/assets/images/Create_Case.png );">{{parseWhatObject(what)}}</option>
+            <option *ngFor="let what of whatList" value="{{what.objectId}}">{{parseWhatObject(what)}}</option>
           </select>
         </div>
         <div class="editor displayDiv">
@@ -35,10 +35,14 @@
                 (change)="onCallNotesChange($event)" cols="20" rows="2" style="width:100%;height:100%;resize: none"
                 title=""></textarea>
             </div>
-            <div class="notesBottonBorder">
-              <input *ngFor="let quickComment of quickCommentList; let i = index;" class="quickNotesBotton" type="button"
-                value="{{i+1}}" (click)="loadQuickComment(i)" title="{{quickComment}}">
-              <input class="submitButton" type="button" value="Submit" (click)="activitySave(false)">
+            <div flex class="notesBottonBorder">
+              <div class="quickCommentsDiv">
+                <input *ngFor="let quickComment of quickCommentList; let i = index;" class="quickNotesBotton" type="button"
+                  value="{{i+1}}" (click)="loadQuickComment(i)" title="{{quickComment}}">
+              </div>
+              <div class="submitDiv">
+                <input class="submitButton" type="button" value="Submit" (click)="activitySave(false)">
+              </div>
             </div>
           </div>
 

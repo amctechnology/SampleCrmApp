@@ -26,6 +26,6 @@ export class AppComponent implements OnInit, AfterViewChecked {
     }
   }
   private getHeight(): number {
-    return this.el.nativeElement.children[0].scrollHeight + 5;
+    return this.el.nativeElement.children[0].scrollHeight + 2;
   }
 }
