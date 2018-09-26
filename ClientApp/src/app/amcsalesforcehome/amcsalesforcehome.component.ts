@@ -353,6 +353,8 @@ export class AMCSalesforceHomeComponent extends Application implements OnInit {
   }
   @bind
   protected setActivityDetails(eventObject) {
+    this.loggerService.logger.logDebug('AMCSalesforceHomeComponent: Activity details received from bridge: '
+      + JSON.stringify(eventObject));
     if (this.currentInteraction) {
       if (eventObject.objectType === 'Contact' || eventObject.objectType === 'Lead') {
         if (!this.whoListContains(eventObject)) {
@@ -370,6 +372,8 @@ export class AMCSalesforceHomeComponent extends Application implements OnInit {
   }
   @bind
   protected createNewEntity(entityType) {
+    this.loggerService.logger.logDebug('AMCSalesforceHomeComponent: Screenpop new Salesforce object of type: '
+      + JSON.stringify(entityType));
     let params: ICreateNewParams;
     if (this.currentInteraction) {
       if (this.ActivityMap.has(this.currentInteraction.interactionId)) {
@@ -379,6 +383,8 @@ export class AMCSalesforceHomeComponent extends Application implements OnInit {
     } else {
       params = this.buildParams(entityType, null);
     }
+    this.loggerService.logger.logDebug('AMCSalesforceHomeComponent: Send screenpop request to bridge with params: '
+      + JSON.stringify(params));
     this.bridgeEventsService.sendEvent('createNewEntity', params);
   }
 
@@ -413,9 +419,12 @@ export class AMCSalesforceHomeComponent extends Application implements OnInit {
     return params;
   }
   protected agentSelectedCallerInformation(id) {
+    this.loggerService.logger.logDebug('AMCSalesforceHomeComponent: Screenpop selected caller information');
     this.bridgeEventsService.sendEvent('agentSelectedCallerInformation', id);
   }
-
+  protected childComponentLogger(log) {
+    this.loggerService.logger.logDebug('AMCSalesforceHomeComponent: ' + log);
+  }
 }
 
 

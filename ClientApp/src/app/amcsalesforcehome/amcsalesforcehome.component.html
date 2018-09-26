@@ -1,9 +1,10 @@
 <div style="background-color: #aec2de;">
   <app-search-information *ngIf="searchResultWasReturned" (agentSelectedCallerInformation)="agentSelectedCallerInformation($event)"
-    [searchReturnedSingleResult]="searchReturnedSingleResult" [searchRecordList]="searchRecordList"></app-search-information>
+    [searchReturnedSingleResult]="searchReturnedSingleResult" [searchRecordList]="searchRecordList"
+    (childComponentLogger)="childComponentLogger($event)"></app-search-information>
   <app-activity *ngIf="currentInteraction" [subject]="subject" [autoSave]="autoSave" [interactionDisconnected]="interactionDisconnected"
     [whoList]="whoList" [whatList]="whatList" [currentInteraction]="currentInteraction" [ActivityMap]="ActivityMap"
-    (ActivitySave)="saveActivity($event)"></app-activity>
+    (ActivitySave)="saveActivity($event)" (childComponentLogger)="childComponentLogger($event)"></app-activity>
   <app-recent></app-recent>
-  <app-create (CreateNewEntity)="createNewEntity($event)"></app-create>
+  <app-create (CreateNewEntity)="createNewEntity($event)" (childComponentLogger)="childComponentLogger($event)"></app-create>
 </div>
