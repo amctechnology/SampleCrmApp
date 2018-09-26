@@ -20,6 +20,8 @@ export class ActivityComponent implements OnInit {
   @Input() autoSave: Subject<void>;
   @Input() subject: string;
   @Output() ActivitySave: EventEmitter<IActivity> = new EventEmitter<IActivity>();
+  @Output() childComponentLogger: EventEmitter<string> = new EventEmitter<string>();
+
   maximizeActivity: boolean;
   currentWhoObject: IActivityDetails;
   currentWhatObject: IActivityDetails;
@@ -27,6 +29,7 @@ export class ActivityComponent implements OnInit {
   quickCommentList: string[];
 
   constructor(private loggerService: LoggerService) {
+    this.childComponentLogger.emit('activity: Constructor start');
     this.quickCommentList = ['Left voicemail: ',
       'Scheduled follow up: ', 'Transferred to: ',
       'Sent email ', 'Number of agents: ',
@@ -40,6 +43,7 @@ export class ActivityComponent implements OnInit {
     this.currentCallNotes = '';
     this.ActivityMap = new Map();
     this.maximizeActivity = true;
+    this.childComponentLogger.emit('activity: Constructor complete');
   }
   ngOnInit() {
     this.interactionDisconnected.subscribe(event => {
@@ -86,22 +90,27 @@ export class ActivityComponent implements OnInit {
       } else {
         this.ActivitySave.emit(activity);
       }
+      this.childComponentLogger.emit('activity: Save activity: ' + JSON.stringify(activity));
     }
   }
   protected onNameSelectChange(event) {
     this.currentWhoObject = this.getWho(event.currentTarget.value);
+    this.childComponentLogger.emit('activity: Call from select box value changed: ' + JSON.stringify(this.currentWhoObject));
     this.activitySave(false);
   }
   protected onRelatedToChange(event) {
     this.currentWhatObject = this.getWhat(event.currentTarget.value);
+    this.childComponentLogger.emit('activity: Related to select box value changed: ' + JSON.stringify(this.currentWhatObject));
     this.activitySave(false);
   }
   protected onSubjectChange(event) {
     this.subject = event.srcElement.value;
+    this.childComponentLogger.emit('activity: Subject value changed: ' + JSON.stringify(this.subject));
     this.activitySave(false);
   }
   protected onCallNotesChange(event) {
     this.currentCallNotes = event.srcElement.value.trim();
+    this.childComponentLogger.emit('activity: Call notes value changed: ' + JSON.stringify(this.currentCallNotes));
     this.activitySave(false);
   }
   protected getInteractionDirection(directionNumber) {
