@@ -5,15 +5,12 @@ import * as applicationAPI from '@amc/application-api';
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.css']
 })
-export class AppComponent implements OnInit, AfterViewChecked {
+export class AppComponent implements AfterViewChecked {
   height: number;
   el: ElementRef;
   constructor(el: ElementRef) {
     this.height = 500;
     this.el = el;
-  }
-  ngOnInit(): void {
-    throw new Error('Method not implemented.');
   }
   ngAfterViewChecked(): void {
     this.setHeight();

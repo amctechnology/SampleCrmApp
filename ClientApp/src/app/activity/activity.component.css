@@ -32,25 +32,25 @@
   border-right: 1px solid #939598;
   border-bottom-left-radius: 3px !IMPORTANT;
   border-bottom-right-radius: 3px !IMPORTANT;
-  height: 25px
+  display: flex;
+
 }
 
 .quickNotesBotton {
   background-color: #1e72ba;
   border: 0;
   color: white;
-  height: 70%;
-  width: 20px;
-  padding-left: 4px;
+  height: 15;
+  width: 15px;
+  text-align: center;
   margin-left: 1%;
   margin-top: 4px;
   outline: none;
-  font-size: 70%;
+  font-size: 9px;
 }
 
 .submitButton {
   border: 0;
-  float: right;
   margin-top: 2px;
   outline: none;
   cursor: pointer;
@@ -63,8 +63,16 @@
   font-size: 98%;
 }
 
+.submitDiv {}
+
+.quickCommentsDiv {
+  text-align: left;
+  flex: 1 0 0;
+  flex-wrap: wrap;
+  display: flex;
+}
+
 .callBody {
-  /* border: 1px solid #939598; */
   border-top: 0;
   position: relative;
 }
@@ -200,13 +208,4 @@ body {
 
 .headerLabel {
   margin-left: 10px
-}
-
-.submitDiv {
-  text-align: right;
-}
-
-.quickCommentsDiv {
-  text-align: left;
-  flex-grow: inherit;
 }
