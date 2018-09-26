@@ -18,7 +18,7 @@ class SalesforceBridge extends Bridge {
 
   constructor() {
     super();
-    this.loggerService.logger.logDebug('start:constructor of the bridge');
+    this.eventService.sendEvent('logDebug', 'bridge: construcutor started');
     this.currentOnFocusEvent = null;
     this.appName = 'Salesforce';
     this.layoutObjectList = [];
@@ -30,12 +30,11 @@ class SalesforceBridge extends Bridge {
     this.eventService.subscribe('saveActivity', this.saveActivity);
     this.eventService.subscribe('createNewEntity', this.createNewEntity);
     this.eventService.subscribe('agentSelectedCallerInformation', this.tryScreenpop);
-    this.loggerService.logger.logDebug('completed:constructor of the bridge');
+    this.eventService.sendEvent('logDebug', 'bridge: constructor complete');
   }
 
   async afterScriptsLoad(): Promise<any> {
-    this.loggerService.logger.logDebug('start:constructor of the bridge');
-
+    this.eventService.sendEvent('logDebug', 'bridge: scripts loaded');
     await super.afterScriptsLoad();
     if (this.isLightning) {
       sforce.opencti.onClickToDial({ listener: this.clickToDialListener });
@@ -49,9 +48,9 @@ class SalesforceBridge extends Bridge {
       sforce.interaction.cti.getSoftphoneLayout(this.buildLayoutObjectList);
     }
     if (this.isLightning) {
-      this.loggerService.logger.logInformation('App running in lightning');
+      this.eventService.sendEvent('logDebug', 'bridge: App running in lightning');
     } else {
-      this.loggerService.logger.logInformation('App running in classic');
+      this.eventService.sendEvent('logDebug', 'bridge: App running in classic');
     }
   }
   @bind
@@ -61,7 +60,7 @@ class SalesforceBridge extends Bridge {
     } else {
       this.layoutObjectList = Object.keys(JSON.parse(result.result).Inbound.objects);
     }
-    this.loggerService.logger.logInformation('Sofphone layout: ' + this.layoutObjectList);
+    this.eventService.sendEvent('logInformation', 'bridge: Sofphone layout: ' + this.layoutObjectList);
   }
   @bind
   isToolbarVisible() {
@@ -104,7 +103,7 @@ class SalesforceBridge extends Bridge {
   async onFocusListener(event) {
     if (event !== this.currentOnFocusEvent) {
       this.currentOnFocusEvent = event;
-      this.loggerService.logger.logDebug('onFocus event: ' + JSON.stringify(event));
+      this.eventService.sendEvent('logDebug', 'bridge: onFocus event: ' + JSON.stringify(event));
       const entity = {
         objectType: '',
         displayName: '',
@@ -128,7 +127,7 @@ class SalesforceBridge extends Bridge {
       }
       if (this.layoutObjectList.includes(entity.objectType) && entity.objectId !== '') {
         this.eventService.sendEvent('setActivityDetails', entity);
-        this.loggerService.logger.logDebug('onFocus event sent to home');
+        this.eventService.sendEvent('logDebug', 'bridge: onFocus event sent to home');
       }
     }
   }
@@ -182,7 +181,7 @@ class SalesforceBridge extends Bridge {
 
   @bind
   async screenpopHandler(event): Promise<any> {
-    this.eventService.sendEvent('logVerbose', 'screenpopHandler START: ' + event);
+    this.eventService.sendEvent('logVerbose', 'bridge: screenpopHandler START: ' + event);
     try {
       let screenpopRecords = null;
       if (event.id && event.type) {
@@ -193,7 +192,7 @@ class SalesforceBridge extends Bridge {
       }
       return screenpopRecords;
     } catch (e) {
-      this.eventService.sendEvent('logError', 'screenpopHandler ERROR=' + e);
+      this.eventService.sendEvent('logError', 'bridge: screenpopHandler ERROR=' + e);
       throw e;
     }
   }
@@ -362,6 +361,7 @@ class SalesforceBridge extends Bridge {
   }
   @bind
   protected saveActivity(activity: IActivity): Promise<any> {
+    this.eventService.sendEvent('logDebug', 'bridge: Activity from home received to save: ' + JSON.stringify(activity));
     if (this.isLightning) {
       return new Promise((resolve, reject) => {
         const activityObject: object = {
@@ -377,12 +377,14 @@ class SalesforceBridge extends Bridge {
             ActivityDate: activity.ActivityDate
           },
           callback: result => {
-            try {
-              activity.ActivityId = result.returnValue.recordId;
-            } catch (e) {
-              console.log('Save could not complete: ' + JSON.stringify(result.errors['0'].details.fieldErrors));
+            if (result.success) {
+              this.eventService.sendEvent('logDebug', 'Activity ' + JSON.stringify(activity) +
+                ' saved in Lightning, sending updated activity back to home');
+              resolve(this.eventService.sendEvent('saveActivityResponse', activity));
+            } else {
+              this.eventService.sendEvent('logDebug', 'bridge: Activity ' + JSON.stringify(activity) +
+                ' could not be saved, error: ' + JSON.stringify(result.errors['0'].details.fieldErrors));
             }
-            resolve(this.eventService.sendEvent('saveActivityResponse', activity));
           }
         };
         if (activity.ActivityId) {
@@ -403,6 +405,8 @@ class SalesforceBridge extends Bridge {
       sforce.interaction.saveLog('Task', activityString, result => {
         activity.ActivityId = result.result;
         console.log('Activity ID = ' + result.result);
+        this.eventService.sendEvent('logDebug', 'bridge: Activity ' + JSON.stringify(activity) +
+          ' saved in Classic');
         resolve(this.eventService.sendEvent('saveActivityResponse', activity));
       });
     });
@@ -410,6 +414,8 @@ class SalesforceBridge extends Bridge {
   @bind
   protected createNewEntity(params: ICreateNewParams) {
     let URL = '';
+    this.eventService.sendEvent('logDebug', 'bridge: New Salesforce object requested with ' +
+      'params: ' + JSON.stringify(params));
     if (this.isLightning) {
       const screenPopObject: IScreenPopObject = {
         type: sforce.opencti.SCREENPOP_TYPE.NEW_RECORD_MODAL,
@@ -418,7 +424,13 @@ class SalesforceBridge extends Bridge {
           defaultFieldValues: {}
         },
         callback: result => {
-          console.log(result);
+          if (result.success) {
+            this.eventService.sendEvent('logDebug', 'bridge: Salesforce object with params: ' +
+              JSON.stringify(params) + ' screenpop successful: ' + result.returnValue);
+          } else {
+            this.eventService.sendEvent('logDebug', 'bridge: Salesforce object with params: ' +
+              JSON.stringify(params) + ' screenpop unsuccessful: ' + result.errors);
+          }
         }
       };
       if (params.entityName === 'Case') {
@@ -438,7 +450,13 @@ class SalesforceBridge extends Bridge {
         URL = '/006/e';
       }
       sforce.interaction.screenPop(URL, true, function (result) {
-        console.log(result);
+        if (result) {
+          this.eventService.sendEvent('logDebug', 'bridge: Salesforce object with params: ' +
+            JSON.stringify(params) + ' screenpop successful');
+        } else {
+          this.eventService.sendEvent('logDebug', 'bridge: Salesforce object with params: ' +
+            JSON.stringify(params) + ' screenpop unsuccessful');
+        }
       });
     }
   }

@@ -26,6 +26,7 @@ export class AMCSalesforceHomeComponent extends Application implements OnInit {
   searchResultWasReturned: boolean;
   constructor(private loggerService: LoggerService) {
     super(loggerService.logger);
+    this.loggerService.logger.logDebug('AMCSalesforceHomeComponent: constructor start');
     this.searchResultWasReturned = false;
     this.interactions = new Map();
     this.whoList = [];
@@ -40,16 +41,18 @@ export class AMCSalesforceHomeComponent extends Application implements OnInit {
       'https://na15.salesforce.com/support/console/42.0/integration.js',
       'https://gs0.lightning.force.com/support/api/42.0/lightning/opencti_min.js'
     ]);
-
+    this.loggerService.logger.logDebug('AMCSalesforceHomeComponent: constructor complete');
   }
   async ngOnInit() {
     await super.ngOnInit();
+    this.loggerService.logger.logDebug('AMCSalesforceHomeComponent: ngOnInit start');
     this.bridgeEventsService.subscribe('clickToDial', event => {
       api.clickToDial(event.number, this.formatCrmResults(event.records));
     });
     this.bridgeEventsService.subscribe('setActivityDetails', this.setActivityDetails);
     this.bridgeEventsService.subscribe('saveActivityResponse', this.saveActivityResponse);
     const config = await api.initializeComplete(this.logger);
+    this.loggerService.logger.logDebug('AMCSalesforceHomeComponent: ngOnInit complete');
   }
 
   formatCrmResults(crmResults: any): api.SearchRecords {
@@ -210,6 +213,7 @@ export class AMCSalesforceHomeComponent extends Application implements OnInit {
   }
 
   protected saveActivity(activity): Promise<string> {
+    this.loggerService.logger.logDebug('AMCSalesforceHomeComponent: Save activity: ' + JSON.stringify(activity));
     if (this.ActivityMap.has(activity.InteractionId)) {
       activity.ActivityId = this.ActivityMap.get(activity.InteractionId).ActivityId;
     }
@@ -217,7 +221,10 @@ export class AMCSalesforceHomeComponent extends Application implements OnInit {
       this.whoList = [];
       this.whatList = [];
     }
-    return Promise.resolve(this.bridgeEventsService.sendEvent('saveActivity', activity));
+    this.loggerService.logger.logDebug('AMCSalesforceHomeComponent: Sending activity: ' + JSON.stringify(activity) +
+      ' to bridge to be saved');
+    return Promise.resolve(this.bridgeEventsService.sendEvent('saveActivity', activity)
+    );
   }
   protected formatDate(date: Date): string {
     let month = '' + (date.getMonth() + 1);
@@ -229,18 +236,16 @@ export class AMCSalesforceHomeComponent extends Application implements OnInit {
     if (day.length < 2) {
       day = '0' + day;
     }
-
     return year + '-' + month + '-' + day;
   }
   @bind
   protected saveActivityResponse(activity: IActivity) {
+    this.loggerService.logger.logDebug('AMCSalesforceHomeComponent: Updated activity received ' +
+      ' from bridge: ' + JSON.stringify(activity));
     this.ActivityMap.set(activity.InteractionId, activity);
   }
-  /**
- * This listens for onInteraction events. It will call preformScreenpop if needed.
- * Note: if overridden you do not need to bind the new method
- */
   protected async onInteraction(interaction: api.IInteraction): Promise<api.SearchRecords> {
+    this.loggerService.logger.logDebug('AMCSalesforceHomeComponent: Interaction recieved: ' + JSON.stringify(interaction));
     try {
       const interactionId = interaction.interactionId;
       const scenarioIdInt = interaction.scenarioId;
@@ -251,18 +256,21 @@ export class AMCSalesforceHomeComponent extends Application implements OnInit {
         if (interaction.details.id === '' && interaction.details.type === '') {
           this.currentInteraction = interaction;
           this.subject = 'Call [' + interaction.details.fields.Phone.Value + ']';
+          this.loggerService.logger.logDebug('AMCSalesforceHomeComponent: New Interaction recieved, no record for screenpop');
           this.ActivityMap.set(interaction.interactionId, this.createActivity(interaction));
+          this.loggerService.logger.logDebug('AMCSalesforceHomeComponent: Autosave activity: ' +
+            JSON.stringify(this.ActivityMap.get(this.currentInteraction.interactionId)));
           this.autoSave.next();
         }
-
-
-
-
       }
       this.scenarioInteractionMappings[scenarioIdInt][interactionId] = true;
       if (this.shouldPreformScreenpop(interaction, isNewScenarioId)) {
+        this.loggerService.logger.logDebug('AMCSalesforceHomeComponent: screenpop for new interaction: ' +
+          JSON.stringify(interaction));
         const searchRecord = await this.preformScreenpop(interaction);
         this.searchRecordList = searchRecord.toJSON();
+        this.loggerService.logger.logDebug('AMCSalesforceHomeComponent: Search results: ' +
+          JSON.stringify(searchRecord.toJSON()));
         if (this.searchRecordList.length > 1) {
           this.searchReturnedSingleResult = false;
           this.searchResultWasReturned = true;
@@ -273,10 +281,14 @@ export class AMCSalesforceHomeComponent extends Application implements OnInit {
         this.currentInteraction = interaction;
         this.subject = 'Call [' + interaction.details.fields.Phone.Value + ']';
         this.ActivityMap.set(interaction.interactionId, this.createActivity(interaction));
+        this.loggerService.logger.logDebug('AMCSalesforceHomeComponent: Autosave activity: ' +
+          JSON.stringify(this.ActivityMap.get(this.currentInteraction.interactionId)));
         this.autoSave.next();
 
         return searchRecord;
       } else if (interaction.state === api.InteractionStates.Disconnected) {
+        this.loggerService.logger.logDebug('AMCSalesforceHomeComponent: Disconnect interaction received: ' +
+          JSON.stringify(interaction));
         delete this.scenarioInteractionMappings[scenarioIdInt][interactionId];
         this.currentInteraction = null;
         this.searchResultWasReturned = false;
@@ -292,15 +304,6 @@ export class AMCSalesforceHomeComponent extends Application implements OnInit {
       throw msg;
     }
     return;
-  }
-  protected mapInteraction(interaction: api.IInteraction) {
-    if (this.interactions.has(interaction.interactionId)) {
-      if (interaction.state === api.InteractionStates.Disconnected) {
-        this.interactions.delete(interaction.interactionId);
-      }
-    } else {
-      this.interactions.set(interaction.interactionId, interaction);
-    }
   }
   protected createActivity(interaction: api.IInteraction): IActivity {
     const date = new Date();
@@ -329,7 +332,7 @@ export class AMCSalesforceHomeComponent extends Application implements OnInit {
       ActivityId: '',
       InteractionId: interaction.interactionId
     };
-
+    this.loggerService.logger.logDebug('AMCSalesforceHomeComponent: Create new activity: ' + JSON.stringify(activity));
     return activity;
   }
   protected whatListContains(whatObject: IActivityDetails): boolean {
