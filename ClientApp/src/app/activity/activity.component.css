@@ -43,7 +43,7 @@
   height: 15;
   width: 15px;
   text-align: center;
-  margin-left: 1%;
+  margin-left: 4px;
   margin-top: 4px;
   outline: none;
   font-size: 9px;
@@ -57,8 +57,8 @@
   background-color: #6cb047;
   color: #ffffff;
   padding-right: 5px;
-  margin-bottom: 3px;
-  margin-right: 2px;
+  margin-bottom: 2px;
+  margin-right: 4px;
   border-radius: 4px;
   font-size: 98%;
 }
@@ -70,6 +70,7 @@
   flex: 1 0 0;
   flex-wrap: wrap;
   display: flex;
+  margin-bottom: 3px;
 }
 
 .callBody {

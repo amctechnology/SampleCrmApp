@@ -33,10 +33,7 @@ export class ActivityComponent implements OnInit {
     this.quickCommentList = ['Left voicemail: ',
       'Scheduled follow up: ', 'Transferred to: ',
       'Sent email ', 'Number of agents: ',
-      'Selling points: ', 'Call Back: ',
-      'Do not disturb: ', 'Requires more information: ',
-      'Escalation: '
-    ];
+      'Selling points: '];
     this.currentWhatObject = null;
     this.currentWhoObject = null;
     this.subject = '';
