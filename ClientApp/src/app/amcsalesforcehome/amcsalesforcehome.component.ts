@@ -46,6 +46,7 @@ export class AMCSalesforceHomeComponent extends Application implements OnInit {
   async ngOnInit() {
     await super.ngOnInit();
     this.loggerService.logger.logDebug('AMCSalesforceHomeComponent: ngOnInit start');
+    this.loggerService.logger.logInformation('AMCSalesforceHomeComponent: Started: ' + new Date().toDateString);
     this.bridgeEventsService.subscribe('clickToDial', event => {
       api.clickToDial(event.number, this.formatCrmResults(event.records));
     });
@@ -421,9 +422,6 @@ export class AMCSalesforceHomeComponent extends Application implements OnInit {
   protected agentSelectedCallerInformation(id) {
     this.loggerService.logger.logDebug('AMCSalesforceHomeComponent: Screenpop selected caller information');
     this.bridgeEventsService.sendEvent('agentSelectedCallerInformation', id);
-  }
-  protected childComponentLogger(log) {
-    this.loggerService.logger.logDebug('AMCSalesforceHomeComponent: ' + log);
   }
 }
 

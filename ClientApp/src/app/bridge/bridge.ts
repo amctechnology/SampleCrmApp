@@ -18,7 +18,6 @@ class SalesforceBridge extends Bridge {
 
   constructor() {
     super();
-    this.eventService.sendEvent('logDebug', 'bridge: construcutor started');
     this.currentOnFocusEvent = null;
     this.appName = 'Salesforce';
     this.layoutObjectList = [];
@@ -30,7 +29,6 @@ class SalesforceBridge extends Bridge {
     this.eventService.subscribe('saveActivity', this.saveActivity);
     this.eventService.subscribe('createNewEntity', this.createNewEntity);
     this.eventService.subscribe('agentSelectedCallerInformation', this.tryScreenpop);
-    this.eventService.sendEvent('logDebug', 'bridge: constructor complete');
   }
 
   async afterScriptsLoad(): Promise<any> {
