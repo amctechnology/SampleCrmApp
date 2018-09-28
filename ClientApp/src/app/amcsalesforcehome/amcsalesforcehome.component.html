@@ -4,6 +4,5 @@
   <app-activity *ngIf="currentInteraction" [subject]="subject" [autoSave]="autoSave" [interactionDisconnected]="interactionDisconnected"
     [whoList]="whoList" [whatList]="whatList" [currentInteraction]="currentInteraction" [ActivityMap]="ActivityMap"
     (ActivitySave)="saveActivity($event)"></app-activity>
-  <app-recent></app-recent>
   <app-create (CreateNewEntity)="createNewEntity($event)"></app-create>
 </div>

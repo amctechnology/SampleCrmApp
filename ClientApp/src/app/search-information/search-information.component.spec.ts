@@ -1,5 +1,5 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
-
+import { LoggerService } from './../logger.service';
 import { SearchInformationComponent } from './search-information.component';
 
 describe('SearchInformationComponent', () => {
@@ -8,9 +8,10 @@ describe('SearchInformationComponent', () => {
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [ SearchInformationComponent ]
+      declarations: [SearchInformationComponent],
+      providers: [LoggerService]
     })
-    .compileComponents();
+      .compileComponents();
   }));
 
   beforeEach(() => {
