@@ -3,7 +3,7 @@
     <label class="headerLabel">
       <b>Create New</b>
     </label>
-    <img class="ViewResizeImage" src="assets/images/section_collapse.png" (click)="resizeCreate('collapse')" title="Collapse">
+    <img class="ViewResizeImage" src="assets/images/section_collapse.png" (click)="isCreateMaximezed = false" title="Collapse">
   </div>
   <div class="callBody">
     <div class="container">
@@ -24,5 +24,5 @@
     <label style="margin-left: 10px">
       <b>Create New</b>
     </label>
-    <img class="ViewResizeImage" src="assets/images/section_expand.png" (click)="resizeCreate('expand')" title="Expand">
+    <img class="ViewResizeImage" src="assets/images/section_expand.png" (click)="isCreateMaximezed = true" title="Expand">
   </div>

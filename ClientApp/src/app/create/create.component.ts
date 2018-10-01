@@ -20,14 +20,4 @@ export class CreateComponent implements OnInit {
       type);
     this.CreateNewEntity.emit(type);
   }
-  protected resizeCreate(size) {
-    if (size === 'collapse') {
-      this.loggerService.logger.logDebug('create: collapse window');
-      this.isCreateMaximized = false;
-    } else {
-      this.loggerService.logger.logDebug('create: expand window');
-      this.isCreateMaximized = true;
-    }
-  }
-
 }
