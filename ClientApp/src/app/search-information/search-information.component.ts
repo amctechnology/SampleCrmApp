@@ -17,15 +17,6 @@ export class SearchInformationComponent {
     this.isSearchInformationMaximized = true;
     this.loggerService.logger.logDebug('searchInformationComponent: Constructor complete');
   }
-  protected resizeSearchInformation(size) {
-    if (size === 'collapse') {
-      this.loggerService.logger.logDebug('searchInformationComponent: collapse window');
-      this.isSearchInformationMaximized = false;
-    } else {
-      this.loggerService.logger.logDebug('searchInformationComponent: expand window');
-      this.isSearchInformationMaximized = true;
-    }
-  }
   protected onAgentSelectedCallerInformation(event) {
     this.loggerService.logger.logDebug('searchInformationComponent: Agent selected caller info: ' +
       event.currentTarget.value);
