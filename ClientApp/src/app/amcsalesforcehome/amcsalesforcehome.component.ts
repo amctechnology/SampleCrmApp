@@ -6,7 +6,7 @@ import { InteractionDirectionTypes } from '@amc/application-api';
 import { Subject } from 'rxjs/Subject';
 import { IActivity } from './../Model/IActivity';
 import { IActivityDetails } from './../Model/IActivityDetails';
-import { ICreateNewParams } from './../Model/ICreateNewParams';
+import { ICreateNewSObjectParams } from './../Model/ICreateNewSObjectParams';
 import { LoggerService } from './../logger.service';
 @Component({
   selector: 'app-amcsalesforcehome',
@@ -370,7 +370,7 @@ export class AMCSalesforceHomeComponent extends Application implements OnInit {
   protected createNewEntity(entityType) {
     this.loggerService.logger.logDebug('AMCSalesforceHomeComponent: Screenpop new Salesforce object of type: '
       + JSON.stringify(entityType));
-    let params: ICreateNewParams;
+    let params: ICreateNewSObjectParams;
     if (this.currentInteraction) {
       if (this.ActivityMap.has(this.currentInteraction.interactionId)) {
         const activity = this.ActivityMap.get(this.currentInteraction.interactionId);
@@ -385,7 +385,7 @@ export class AMCSalesforceHomeComponent extends Application implements OnInit {
   }
 
   protected buildParams(entityType, activity) {
-    const params: ICreateNewParams = {
+    const params: ICreateNewSObjectParams = {
       entityName: entityType,
       caseFields: {},
       opportunityFields: {},

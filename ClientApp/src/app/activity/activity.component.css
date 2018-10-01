@@ -32,47 +32,41 @@
   border-right: 1px solid #939598;
   border-bottom-left-radius: 3px !IMPORTANT;
   border-bottom-right-radius: 3px !IMPORTANT;
-  display: flex;
-
+  height: 25px
 }
 
 .quickNotesBotton {
   background-color: #1e72ba;
   border: 0;
   color: white;
-  height: 15;
-  width: 15px;
-  text-align: center;
-  margin-left: 4px;
+  height: 70%;
+  width: 20px;
+  padding-left: 4px;
+  margin-left: 1%;
   margin-top: 4px;
   outline: none;
-  font-size: 9px;
+  font-size: 70%;
+
+
 }
 
 .submitButton {
   border: 0;
+  float: right;
   margin-top: 2px;
   outline: none;
   cursor: pointer;
   background-color: #6cb047;
   color: #ffffff;
   padding-right: 5px;
-  margin-bottom: 2px;
-  margin-right: 4px;
+  margin-bottom: 3px;
+  margin-right: 2px;
   border-radius: 4px;
   font-size: 98%;
 }
 
-
-.quickCommentsDiv {
-  text-align: left;
-  flex: 1 0 0;
-  flex-wrap: wrap;
-  display: flex;
-  margin-bottom: 3px;
-}
-
 .callBody {
+  /* border: 1px solid #939598; */
   border-top: 0;
   position: relative;
 }
@@ -124,22 +118,24 @@
 .dropDownListStyle {
   border: 1px solid #939598 !IMPORTANT;
   border-radius: 3px !IMPORTANT;
+  width: 71% !IMPORTANT;
   height: 20px !IMPORTANT;
   text-align: left !IMPORTANT;
   white-space: nowrap !IMPORTANT;
   text-overflow: ellipsis !IMPORTANT;
-  margin: 0 2% 0 0;
+  margin: 0 0% 0 0;
 }
 
 .activitySubjectTextBoxStyle {
   border: 1px solid #939598 !IMPORTANT;
   border-radius: 3px !IMPORTANT;
+  width: 71% !IMPORTANT;
   height: 20px !IMPORTANT;
   text-align: left !IMPORTANT;
   box-sizing: border-box;
   -webkit-box-sizing: border-box;
   -moz-box-sizing: border-box;
-  margin: 0 2% 0 0;
+  margin: 0 0% 0 0;
   padding-left: 2px;
 }
 
@@ -162,12 +158,11 @@
 
 .displayLabels {
   margin-left: 5px;
-  display: table;
-  margin-right: 2%;
+  width: 25%;
 }
 
 .displayData {
-  width: 100%;
+  width: 70%;
 }
 
 .container {

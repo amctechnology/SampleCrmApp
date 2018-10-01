@@ -6,7 +6,7 @@ import { Subject } from 'rxjs/Subject';
 import { OnInit } from '@angular/core';
 import { IActivity } from './../Model/IActivity';
 import { IActivityDetails } from './../Model/IActivityDetails';
-import { ICreateNewParams } from './../Model/ICreateNewParams';
+import { ICreateNewSObjectParams } from './../Model/ICreateNewSObjectParams';
 import { LoggerService } from './../logger.service';
 declare var sforce: any;
 
@@ -404,7 +404,7 @@ class SalesforceBridge extends Bridge {
     });
   }
   @bind
-  protected createNewEntity(params: ICreateNewParams) {
+  protected createNewEntity(params: ICreateNewSObjectParams) {
     let URL = '';
     this.eventService.sendEvent('logDebug', 'bridge: New Salesforce object requested with ' +
       'params: ' + JSON.stringify(params));

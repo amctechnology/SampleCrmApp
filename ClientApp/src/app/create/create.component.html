@@ -1,9 +1,9 @@
-<div *ngIf="isCreateMaximized" class="callDisplay" style="display: grid;">
+<div *ngIf="isCreateMaximized" class="callDisplay">
   <div class="editor callHeader">
     <label class="headerLabel">
       <b>Create New</b>
     </label>
-    <img class="ViewResizeImage" src="assets/images/section_collapse.png" (click)="isCreateMaximezed = false" title="Collapse">
+    <img class="ViewResizeImage" src="assets/images/section_collapse.png" (click)="isCreateMaximized = false" title="Collapse">
   </div>
   <div class="callBody">
     <div class="container">
@@ -21,8 +21,8 @@
 </div>
 <div *ngIf="!isCreateMaximized" class="callDisplay">
   <div class="editor callHeader">
-    <label style="margin-left: 10px">
+    <label class="headerLabel">
       <b>Create New</b>
     </label>
-    <img class="ViewResizeImage" src="assets/images/section_expand.png" (click)="isCreateMaximezed = true" title="Expand">
+    <img class="ViewResizeImage" src="assets/images/section_expand.png" (click)="isCreateMaximized = true" title="Expand">
   </div>

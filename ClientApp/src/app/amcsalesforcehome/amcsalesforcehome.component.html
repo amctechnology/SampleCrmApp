@@ -1,4 +1,4 @@
-<div style="background-color: #aec2de;">
+<div class="body">
   <app-search-information *ngIf="searchResultWasReturned" (agentSelectedCallerInformation)="agentSelectedCallerInformation($event)"
     [searchReturnedSingleResult]="searchReturnedSingleResult" [searchRecordList]="searchRecordList"></app-search-information>
   <app-activity *ngIf="currentInteraction" [subject]="subject" [autoSave]="autoSave" [interactionDisconnected]="interactionDisconnected"
