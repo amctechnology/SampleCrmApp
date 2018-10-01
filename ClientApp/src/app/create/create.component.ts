@@ -7,10 +7,10 @@ import { LoggerService } from './../logger.service';
 })
 export class CreateComponent implements OnInit {
   @Output() CreateNewEntity: EventEmitter<string> = new EventEmitter<string>();
-  maximizeCreate: boolean;
+  isCreateMaximized: boolean;
   constructor(private loggerService: LoggerService) {
     this.loggerService.logger.logDebug('create: Constructor start');
-    this.maximizeCreate = true;
+    this.isCreateMaximized = true;
     this.loggerService.logger.logDebug('create: Constructor complete');
   }
   ngOnInit() {
@@ -23,10 +23,10 @@ export class CreateComponent implements OnInit {
   protected resizeCreate(size) {
     if (size === 'collapse') {
       this.loggerService.logger.logDebug('create: collapse window');
-      this.maximizeCreate = false;
+      this.isCreateMaximized = false;
     } else {
       this.loggerService.logger.logDebug('create: expand window');
-      this.maximizeCreate = true;
+      this.isCreateMaximized = true;
     }
   }
 

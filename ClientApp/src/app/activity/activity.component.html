@@ -1,4 +1,4 @@
-<div *ngIf="maximizeActivity" class="callDisplay">
+<div *ngIf="isActivityMaximized" class="callDisplay">
   <div class="editor callHeader">
     <label class="headerLabel">
       <b>Activity Information</b>
@@ -51,7 +51,7 @@
     </div>
   </div>
 </div>
-<div *ngIf="!maximizeActivity" class="callDisplay">
+<div *ngIf="!isActivityMaximized" class="callDisplay">
   <div class="editor callHeader">
     <label style="margin-left: 10px">
       <b>Activity Information</b>

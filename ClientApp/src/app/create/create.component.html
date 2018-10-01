@@ -1,4 +1,4 @@
-<div *ngIf="maximizeCreate" class="callDisplay" style="display: grid;">
+<div *ngIf="isCreateMaximized" class="callDisplay" style="display: grid;">
   <div class="editor callHeader">
     <label class="headerLabel">
       <b>Create New</b>
@@ -19,7 +19,7 @@
     </div>
   </div>
 </div>
-<div *ngIf="!maximizeCreate" class="callDisplay">
+<div *ngIf="!isCreateMaximized" class="callDisplay">
   <div class="editor callHeader">
     <label style="margin-left: 10px">
       <b>Create New</b>

@@ -10,20 +10,20 @@ export class SearchInformationComponent {
   @Input() searchReturnedSingleResult: boolean;
   @Input() searchRecordList: Array<api.IRecordItem>;
   @Output() agentSelectedCallerInformation: EventEmitter<string> = new EventEmitter();
-  maximizeSearchInformation: boolean;
+  isSearchInformationMaximized: boolean;
   imageLocation: string;
   constructor(private loggerService: LoggerService) {
     this.loggerService.logger.logDebug('searchInformationComponent: Constructor start');
-    this.maximizeSearchInformation = true;
+    this.isSearchInformationMaximized = true;
     this.loggerService.logger.logDebug('searchInformationComponent: Constructor complete');
   }
   protected resizeSearchInformation(size) {
     if (size === 'collapse') {
       this.loggerService.logger.logDebug('searchInformationComponent: collapse window');
-      this.maximizeSearchInformation = false;
+      this.isSearchInformationMaximized = false;
     } else {
       this.loggerService.logger.logDebug('searchInformationComponent: expand window');
-      this.maximizeSearchInformation = true;
+      this.isSearchInformationMaximized = true;
     }
   }
   protected onAgentSelectedCallerInformation(event) {

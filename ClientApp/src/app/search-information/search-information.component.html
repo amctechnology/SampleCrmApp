@@ -1,4 +1,4 @@
-<div *ngIf="maximizeSearchInformation" class="callDisplay" style="display: grid;">
+<div *ngIf="isSearchInformationMaximized" class="callDisplay" style="display: grid;">
   <div class="editor callHeader">
     <label class="headerLabel">
       <b>Caller Information</b>
@@ -19,7 +19,7 @@
   </div>
 </div>
 
-<div *ngIf="!maximizeSearchInformation" class="callDisplay">
+<div *ngIf="!isSearchInformationMaximized" class="callDisplay">
   <div class="editor callHeader">
     <label style="margin-left: 10px">
       <b>Caller Information</b>

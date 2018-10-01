@@ -22,7 +22,7 @@ export class ActivityComponent implements OnInit {
   @Output() ActivitySave: EventEmitter<IActivity> = new EventEmitter<IActivity>();
   @Output() childComponentLogger: EventEmitter<string> = new EventEmitter<string>();
 
-  maximizeActivity: boolean;
+  isActivityMaximized: boolean;
   currentWhoObject: IActivityDetails;
   currentWhatObject: IActivityDetails;
   currentCallNotes: string;
@@ -39,7 +39,7 @@ export class ActivityComponent implements OnInit {
     this.subject = '';
     this.currentCallNotes = '';
     this.ActivityMap = new Map();
-    this.maximizeActivity = true;
+    this.isActivityMaximized = true;
     this.loggerService.logger.logDebug('activity: Constructor complete');
   }
   ngOnInit() {
@@ -55,10 +55,10 @@ export class ActivityComponent implements OnInit {
   protected resizeActivity(size) {
     if (size === 'collapse') {
       this.loggerService.logger.logDebug('activity: collapse window');
-      this.maximizeActivity = false;
+      this.isActivityMaximized = false;
     } else {
       this.loggerService.logger.logDebug('activity: expand window');
-      this.maximizeActivity = true;
+      this.isActivityMaximized = true;
     }
   }
   protected activitySave(clearActivityFields) {
