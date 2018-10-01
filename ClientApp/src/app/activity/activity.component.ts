@@ -52,15 +52,6 @@ export class ActivityComponent implements OnInit {
       this.activitySave(false);
     });
   }
-  protected resizeActivity(size) {
-    if (size === 'collapse') {
-      this.loggerService.logger.logDebug('activity: collapse window');
-      this.isActivityMaximized = false;
-    } else {
-      this.loggerService.logger.logDebug('activity: expand window');
-      this.isActivityMaximized = true;
-    }
-  }
   protected activitySave(clearActivityFields) {
     if (this.currentInteraction) {
       const activity = this.ActivityMap.get(this.currentInteraction.interactionId);
