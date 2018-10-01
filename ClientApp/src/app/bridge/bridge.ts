@@ -268,13 +268,7 @@ class SalesforceBridge extends Bridge {
       }
     });
   }
-  callback(response) {
-    if (response.success) {
-      console.log('API method call executed successfully! returnValue:', response.returnValue);
-    } else {
-      console.error('Something went wrong! Errors:', response.errors);
-    }
-  }
+
   private VerifyMode() {
     const fullUrl = document.location.href;
     const parameters = fullUrl.split('&');
@@ -358,7 +352,7 @@ class SalesforceBridge extends Bridge {
     });
   }
   @bind
-  protected saveActivity(activity: IActivity): Promise<any> {
+  protected saveActivity(activity: IActivity): Promise<IActivity> {
     this.eventService.sendEvent('logDebug', 'bridge: Activity from home received to save: ' + JSON.stringify(activity));
     if (this.isLightning) {
       return new Promise((resolve, reject) => {
@@ -405,7 +399,7 @@ class SalesforceBridge extends Bridge {
         console.log('Activity ID = ' + result.result);
         this.eventService.sendEvent('logDebug', 'bridge: Activity ' + JSON.stringify(activity) +
           ' saved in Classic');
-        resolve(this.eventService.sendEvent('saveActivityResponse', activity));
+        resolve(activity);
       });
     });
   }

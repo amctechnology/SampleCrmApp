@@ -50,7 +50,6 @@ export class AMCSalesforceHomeComponent extends Application implements OnInit {
       api.clickToDial(event.number, this.formatCrmResults(event.records));
     });
     this.bridgeEventsService.subscribe('setActivityDetails', this.setActivityDetails);
-    this.bridgeEventsService.subscribe('saveActivityResponse', this.saveActivityResponse);
     const config = await api.initializeComplete(this.logger);
     this.loggerService.logger.logDebug('AMCSalesforceHomeComponent: ngOnInit complete');
   }
@@ -212,7 +211,7 @@ export class AMCSalesforceHomeComponent extends Application implements OnInit {
     return this.bridgeEventsService.sendEvent('isToolbarVisible');
   }
 
-  protected saveActivity(activity): Promise<string> {
+  protected async saveActivity(activity): Promise<string> {
     this.loggerService.logger.logDebug('AMCSalesforceHomeComponent: Save activity: ' + JSON.stringify(activity));
     if (this.ActivityMap.has(activity.InteractionId)) {
       activity.ActivityId = this.ActivityMap.get(activity.InteractionId).ActivityId;
@@ -223,8 +222,11 @@ export class AMCSalesforceHomeComponent extends Application implements OnInit {
     }
     this.loggerService.logger.logDebug('AMCSalesforceHomeComponent: Sending activity: ' + JSON.stringify(activity) +
       ' to bridge to be saved');
-    return Promise.resolve(this.bridgeEventsService.sendEvent('saveActivity', activity)
-    );
+    activity = await this.bridgeEventsService.sendEvent('saveActivity', activity);
+    this.loggerService.logger.logDebug('AMCSalesforceHomeComponent: Updated activity received ' +
+      ' from bridge: ' + JSON.stringify(activity));
+    this.ActivityMap.set(activity.InteractionId, activity);
+    return Promise.resolve(activity.ActivityId);
   }
   protected formatDate(date: Date): string {
     let month = '' + (date.getMonth() + 1);
@@ -237,12 +239,6 @@ export class AMCSalesforceHomeComponent extends Application implements OnInit {
       day = '0' + day;
     }
     return year + '-' + month + '-' + day;
-  }
-  @bind
-  protected saveActivityResponse(activity: IActivity) {
-    this.loggerService.logger.logDebug('AMCSalesforceHomeComponent: Updated activity received ' +
-      ' from bridge: ' + JSON.stringify(activity));
-    this.ActivityMap.set(activity.InteractionId, activity);
   }
   protected async onInteraction(interaction: api.IInteraction): Promise<api.SearchRecords> {
     this.loggerService.logger.logDebug('AMCSalesforceHomeComponent: Interaction recieved: ' + JSON.stringify(interaction));

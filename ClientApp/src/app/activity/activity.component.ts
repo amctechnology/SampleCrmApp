@@ -115,9 +115,9 @@ export class ActivityComponent implements OnInit {
     this.activitySave(false);
   }
   protected getInteractionDirection(directionNumber) {
-    if (directionNumber === 0) {
+    if (directionNumber === api.InteractionDirectionTypes.Inbound) {
       return 'Inbound';
-    } else if (directionNumber === 1) {
+    } else if (directionNumber === api.InteractionDirectionTypes.Outbound) {
       return 'Outbound';
     }
     return 'Internal';
