@@ -249,15 +249,6 @@ export class AMCSalesforceHomeComponent extends Application implements OnInit {
       if (!this.scenarioInteractionMappings.hasOwnProperty(scenarioIdInt)) {
         this.scenarioInteractionMappings[scenarioIdInt] = {};
         isNewScenarioId = true;
-        if (interaction.details.id === '' && interaction.details.type === '') {
-          this.currentInteraction = interaction;
-          this.subject = 'Call [' + interaction.details.fields.Phone.Value + ']';
-          this.loggerService.logger.logDebug('AMCSalesforceHomeComponent: New Interaction recieved, no record for screenpop');
-          this.ActivityMap.set(interaction.interactionId, this.createActivity(interaction));
-          this.loggerService.logger.logDebug('AMCSalesforceHomeComponent: Autosave activity: ' +
-            JSON.stringify(this.ActivityMap.get(this.currentInteraction.interactionId)));
-          this.autoSave.next();
-        }
       }
       this.scenarioInteractionMappings[scenarioIdInt][interactionId] = true;
       if (this.shouldPreformScreenpop(interaction, isNewScenarioId)) {

@@ -31,13 +31,15 @@
               <textarea value="{{currentCallNotes}}" placeholder="Click to add a comment" class="activityCommentsTextBoxStyle"
                 (change)="onCallNotesChange($event)" cols="20" rows="2" title=""></textarea>
             </div>
-            <div flex class="notesBottonBorder">
-              <div class="quickCommentsDiv">
-                <input *ngFor="let quickComment of quickCommentList; let i = index;" class="quickNotesBotton" type="button"
-                  value="{{i+1}}" (click)="loadQuickComment(i)" title="{{quickComment}}">
-              </div>
-              <div>
-                <input class="submitButton" type="button" value="Submit" (click)="activitySave(false)">
+            <div class="notesBottonBorder">
+              <div class="container">
+                <div class="quickCommentsDiv">
+                  <input *ngFor="let quickComment of quickCommentList; let i = index;" class="quickNotesBotton" type="button"
+                    value="{{i+1}}" (click)="loadQuickComment(i)" title="{{quickComment}}">
+                </div>
+                <div class="submitDiv">
+                  <input class="submitButton" type="button" value="Submit" (click)="activitySave(false)">
+                </div>
               </div>
             </div>
           </div>

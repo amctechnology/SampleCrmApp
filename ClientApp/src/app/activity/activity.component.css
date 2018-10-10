@@ -150,6 +150,8 @@
   -webkit-box-sizing: border-box;
   -moz-box-sizing: border-box;
   resize: none;
+  width: 100%;
+  height: 95px;
 }
 
 .displayDiv {
@@ -170,6 +172,18 @@
   width: 90%;
   display: flex;
   align-items: center;
+}
+
+.quickCommentsDiv {
+  text-align: left;
+  flex: 1 0 0;
+  flex-wrap: wrap;
+  display: flex;
+  margin-bottom: 3px;
+}
+
+.submitDiv {
+  text-align: right;
 }
 
 .newEntityImages {
