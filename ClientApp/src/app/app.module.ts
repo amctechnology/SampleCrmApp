@@ -8,7 +8,6 @@ import { AppComponent } from './app.component';
 import { AMCSalesforceHomeComponent } from './amcsalesforcehome/amcsalesforcehome.component';
 import { ActivityComponent } from './activity/activity.component';
 import { CreateComponent } from './create/create.component';
-import { RecentComponent } from './recent/recent.component';
 import { SearchInformationComponent } from './search-information/search-information.component';
 import { LoggerService } from './logger.service';
 
@@ -18,7 +17,6 @@ import { LoggerService } from './logger.service';
     AMCSalesforceHomeComponent,
     ActivityComponent,
     CreateComponent,
-    RecentComponent,
     SearchInformationComponent,
 
   ],
