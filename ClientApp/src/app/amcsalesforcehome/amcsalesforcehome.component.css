@@ -37,7 +37,7 @@
   float: right;
   margin-top: 4px;
   margin-right: 5px;
-  margin-left:5px;
+  margin-left: 5px;
 }
 
 .amcIcon {
@@ -48,7 +48,7 @@
 }
 
 .callDisplay {
-  display:grid;
+  display: grid;
   background-color: #aec2de;
 }
 
@@ -59,7 +59,6 @@
   margin: 4px 5% 0 0px;
   font-family: Arial;
   white-space: nowrap;
-  /*overflow: hidden;*/
   text-overflow: ellipsis;
   border: 0;
   padding-top: 2px;
@@ -95,7 +94,7 @@
   -webkit-box-sizing: border-box;
   -moz-box-sizing: border-box;
   margin: 0 5% 0 0;
-  padding-left:2px;
+  padding-left: 2px;
 }
 
 .activityCommentsTextBoxStyle {
@@ -124,7 +123,7 @@
 }
 
 .container {
-  width:100%;
+  width: 100%;
   display: flex;
   align-items: center;
 }
@@ -134,7 +133,7 @@
   height: 25px;
   margin-top: 2px;
   cursor: pointer;
-  padding-left:5px;
+  padding-left: 5px;
 }
 
 .body {
@@ -144,4 +143,3 @@
   background-color: #fff;
   font-family: Arial;
 }
-

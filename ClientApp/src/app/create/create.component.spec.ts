@@ -1,5 +1,5 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
-
+import { LoggerService } from './../logger.service';
 import { CreateComponent } from './create.component';
 
 describe('CreateComponent', () => {
@@ -8,9 +8,10 @@ describe('CreateComponent', () => {
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [ CreateComponent ]
+      declarations: [CreateComponent],
+      providers: [LoggerService]
     })
-    .compileComponents();
+      .compileComponents();
   }));
 
   beforeEach(() => {

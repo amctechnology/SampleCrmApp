@@ -24,6 +24,7 @@
   width: 100% !important;
   margin-top: 0px !important;
 }
+
 .notesBottonBorder {
   background-color: #ffffff;
   border-left: 1px solid #939598;
@@ -31,8 +32,9 @@
   border-right: 1px solid #939598;
   border-bottom-left-radius: 3px !IMPORTANT;
   border-bottom-right-radius: 3px !IMPORTANT;
-  height:25px
+  height: 30px
 }
+
 .quickNotesBotton {
   background-color: #1e72ba;
   border: 0;
@@ -40,27 +42,27 @@
   height: 70%;
   width: 20px;
   padding-left: 4px;
-  margin-left: 1%;
-  margin-top:4px;
-  outline:none;
+  margin-left: 2%;
+  outline: none;
   font-size: 70%;
 
 
 }
+
 .submitButton {
   border: 0;
-  float:right;
-  margin-top:2px;
-  outline:none;
-  cursor:pointer;
+  float: right;
+  margin-top: 2px;
+  outline: none;
+  cursor: pointer;
   background-color: #6cb047;
   color: #ffffff;
   padding-right: 5px;
-  margin-bottom: 3px;
   margin-right: 2px;
   border-radius: 4px;
   font-size: 98%;
 }
+
 .callBody {
   /* border: 1px solid #939598; */
   border-top: 0;
@@ -73,7 +75,7 @@
   float: right;
   margin-top: 4px;
   margin-right: 5px;
-  margin-left:5px;
+  margin-left: 5px;
 }
 
 .amcIcon {
@@ -84,10 +86,11 @@
 }
 
 .callDisplay {
-  display:grid;
+  display: grid;
   margin-bottom: 8px;
   background-color: #ffffff;
 }
+
 .editor {
   font-size: 0.9em;
   width: 70%;
@@ -131,19 +134,20 @@
   -webkit-box-sizing: border-box;
   -moz-box-sizing: border-box;
   margin: 0 0% 0 0;
-  padding-left:2px;
+  padding-left: 2px;
 }
 
 .activityCommentsTextBoxStyle {
-  border: 1px solid #939598 !IMPORTANT;
-  border-top-left-radius: 3px !IMPORTANT;
-  border-top-right-radius: 3px !IMPORTANT;
+  border: none;
   color: #333333 !IMPORTANT;
   text-align: left !IMPORTANT;
   margin: 0px 0% 0px 0px;
   box-sizing: border-box;
   -webkit-box-sizing: border-box;
   -moz-box-sizing: border-box;
+  resize: none;
+  width: 100%;
+  height: 95px;
 }
 
 .displayDiv {
@@ -154,16 +158,30 @@
 .displayLabels {
   margin-left: 5px;
   width: 25%;
+  margin-right: 2px;
 }
 
 .displayData {
   width: 70%;
 }
 
-.container {
-  width:90%;
+.commentsButtonDiv {
+  width: 100%;
   display: flex;
   align-items: center;
+}
+
+.quickCommentsDiv {
+  text-align: left;
+  flex: 1 0 0;
+  flex-wrap: wrap;
+  display: flex;
+  margin-top: 5px;
+}
+
+.submitDiv {
+  text-align: right;
+  margin-top: 4px
 }
 
 .newEntityImages {
@@ -171,7 +189,7 @@
   height: 25px;
   margin-top: 2px;
   cursor: pointer;
-  padding-left:5px;
+  padding-left: 5px;
 }
 
 body {
@@ -183,9 +201,9 @@ body {
 }
 
 .callNotesContainer {
-  float:left;
-  height:120px;
-  width:100%;
+  float: left;
+  height: 100%;
+  width: 100%;
   margin-right: 5px;
   margin-left: 5px;
 }
@@ -194,4 +212,19 @@ body {
   width: 20px;
   height: 20px;
   float: right;
+}
+
+.headerLabel {
+  margin-left: 10px
+}
+
+.textAreaDiv {
+  background-color: #ffffff;
+  border-left: 1px solid #939598;
+  border-bottom: 1px solid #939598;
+  border-right: 1px solid #939598;
+  border-top: 1px solid #939598;
+  border-top-left-radius: 3px !IMPORTANT;
+  border-top-right-radius: 3px !IMPORTANT;
+
 }

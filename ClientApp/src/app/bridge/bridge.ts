@@ -6,19 +6,19 @@ import { Subject } from 'rxjs/Subject';
 import { OnInit } from '@angular/core';
 import { IActivity } from './../Model/IActivity';
 import { IActivityDetails } from './../Model/IActivityDetails';
-import { IParams } from './../Model/IParams';
-
+import { ICreateNewSObjectParams } from './../Model/ICreateNewSObjectParams';
+import { LoggerService } from './../logger.service';
 declare var sforce: any;
 
 class SalesforceBridge extends Bridge {
   private isLightning = false;
-  private currentEvent: any;
+  private currentOnFocusEvent: ISalesforceClassicOnFocusEvent | ISalesforceLightningOnFocusEvent;
   activity: IActivity = null;
-  layoutObjectList: Array<string>;
+  layoutObjectList: string[];
 
   constructor() {
     super();
-    this.currentEvent = null;
+    this.currentOnFocusEvent = null;
     this.appName = 'Salesforce';
     this.layoutObjectList = [];
     this.VerifyMode();
@@ -26,16 +26,13 @@ class SalesforceBridge extends Bridge {
     this.eventService.subscribe('getUserInfo', this.getUserInfo);
     this.eventService.subscribe('getSearchLayout', this.getSearchLayout);
     this.eventService.subscribe('isToolbarVisible', this.isToolbarVisible);
-    // subscribe for activities to be saved
     this.eventService.subscribe('saveActivity', this.saveActivity);
-    // create new entity
     this.eventService.subscribe('createNewEntity', this.createNewEntity);
-
-    this.eventService.subscribe('screenPopSelectedSearchResult', this. tryScreenpop);
-
+    this.eventService.subscribe('agentSelectedCallerInformation', this.tryScreenpop);
   }
 
   async afterScriptsLoad(): Promise<any> {
+    this.eventService.sendEvent('logDebug', 'bridge: scripts loaded');
     await super.afterScriptsLoad();
     if (this.isLightning) {
       sforce.opencti.onClickToDial({ listener: this.clickToDialListener });
@@ -48,14 +45,20 @@ class SalesforceBridge extends Bridge {
       sforce.interaction.onFocus(this.onFocusListener);
       sforce.interaction.cti.getSoftphoneLayout(this.buildLayoutObjectList);
     }
+    if (this.isLightning) {
+      this.eventService.sendEvent('logDebug', 'bridge: App running in lightning');
+    } else {
+      this.eventService.sendEvent('logDebug', 'bridge: App running in classic');
+    }
   }
   @bind
-  protected buildLayoutObjectList(result)  {
+  protected buildLayoutObjectList(result) {
     if (this.isLightning) {
       this.layoutObjectList = Object.keys(result.returnValue.Inbound.objects);
     } else {
       this.layoutObjectList = Object.keys(JSON.parse(result.result).Inbound.objects);
     }
+    this.eventService.sendEvent('logInformation', 'bridge: Sofphone layout: ' + this.layoutObjectList);
   }
   @bind
   isToolbarVisible() {
@@ -94,42 +97,36 @@ class SalesforceBridge extends Bridge {
       }
     });
   }
-// Use for registering changes on screen within CRM
   @bind
   async onFocusListener(event) {
-    if ( event !== this.currentEvent) {
-      this.currentEvent = event;
-
-    const entity = {
-      objectType: '',
-      displayName: '',
-      objectName: '',
-      objectId: '',
-      url: ''
-    };
-    if (this.isLightning) {
-      entity.objectType = event.objectType;
-      entity.displayName = event.objectType;
-      entity.objectId = event.recordId;
-      entity.objectName = event.recordName;
-      entity.url = event.url;
-      if ( entity.objectId === '') {
-        return 1;
+    if (event !== this.currentOnFocusEvent) {
+      this.currentOnFocusEvent = event;
+      this.eventService.sendEvent('logDebug', 'bridge: onFocus event: ' + JSON.stringify(event));
+      const entity = {
+        objectType: '',
+        displayName: '',
+        objectName: '',
+        objectId: '',
+        url: ''
+      };
+      if (this.isLightning) {
+        entity.objectType = event.objectType;
+        entity.displayName = event.objectType;
+        entity.objectId = event.recordId;
+        entity.objectName = event.recordName;
+        entity.url = event.url;
+      } else {
+        const temp = JSON.parse(event.result);
+        entity.objectType = temp.object;
+        entity.displayName = temp.displayName;
+        entity.objectId = temp.objectId;
+        entity.objectName = temp.objectName;
+        entity.url = temp.url;
       }
-    } else {
-      const temp = JSON.parse(event.result);
-      entity.objectType = temp.object;
-      entity.displayName = temp.displayName;
-      entity.objectId = temp.objectId;
-      entity.objectName = temp.objectName;
-      entity.url = temp.url;
-      if ( entity.objectId === '') {
-        return 1;
+      if (this.layoutObjectList.includes(entity.objectType) && entity.objectId !== '') {
+        this.eventService.sendEvent('setActivityDetails', entity);
+        this.eventService.sendEvent('logDebug', 'bridge: onFocus event sent to home');
       }
-    }
-    if (this.layoutObjectList.includes(entity.objectType)) {
-      this.eventService.sendEvent('setActivityDetails', entity);
-    }
     }
   }
 
@@ -182,7 +179,7 @@ class SalesforceBridge extends Bridge {
 
   @bind
   async screenpopHandler(event): Promise<any> {
-    this.eventService.sendEvent('logVerbose', 'screenpopHandler START: ' + event);
+    this.eventService.sendEvent('logVerbose', 'bridge: screenpopHandler START: ' + event);
     try {
       let screenpopRecords = null;
       if (event.id && event.type) {
@@ -193,7 +190,7 @@ class SalesforceBridge extends Bridge {
       }
       return screenpopRecords;
     } catch (e) {
-      this.eventService.sendEvent('logError', 'screenpopHandler ERROR=' + e);
+      this.eventService.sendEvent('logError', 'bridge: screenpopHandler ERROR=' + e);
       throw e;
     }
   }
@@ -271,13 +268,7 @@ class SalesforceBridge extends Bridge {
       }
     });
   }
-  callback(response) {
-    if (response.success) {
-       console.log('API method call executed successfully! returnValue:', response.returnValue);
-    } else {
-       console.error('Something went wrong! Errors:', response.errors);
-    }
-   }
+
   private VerifyMode() {
     const fullUrl = document.location.href;
     const parameters = fullUrl.split('&');
@@ -361,7 +352,8 @@ class SalesforceBridge extends Bridge {
     });
   }
   @bind
-  protected saveActivity(activity: IActivity): Promise<any> {
+  protected saveActivity(activity: IActivity): Promise<IActivity> {
+    this.eventService.sendEvent('logDebug', 'bridge: Activity from home received to save: ' + JSON.stringify(activity));
     if (this.isLightning) {
       return new Promise((resolve, reject) => {
         const activityObject: object = {
@@ -377,12 +369,14 @@ class SalesforceBridge extends Bridge {
             ActivityDate: activity.ActivityDate
           },
           callback: result => {
-            try {
-              activity.ActivityId = result.returnValue.recordId;
-            } catch (e) {
-              console.log('Save could not complete: ' + JSON.stringify(result.errors['0'].details.fieldErrors));
+            if (result.success) {
+              this.eventService.sendEvent('logDebug', 'Activity ' + JSON.stringify(activity) +
+                ' saved in Lightning, sending updated activity back to home');
+              resolve(activity);
+            } else {
+              this.eventService.sendEvent('logDebug', 'bridge: Activity ' + JSON.stringify(activity) +
+                ' could not be saved, error: ' + JSON.stringify(result.errors['0'].details.fieldErrors));
             }
-            resolve(this.eventService.sendEvent('saveActivityResponse', activity));
           }
         };
         if (activity.ActivityId) {
@@ -394,22 +388,26 @@ class SalesforceBridge extends Bridge {
     return new Promise((resolve, reject) => {
       let activityString = '';
       activityString = 'WhoId=' + activity.WhoObject.objectId + '&WhatId=' + activity.WhatObject.objectId + '&CallType=' +
-      activity.CallType + '&CallDurationInSeconds=' + activity.CallDurationInSeconds + '&Subject=' +
-      activity.Subject + '&Description=' + activity.Description + '&Status=' + activity.Status +
-      '&ActivityDate=' + activity.ActivityDate;
+        activity.CallType + '&CallDurationInSeconds=' + activity.CallDurationInSeconds + '&Subject=' +
+        activity.Subject + '&Description=' + activity.Description + '&Status=' + activity.Status +
+        '&ActivityDate=' + activity.ActivityDate;
       if (activity.ActivityId) {
         activityString = activityString + '&Id=' + activity.ActivityId;
       }
       sforce.interaction.saveLog('Task', activityString, result => {
         activity.ActivityId = result.result;
         console.log('Activity ID = ' + result.result);
-        resolve(this.eventService.sendEvent('saveActivityResponse', activity));
+        this.eventService.sendEvent('logDebug', 'bridge: Activity ' + JSON.stringify(activity) +
+          ' saved in Classic');
+        resolve(activity);
       });
     });
   }
   @bind
-  protected createNewEntity(params: IParams) {
-    let  URL = '';
+  protected createNewEntity(params: ICreateNewSObjectParams) {
+    let URL = '';
+    this.eventService.sendEvent('logDebug', 'bridge: New Salesforce object requested with ' +
+      'params: ' + JSON.stringify(params));
     if (this.isLightning) {
       const screenPopObject: IScreenPopObject = {
         type: sforce.opencti.SCREENPOP_TYPE.NEW_RECORD_MODAL,
@@ -417,16 +415,22 @@ class SalesforceBridge extends Bridge {
           entityName: params.entityName,
           defaultFieldValues: {}
         },
-        callback: result => {
-          console.log(result);
+        callback: (result: ISaveLogResult) => {
+          if (result.success) {
+            this.eventService.sendEvent('logDebug', 'bridge: Salesforce object with params: ' +
+              JSON.stringify(params) + ' screenpop successful: ' + result.returnValue);
+          } else {
+            this.eventService.sendEvent('logDebug', 'bridge: Salesforce object with params: ' +
+              JSON.stringify(params) + ' screenpop unsuccessful: ' + result.errors);
+          }
         }
       };
       if (params.entityName === 'Case') {
         screenPopObject.params.defaultFieldValues = params.caseFields;
-      } else if ( params.entityName === 'Opportunity') {
+      } else if (params.entityName === 'Opportunity') {
         screenPopObject.params.defaultFieldValues = params.opportunityFields;
-      } else if ( params.entityName === 'Lead') {
-          screenPopObject.params.defaultFieldValues = params.leadFields;
+      } else if (params.entityName === 'Lead') {
+        screenPopObject.params.defaultFieldValues = params.leadFields;
       }
       sforce.opencti.screenPop(screenPopObject);
     } else {
@@ -437,10 +441,16 @@ class SalesforceBridge extends Bridge {
       } else if (params.entityName === 'Opportunity') {
         URL = '/006/e';
       }
-      sforce.interaction.screenPop(URL, true, function(result)  {
-        console.log(result);
+      sforce.interaction.screenPop(URL, true, function (result) {
+        if (result) {
+          this.eventService.sendEvent('logDebug', 'bridge: Salesforce object with params: ' +
+            JSON.stringify(params) + ' screenpop successful');
+        } else {
+          this.eventService.sendEvent('logDebug', 'bridge: Salesforce object with params: ' +
+            JSON.stringify(params) + ' screenpop unsuccessful');
+        }
       });
-   }
+    }
   }
 
 }
@@ -450,9 +460,33 @@ const bridge = new SalesforceBridge();
 interface IScreenPopObject {
   type: string;
   params: {
-          entityName: string;
-          defaultFieldValues?: Object;
-        };
-  callback: any;
+    entityName: string;
+    defaultFieldValues?: Object;
+  };
+  callback: (result: ISaveLogResult) => void;
+}
+interface ISaveLogResult {
+  success?: boolean;
+  returnValue?: object;
+  errors?: string[];
+}
+interface ISalesforceClassicOnFocusEvent {
+  result: {
+    url: string;
+    objectId: string;
+    objectName: string;
+    object: string;
+    displayName: string;
+  };
+  error: string;
 }
 
+interface ISalesforceLightningOnFocusEvent {
+  url: string;
+  recordId: string;
+  recordName: string;
+  objectType: string;
+  accountId?: string;
+  contactId?: string;
+  personAccount: boolean;
+}

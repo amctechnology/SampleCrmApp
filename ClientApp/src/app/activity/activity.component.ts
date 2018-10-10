@@ -4,8 +4,8 @@ import { Observable } from 'rxjs/Observable';
 import { Subject } from 'rxjs/Subject';
 import { IActivity } from './../Model/IActivity';
 import { IActivityDetails } from './../Model/IActivityDetails';
-import { IParams } from './../Model/IParams';
-
+import { ICreateNewSObjectParams } from './../Model/ICreateNewSObjectParams';
+import { LoggerService } from './../logger.service';
 @Component({
   selector: 'app-activity',
   templateUrl: './activity.component.html',
@@ -20,98 +20,95 @@ export class ActivityComponent implements OnInit {
   @Input() autoSave: Subject<void>;
   @Input() subject: string;
   @Output() ActivitySave: EventEmitter<IActivity> = new EventEmitter<IActivity>();
+  @Output() childComponentLogger: EventEmitter<string> = new EventEmitter<string>();
 
-  curWho: IActivityDetails;
-  curWhat: IActivityDetails;
-  callNotes: string;
-  quickCommentList: Array<string>;
-  maximizeActivity: boolean;
-  constructor() {
-    this.InitializeQuickComments();
-    this.curWhat = null;
-    this.curWho = null;
+  isActivityMaximized: boolean;
+  currentWhoObject: IActivityDetails;
+  currentWhatObject: IActivityDetails;
+  currentCallNotes: string;
+  quickCommentList: string[];
+
+  constructor(private loggerService: LoggerService) {
+    this.loggerService.logger.logDebug('activity: Constructor start');
+    this.quickCommentList = ['Left voicemail: ',
+      'Scheduled follow up: ', 'Transferred to: ',
+      'Sent email ', 'Number of agents: ',
+      'Selling points: '];
+    this.currentWhatObject = null;
+    this.currentWhoObject = null;
     this.subject = '';
-    this. callNotes = '';
+    this.currentCallNotes = '';
     this.ActivityMap = new Map();
-    this.maximizeActivity = true;
+    this.isActivityMaximized = true;
+    this.loggerService.logger.logDebug('activity: Constructor complete');
   }
-
   ngOnInit() {
     this.interactionDisconnected.subscribe(event => {
+      this.loggerService.logger.logDebug('create: Interaction disconnected event received');
       this.activitySave(true);
     });
     this.autoSave.subscribe(event => {
+      this.loggerService.logger.logDebug('create: Auto save event received');
       this.activitySave(false);
     });
   }
-
-  setSelectedInteraction(interactionList) {
-    console.log('interaction ' + interactionList.srcElement[0].id );
-  }
-
-  protected resizeActivity(size) {
-    if (size === 'collapse') {
-      this.maximizeActivity = false;
-    } else {
-      this.maximizeActivity = true;
-    }
-  }
-  protected activitySave(clear_activity_fields) {
+  protected activitySave(clearActivityFields) {
     if (this.currentInteraction) {
-    // tslint:disable-next-line:prefer-const
-    let activity = this.ActivityMap.get(this.currentInteraction.interactionId);
-    activity.CallDurationInSeconds = this.getSecondsElapsed(activity.TimeStamp).toString();
+      const activity = this.ActivityMap.get(this.currentInteraction.interactionId);
+      activity.CallDurationInSeconds = this.getSecondsElapsed(activity.TimeStamp).toString();
 
-    if (this.curWhat === null) {
-      if (this.whatList.length !== 0) {
-        activity.WhatObject = this.whatList[0];
+      if (this.currentWhatObject === null) {
+        if (this.whatList.length !== 0) {
+          activity.WhatObject = this.whatList[0];
+        }
+      } else {
+        activity.WhatObject = this.currentWhatObject;
       }
-    } else {
-      activity.WhatObject = this.curWhat;
-    }
-    if (this.curWho === null) {
-      if (this.whoList.length !== 0 ) {
-        activity.WhoObject = this.whoList[0];
+      if (this.currentWhoObject === null) {
+        if (this.whoList.length !== 0) {
+          activity.WhoObject = this.whoList[0];
+        }
+      } else {
+        activity.WhoObject = this.currentWhoObject;
       }
-    } else {
-      activity.WhoObject = this.curWho;
+      activity.Description = this.currentCallNotes;
+      activity.CallType = this.getInteractionDirection(this.currentInteraction.direction);
+      activity.Subject = this.subject;
+      if (clearActivityFields) {
+        activity.Status = 'Completed';
+        this.subject = null;
+        this.currentCallNotes = null;
+        this.ActivitySave.emit(activity);
+      } else {
+        this.ActivitySave.emit(activity);
+      }
+      this.loggerService.logger.logDebug('activity: Save activity: ' + JSON.stringify(activity));
     }
-    activity.Description = this.callNotes;
-    activity.CallType = this.getInteractionDirection(this.currentInteraction.direction);
-    activity.Subject = this.subject;
-    if (clear_activity_fields) {
-      activity.Status = 'Completed';
-      this.clearActivityDetails();
-      this.ActivitySave.emit(activity);
-    } else {
-      this.ActivitySave.emit(activity);
-    }
-  }
-  }
-  protected clearActivityDetails() {
-    this.subject = null;
-    this.callNotes = null;
   }
   protected onNameSelectChange(event) {
-    this.curWho = this.getWho(event.currentTarget.value);
+    this.currentWhoObject = this.getWho(event.currentTarget.value);
+    this.loggerService.logger.logDebug('activity: Call from select box value changed: ' + JSON.stringify(this.currentWhoObject));
     this.activitySave(false);
   }
   protected onRelatedToChange(event) {
-    this. curWhat = this.getWhat(event.currentTarget.value);
+    this.currentWhatObject = this.getWhat(event.currentTarget.value);
+    this.loggerService.logger.logDebug('activity: Related to select box value changed: ' + JSON.stringify(this.currentWhatObject));
     this.activitySave(false);
   }
   protected onSubjectChange(event) {
     this.subject = event.srcElement.value;
+    this.loggerService.logger.logDebug('activity: Subject value changed: ' + JSON.stringify(this.subject));
     this.activitySave(false);
   }
   protected onCallNotesChange(event) {
-    this.callNotes = event.srcElement.value.trim();
+    this.currentCallNotes = event.srcElement.value.trim();
+    this.loggerService.logger.logDebug('activity: Call notes value changed: ' + JSON.stringify(this.currentCallNotes));
     this.activitySave(false);
   }
   protected getInteractionDirection(directionNumber) {
-    if (directionNumber === 0 ) {
+    if (directionNumber === api.InteractionDirectionTypes.Inbound) {
       return 'Inbound';
-    } else if (directionNumber === 1) {
+    } else if (directionNumber === api.InteractionDirectionTypes.Outbound) {
       return 'Outbound';
     }
     return 'Internal';
@@ -120,7 +117,6 @@ export class ActivityComponent implements OnInit {
     const EndDate = new Date();
     return Math.round((EndDate.getTime() - startDate.getTime()) / 1000);
   }
-
   protected getWho(id): IActivityDetails {
     for (let i = 0; i < this.whoList.length; i++) {
       if (this.whoList[i].objectId === id) {
@@ -135,24 +131,8 @@ export class ActivityComponent implements OnInit {
       }
     }
   }
-
-  protected InitializeQuickComments() {
-    this.quickCommentList = [];
-    this.quickCommentList.push('Left voicemail: ');
-    this.quickCommentList.push('Scheduled follow up: ');
-    this.quickCommentList.push('Transferred to: ');
-    this.quickCommentList.push('Sent email ');
-    this.quickCommentList.push('Number of agents: ');
-    this.quickCommentList.push('Selling points: ');
-    this.quickCommentList.push('Call Back: ');
-    this.quickCommentList.push('Do not disturb: ');
-    this.quickCommentList.push('Requires more information: ');
-    this.quickCommentList.push('Escalation: ');
-
-  }
-
   protected loadQuickComment(value) {
-    this.callNotes = this.quickCommentList[value];
+    this.currentCallNotes = this.quickCommentList[value];
   }
 
   protected parseWhoObject(whoObject: IActivityDetails): string {
@@ -162,4 +142,4 @@ export class ActivityComponent implements OnInit {
   protected parseWhatObject(whatObject: IActivityDetails): string {
     return whatObject.objectType + ': ' + whatObject.objectName;
   }
-  }
+}
