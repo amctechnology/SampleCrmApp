@@ -277,6 +277,7 @@ export class AMCSalesforceHomeComponent extends Application implements OnInit {
         this.loggerService.logger.logDebug('AMCSalesforceHomeComponent: Disconnect interaction received: ' +
           JSON.stringify(interaction));
         delete this.scenarioInteractionMappings[scenarioIdInt][interactionId];
+        delete this.ActivityMap[interactionId];
         this.currentInteraction = null;
         this.searchResultWasReturned = false;
         this.interactionDisconnected.next(true);
