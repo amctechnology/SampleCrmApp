@@ -32,7 +32,7 @@
   border-right: 1px solid #939598;
   border-bottom-left-radius: 3px !IMPORTANT;
   border-bottom-right-radius: 3px !IMPORTANT;
-  height: 25px
+  height: 30px
 }
 
 .quickNotesBotton {
@@ -42,8 +42,7 @@
   height: 70%;
   width: 20px;
   padding-left: 4px;
-  margin-left: 1%;
-  margin-top: 4px;
+  margin-left: 2%;
   outline: none;
   font-size: 70%;
 
@@ -59,7 +58,6 @@
   background-color: #6cb047;
   color: #ffffff;
   padding-right: 5px;
-  margin-bottom: 3px;
   margin-right: 2px;
   border-radius: 4px;
   font-size: 98%;
@@ -140,9 +138,7 @@
 }
 
 .activityCommentsTextBoxStyle {
-  border: 1px solid #939598 !IMPORTANT;
-  border-top-left-radius: 3px !IMPORTANT;
-  border-top-right-radius: 3px !IMPORTANT;
+  border: none;
   color: #333333 !IMPORTANT;
   text-align: left !IMPORTANT;
   margin: 0px 0% 0px 0px;
@@ -162,14 +158,15 @@
 .displayLabels {
   margin-left: 5px;
   width: 25%;
+  margin-right: 2px;
 }
 
 .displayData {
   width: 70%;
 }
 
-.container {
-  width: 90%;
+.commentsButtonDiv {
+  width: 100%;
   display: flex;
   align-items: center;
 }
@@ -179,11 +176,12 @@
   flex: 1 0 0;
   flex-wrap: wrap;
   display: flex;
-  margin-bottom: 3px;
+  margin-top: 5px;
 }
 
 .submitDiv {
   text-align: right;
+  margin-top: 4px
 }
 
 .newEntityImages {
@@ -204,7 +202,7 @@ body {
 
 .callNotesContainer {
   float: left;
-  height: 120px;
+  height: 100%;
   width: 100%;
   margin-right: 5px;
   margin-left: 5px;
@@ -218,4 +216,15 @@ body {
 
 .headerLabel {
   margin-left: 10px
+}
+
+.textAreaDiv {
+  background-color: #ffffff;
+  border-left: 1px solid #939598;
+  border-bottom: 1px solid #939598;
+  border-right: 1px solid #939598;
+  border-top: 1px solid #939598;
+  border-top-left-radius: 3px !IMPORTANT;
+  border-top-right-radius: 3px !IMPORTANT;
+
 }

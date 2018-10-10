@@ -246,12 +246,12 @@ export class AMCSalesforceHomeComponent extends Application implements OnInit {
       const interactionId = interaction.interactionId;
       const scenarioIdInt = interaction.scenarioId;
       let isNewScenarioId = false;
-      if (!this.scenarioInteractionMappings.hasOwnProperty(scenarioIdInt)) {
+      if (!this.scenarioInteractionMappings.hasOwnProperty(scenarioIdInt) && this.currentInteraction === null) {
         this.scenarioInteractionMappings[scenarioIdInt] = {};
         isNewScenarioId = true;
+        this.scenarioInteractionMappings[scenarioIdInt][interactionId] = true;
       }
-      this.scenarioInteractionMappings[scenarioIdInt][interactionId] = true;
-      if (this.shouldPreformScreenpop(interaction, isNewScenarioId)) {
+      if (this.shouldPreformScreenpop(interaction, isNewScenarioId) && this.currentInteraction === null) {
         this.loggerService.logger.logDebug('AMCSalesforceHomeComponent: screenpop for new interaction: ' +
           JSON.stringify(interaction));
         const searchRecord = await this.preformScreenpop(interaction);
@@ -273,7 +273,7 @@ export class AMCSalesforceHomeComponent extends Application implements OnInit {
         this.autoSave.next();
 
         return searchRecord;
-      } else if (interaction.state === api.InteractionStates.Disconnected) {
+      } else if (interaction.state === api.InteractionStates.Disconnected && this.currentInteraction.interactionId === interactionId) {
         this.loggerService.logger.logDebug('AMCSalesforceHomeComponent: Disconnect interaction received: ' +
           JSON.stringify(interaction));
         delete this.scenarioInteractionMappings[scenarioIdInt][interactionId];
