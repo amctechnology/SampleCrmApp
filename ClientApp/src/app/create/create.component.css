@@ -49,6 +49,7 @@
 .callDisplay {
   display: grid;
   background-color: #ffffff;
+  display: grid;
 }
 
 .ViewResizeImage {

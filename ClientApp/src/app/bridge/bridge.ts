@@ -6,7 +6,7 @@ import { Subject } from 'rxjs/Subject';
 import { OnInit } from '@angular/core';
 import { IActivity } from './../Model/IActivity';
 import { IActivityDetails } from './../Model/IActivityDetails';
-import { ICreateNewParams } from './../Model/ICreateNewParams';
+import { ICreateNewSObjectParams } from './../Model/ICreateNewSObjectParams';
 import { LoggerService } from './../logger.service';
 declare var sforce: any;
 
@@ -268,13 +268,7 @@ class SalesforceBridge extends Bridge {
       }
     });
   }
-  callback(response) {
-    if (response.success) {
-      console.log('API method call executed successfully! returnValue:', response.returnValue);
-    } else {
-      console.error('Something went wrong! Errors:', response.errors);
-    }
-  }
+
   private VerifyMode() {
     const fullUrl = document.location.href;
     const parameters = fullUrl.split('&');
@@ -358,7 +352,7 @@ class SalesforceBridge extends Bridge {
     });
   }
   @bind
-  protected saveActivity(activity: IActivity): Promise<any> {
+  protected saveActivity(activity: IActivity): Promise<IActivity> {
     this.eventService.sendEvent('logDebug', 'bridge: Activity from home received to save: ' + JSON.stringify(activity));
     if (this.isLightning) {
       return new Promise((resolve, reject) => {
@@ -405,12 +399,12 @@ class SalesforceBridge extends Bridge {
         console.log('Activity ID = ' + result.result);
         this.eventService.sendEvent('logDebug', 'bridge: Activity ' + JSON.stringify(activity) +
           ' saved in Classic');
-        resolve(this.eventService.sendEvent('saveActivityResponse', activity));
+        resolve(activity);
       });
     });
   }
   @bind
-  protected createNewEntity(params: ICreateNewParams) {
+  protected createNewEntity(params: ICreateNewSObjectParams) {
     let URL = '';
     this.eventService.sendEvent('logDebug', 'bridge: New Salesforce object requested with ' +
       'params: ' + JSON.stringify(params));
@@ -421,7 +415,7 @@ class SalesforceBridge extends Bridge {
           entityName: params.entityName,
           defaultFieldValues: {}
         },
-        callback: result => {
+        callback: (result: ISaveLogResult) => {
           if (result.success) {
             this.eventService.sendEvent('logDebug', 'bridge: Salesforce object with params: ' +
               JSON.stringify(params) + ' screenpop successful: ' + result.returnValue);
@@ -469,9 +463,13 @@ interface IScreenPopObject {
     entityName: string;
     defaultFieldValues?: Object;
   };
-  callback: any;
+  callback: (result: ISaveLogResult) => void;
 }
-
+interface ISaveLogResult {
+  success?: boolean;
+  returnValue?: object;
+  errors?: string[];
+}
 interface ISalesforceClassicOnFocusEvent {
   result: {
     url: string;

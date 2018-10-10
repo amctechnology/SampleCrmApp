@@ -4,7 +4,7 @@ import { Observable } from 'rxjs/Observable';
 import { Subject } from 'rxjs/Subject';
 import { IActivity } from './../Model/IActivity';
 import { IActivityDetails } from './../Model/IActivityDetails';
-import { ICreateNewParams } from './../Model/ICreateNewParams';
+import { ICreateNewSObjectParams } from './../Model/ICreateNewSObjectParams';
 import { LoggerService } from './../logger.service';
 @Component({
   selector: 'app-activity',
@@ -22,7 +22,7 @@ export class ActivityComponent implements OnInit {
   @Output() ActivitySave: EventEmitter<IActivity> = new EventEmitter<IActivity>();
   @Output() childComponentLogger: EventEmitter<string> = new EventEmitter<string>();
 
-  maximizeActivity: boolean;
+  isActivityMaximized: boolean;
   currentWhoObject: IActivityDetails;
   currentWhatObject: IActivityDetails;
   currentCallNotes: string;
@@ -39,7 +39,7 @@ export class ActivityComponent implements OnInit {
     this.subject = '';
     this.currentCallNotes = '';
     this.ActivityMap = new Map();
-    this.maximizeActivity = true;
+    this.isActivityMaximized = true;
     this.loggerService.logger.logDebug('activity: Constructor complete');
   }
   ngOnInit() {
@@ -51,15 +51,6 @@ export class ActivityComponent implements OnInit {
       this.loggerService.logger.logDebug('create: Auto save event received');
       this.activitySave(false);
     });
-  }
-  protected resizeActivity(size) {
-    if (size === 'collapse') {
-      this.loggerService.logger.logDebug('activity: collapse window');
-      this.maximizeActivity = false;
-    } else {
-      this.loggerService.logger.logDebug('activity: expand window');
-      this.maximizeActivity = true;
-    }
   }
   protected activitySave(clearActivityFields) {
     if (this.currentInteraction) {
@@ -115,9 +106,9 @@ export class ActivityComponent implements OnInit {
     this.activitySave(false);
   }
   protected getInteractionDirection(directionNumber) {
-    if (directionNumber === 0) {
+    if (directionNumber === api.InteractionDirectionTypes.Inbound) {
       return 'Inbound';
-    } else if (directionNumber === 1) {
+    } else if (directionNumber === api.InteractionDirectionTypes.Outbound) {
       return 'Outbound';
     }
     return 'Internal';

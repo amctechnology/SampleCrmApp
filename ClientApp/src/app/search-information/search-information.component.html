@@ -1,9 +1,9 @@
-<div *ngIf="maximizeSearchInformation" class="callDisplay" style="display: grid;">
+<div *ngIf="isSearchInformationMaximized" class="callDisplay">
   <div class="editor callHeader">
     <label class="headerLabel">
       <b>Caller Information</b>
     </label>
-    <img class="ViewResizeImage" src="assets/images/section_collapse.png" (click)="resizeSearchInformation('collapse')"
+    <img class="ViewResizeImage" src="assets/images/section_collapse.png" (click)="isSearchInformationMaximized = false"
       title="Collapse">
   </div>
   <div class="callBody">
@@ -19,11 +19,11 @@
   </div>
 </div>
 
-<div *ngIf="!maximizeSearchInformation" class="callDisplay">
+<div *ngIf="!isSearchInformationMaximized" class="callDisplay">
   <div class="editor callHeader">
-    <label style="margin-left: 10px">
+    <label class="headerLabel">
       <b>Caller Information</b>
     </label>
-    <img class="ViewResizeImage" src="assets/images/section_expand.png" (click)="resizeSearchInformation('expand')"
+    <img class="ViewResizeImage" src="assets/images/section_expand.png" (click)="isSearchInformationMaximized = true"
       title="Expand">
   </div>
