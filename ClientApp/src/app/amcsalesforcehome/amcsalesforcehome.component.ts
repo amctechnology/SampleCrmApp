@@ -273,17 +273,21 @@ export class AMCSalesforceHomeComponent extends Application implements OnInit {
         this.autoSave.next();
 
         return searchRecord;
-      } else if (interaction.state === api.InteractionStates.Disconnected && this.currentInteraction.interactionId === interactionId) {
+      } else if (interaction.state === api.InteractionStates.Disconnected && this.currentInteraction) {
         this.loggerService.logger.logDebug('AMCSalesforceHomeComponent: Disconnect interaction received: ' +
           JSON.stringify(interaction));
-        delete this.scenarioInteractionMappings[scenarioIdInt][interactionId];
-        delete this.ActivityMap[interactionId];
-        this.currentInteraction = null;
-        this.searchResultWasReturned = false;
-        this.interactionDisconnected.next(true);
-        this.searchRecordList = [];
-        if (Object.keys(this.scenarioInteractionMappings[scenarioIdInt]).length === 0) {
-          delete this.scenarioInteractionMappings[scenarioIdInt];
+        if (this.currentInteraction.interactionId === interactionId) {
+          delete this.ActivityMap[interactionId];
+          this.currentInteraction = null;
+          this.searchResultWasReturned = false;
+          this.interactionDisconnected.next(true);
+          this.searchRecordList = [];
+        }
+        if (this.scenarioInteractionMappings[scenarioIdInt]) {
+          delete this.scenarioInteractionMappings[scenarioIdInt][interactionId];
+          if (Object.keys(this.scenarioInteractionMappings[scenarioIdInt]).length === 0) {
+            delete this.scenarioInteractionMappings[scenarioIdInt];
+          }
         }
       }
     } catch (e) {
