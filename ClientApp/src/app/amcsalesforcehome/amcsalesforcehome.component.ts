@@ -60,6 +60,8 @@ export class AMCSalesforceHomeComponent extends Application implements OnInit {
     let numberIndex = 0;
     let formatIndex = 0;
     let formattedNumber = '';
+    number = this.reverse(number);
+    phoneNumberFormat = this.reverse(phoneNumberFormat);
     if (number && phoneNumberFormat) {
       while (formatIndex < phoneNumberFormat.length) {
         if (numberIndex === number.length + 1) {
@@ -291,8 +293,7 @@ export class AMCSalesforceHomeComponent extends Application implements OnInit {
       const interactionId = interaction.interactionId;
       const scenarioIdInt = interaction.scenarioId;
       let isNewScenarioId = false;
-      interaction.details.fields.Phone.Value = this.formatPhoneNumber(this.reverse(interaction.details.fields.Phone.Value),
-        this.reverse(this.phoneNumberFormat));
+      interaction.details.fields.Phone.Value = this.formatPhoneNumber(interaction.details.fields.Phone.Value, this.phoneNumberFormat);
       if (!this.scenarioInteractionMappings.hasOwnProperty(scenarioIdInt) && this.currentInteraction === null) {
         this.scenarioInteractionMappings[scenarioIdInt] = {};
         isNewScenarioId = true;
