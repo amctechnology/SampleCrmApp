@@ -24,6 +24,7 @@ export class AMCSalesforceHomeComponent extends Application implements OnInit {
   searchRecordList: api.IRecordItem[];
   searchReturnedSingleResult: boolean;
   searchResultWasReturned: boolean;
+  phoneNumberFormat: string;
   constructor(private loggerService: LoggerService) {
     super(loggerService.logger);
     this.loggerService.logger.logDebug('AMCSalesforceHomeComponent: constructor start');
@@ -34,6 +35,7 @@ export class AMCSalesforceHomeComponent extends Application implements OnInit {
     this.ActivityMap = new Map();
     this.searchRecordList = [];
     this.currentInteraction = null;
+    this.phoneNumberFormat = null;
     this.appName = 'Salesforce';
     this.bridgeScripts = this.bridgeScripts.concat([
       window.location.origin + '/bridge.bundle.js',
@@ -51,9 +53,50 @@ export class AMCSalesforceHomeComponent extends Application implements OnInit {
     });
     this.bridgeEventsService.subscribe('setActivityDetails', this.setActivityDetails);
     const config = await api.initializeComplete(this.logger);
+    this.phoneNumberFormat = String(config.variables['Phone number format'])
     this.loggerService.logger.logDebug('AMCSalesforceHomeComponent: ngOnInit complete');
   }
-
+  protected formatPhoneNumber(number, phoneNumberFormat) {
+    if (number && phoneNumberFormat) {
+      let numberIndex = 0;
+      let formatIndex = 0;
+      let formattedNumber = '';
+      while (formatIndex < phoneNumberFormat.length()) {
+        if (numberIndex === number.length() + 1) {
+          return this.reverse(formattedNumber);
+        }
+        if (phoneNumberFormat[formatIndex] !== 'x') {
+          formattedNumber = formattedNumber + phoneNumberFormat[formatIndex]
+          formatIndex = formatIndex + 1;
+          if (numberIndex < number.length() && !number[numberIndex].isInteger()) {
+            numberIndex = numberIndex + 1;
+          }
+        } else if (!number[numberIndex].isInteger()) {
+          numberIndex = numberIndex + 1;
+          formatIndex = formatIndex - 1;
+        } else {
+          if (numberIndex === number.length()) {
+            return this.reverse(formattedNumber);
+          }
+          while (formatIndex < phoneNumberFormat.length() && phoneNumberFormat[formatIndex] === 'x') {
+            formatIndex = formatIndex + 1;
+            if (numberIndex < number.length() && number[numberIndex].isInteger()) {
+              formattedNumber = formattedNumber + number[numberIndex]
+              numberIndex = numberIndex + 1;
+            }
+          }
+        }
+      }
+      return this.reverse(formattedNumber);
+    }
+  }
+  protected reverse(input: string): string {
+    let reverse = '';
+    for (let i = 0; i < input.length; i++) {
+      reverse = input[i] + reverse;
+    }
+    return reverse;
+  }
   formatCrmResults(crmResults: any): api.SearchRecords {
     const ignoreFields = ['Name', 'displayName', 'object', 'Id', 'RecordType'];
     const result = new api.SearchRecords();
