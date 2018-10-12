@@ -53,42 +53,44 @@ export class AMCSalesforceHomeComponent extends Application implements OnInit {
     });
     this.bridgeEventsService.subscribe('setActivityDetails', this.setActivityDetails);
     const config = await api.initializeComplete(this.logger);
-    this.phoneNumberFormat = String(config.variables['Phone number format'])
+    this.phoneNumberFormat = String(config.variables['Phone number format']);
     this.loggerService.logger.logDebug('AMCSalesforceHomeComponent: ngOnInit complete');
   }
-  protected formatPhoneNumber(number, phoneNumberFormat) {
+  protected formatPhoneNumber(number: string, phoneNumberFormat: string) {
+    let numberIndex = 0;
+    let formatIndex = 0;
+    let formattedNumber = '';
     if (number && phoneNumberFormat) {
-      let numberIndex = 0;
-      let formatIndex = 0;
-      let formattedNumber = '';
-      while (formatIndex < phoneNumberFormat.length()) {
-        if (numberIndex === number.length() + 1) {
+      while (formatIndex < phoneNumberFormat.length) {
+        if (numberIndex === number.length + 1) {
           return this.reverse(formattedNumber);
         }
         if (phoneNumberFormat[formatIndex] !== 'x') {
-          formattedNumber = formattedNumber + phoneNumberFormat[formatIndex]
+          formattedNumber = formattedNumber + phoneNumberFormat[formatIndex];
           formatIndex = formatIndex + 1;
-          if (numberIndex < number.length() && !number[numberIndex].isInteger()) {
+          if (numberIndex < number.length && isNaN(Number(number[numberIndex]))) {
             numberIndex = numberIndex + 1;
           }
-        } else if (!number[numberIndex].isInteger()) {
+        } else if (isNaN(Number(number[numberIndex]))) {
           numberIndex = numberIndex + 1;
-          formatIndex = formatIndex - 1;
         } else {
-          if (numberIndex === number.length()) {
+          if (numberIndex === number.length) {
             return this.reverse(formattedNumber);
           }
-          while (formatIndex < phoneNumberFormat.length() && phoneNumberFormat[formatIndex] === 'x') {
+          while (formatIndex < phoneNumberFormat.length && phoneNumberFormat[formatIndex] === 'x') {
             formatIndex = formatIndex + 1;
-            if (numberIndex < number.length() && number[numberIndex].isInteger()) {
-              formattedNumber = formattedNumber + number[numberIndex]
+            if (numberIndex < number.length && !isNaN(Number(number[numberIndex]))) {
+              formattedNumber = formattedNumber + number[numberIndex];
               numberIndex = numberIndex + 1;
+            } else {
+              formatIndex = formatIndex - 1;
+              break;
             }
           }
         }
       }
-      return this.reverse(formattedNumber);
     }
+    return this.reverse(formattedNumber);
   }
   protected reverse(input: string): string {
     let reverse = '';
@@ -289,6 +291,8 @@ export class AMCSalesforceHomeComponent extends Application implements OnInit {
       const interactionId = interaction.interactionId;
       const scenarioIdInt = interaction.scenarioId;
       let isNewScenarioId = false;
+      interaction.details.fields.Phone.Value = this.formatPhoneNumber(this.reverse(interaction.details.fields.Phone.Value),
+        this.reverse(this.phoneNumberFormat));
       if (!this.scenarioInteractionMappings.hasOwnProperty(scenarioIdInt) && this.currentInteraction === null) {
         this.scenarioInteractionMappings[scenarioIdInt] = {};
         isNewScenarioId = true;
