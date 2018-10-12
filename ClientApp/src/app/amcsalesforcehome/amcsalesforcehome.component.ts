@@ -24,6 +24,7 @@ export class AMCSalesforceHomeComponent extends Application implements OnInit {
   searchRecordList: api.IRecordItem[];
   searchReturnedSingleResult: boolean;
   searchResultWasReturned: boolean;
+  phoneNumberFormat: string;
   constructor(private loggerService: LoggerService) {
     super(loggerService.logger);
     this.loggerService.logger.logDebug('AMCSalesforceHomeComponent: constructor start');
@@ -34,6 +35,7 @@ export class AMCSalesforceHomeComponent extends Application implements OnInit {
     this.ActivityMap = new Map();
     this.searchRecordList = [];
     this.currentInteraction = null;
+    this.phoneNumberFormat = null;
     this.appName = 'Salesforce';
     this.bridgeScripts = this.bridgeScripts.concat([
       window.location.origin + '/bridge.bundle.js',
@@ -51,9 +53,54 @@ export class AMCSalesforceHomeComponent extends Application implements OnInit {
     });
     this.bridgeEventsService.subscribe('setActivityDetails', this.setActivityDetails);
     const config = await api.initializeComplete(this.logger);
+    this.phoneNumberFormat = String(config.variables['Phone number format']);
     this.loggerService.logger.logDebug('AMCSalesforceHomeComponent: ngOnInit complete');
   }
-
+  protected formatPhoneNumber(number: string, phoneNumberFormat: string) {
+    let numberIndex = 0;
+    let formatIndex = 0;
+    let formattedNumber = '';
+    number = this.reverse(number);
+    phoneNumberFormat = this.reverse(phoneNumberFormat);
+    if (number && phoneNumberFormat) {
+      while (formatIndex < phoneNumberFormat.length) {
+        if (numberIndex === number.length + 1) {
+          return this.reverse(formattedNumber);
+        }
+        if (phoneNumberFormat[formatIndex] !== 'x') {
+          formattedNumber = formattedNumber + phoneNumberFormat[formatIndex];
+          formatIndex = formatIndex + 1;
+          if (numberIndex < number.length && isNaN(Number(number[numberIndex]))) {
+            numberIndex = numberIndex + 1;
+          }
+        } else if (isNaN(Number(number[numberIndex]))) {
+          numberIndex = numberIndex + 1;
+        } else {
+          if (numberIndex === number.length) {
+            return this.reverse(formattedNumber);
+          }
+          while (formatIndex < phoneNumberFormat.length && phoneNumberFormat[formatIndex] === 'x') {
+            formatIndex = formatIndex + 1;
+            if (numberIndex < number.length && !isNaN(Number(number[numberIndex]))) {
+              formattedNumber = formattedNumber + number[numberIndex];
+              numberIndex = numberIndex + 1;
+            } else {
+              formatIndex = formatIndex - 1;
+              break;
+            }
+          }
+        }
+      }
+    }
+    return this.reverse(formattedNumber);
+  }
+  protected reverse(input: string): string {
+    let reverse = '';
+    for (let i = 0; i < input.length; i++) {
+      reverse = input[i] + reverse;
+    }
+    return reverse;
+  }
   formatCrmResults(crmResults: any): api.SearchRecords {
     const ignoreFields = ['Name', 'displayName', 'object', 'Id', 'RecordType'];
     const result = new api.SearchRecords();
@@ -246,6 +293,7 @@ export class AMCSalesforceHomeComponent extends Application implements OnInit {
       const interactionId = interaction.interactionId;
       const scenarioIdInt = interaction.scenarioId;
       let isNewScenarioId = false;
+      interaction.details.fields.Phone.Value = this.formatPhoneNumber(interaction.details.fields.Phone.Value, this.phoneNumberFormat);
       if (!this.scenarioInteractionMappings.hasOwnProperty(scenarioIdInt) && this.currentInteraction === null) {
         this.scenarioInteractionMappings[scenarioIdInt] = {};
         isNewScenarioId = true;
@@ -273,21 +321,17 @@ export class AMCSalesforceHomeComponent extends Application implements OnInit {
         this.autoSave.next();
 
         return searchRecord;
-      } else if (interaction.state === api.InteractionStates.Disconnected && this.currentInteraction) {
+      } else if (interaction.state === api.InteractionStates.Disconnected && this.currentInteraction.interactionId === interactionId) {
         this.loggerService.logger.logDebug('AMCSalesforceHomeComponent: Disconnect interaction received: ' +
           JSON.stringify(interaction));
-        if (this.currentInteraction.interactionId === interactionId) {
-          delete this.ActivityMap[interactionId];
-          this.currentInteraction = null;
-          this.searchResultWasReturned = false;
-          this.interactionDisconnected.next(true);
-          this.searchRecordList = [];
-        }
-        if (this.scenarioInteractionMappings[scenarioIdInt]) {
-          delete this.scenarioInteractionMappings[scenarioIdInt][interactionId];
-          if (Object.keys(this.scenarioInteractionMappings[scenarioIdInt]).length === 0) {
-            delete this.scenarioInteractionMappings[scenarioIdInt];
-          }
+        delete this.scenarioInteractionMappings[scenarioIdInt][interactionId];
+        delete this.ActivityMap[interactionId];
+        this.currentInteraction = null;
+        this.searchResultWasReturned = false;
+        this.interactionDisconnected.next(true);
+        this.searchRecordList = [];
+        if (Object.keys(this.scenarioInteractionMappings[scenarioIdInt]).length === 0) {
+          delete this.scenarioInteractionMappings[scenarioIdInt];
         }
       }
     } catch (e) {
