@@ -13,18 +13,18 @@ import { LoggerService } from './../logger.service';
   templateUrl: './amcsalesforcehome.component.html',
 })
 export class AMCSalesforceHomeComponent extends Application implements OnInit {
-  interactionDisconnected: Subject<boolean> = new Subject();
-  interactions: Map<String, api.IInteraction>;
-  whoList: IActivityDetails[];
-  whatList: IActivityDetails[];
-  subject: string;
-  currentInteraction: api.IInteraction;
-  ActivityMap: Map<string, IActivity>;
-  autoSave: Subject<void> = new Subject();
-  searchRecordList: api.IRecordItem[];
-  searchReturnedSingleResult: boolean;
-  searchResultWasReturned: boolean;
-  phoneNumberFormat: string;
+  protected interactionDisconnected: Subject<boolean> = new Subject();
+  protected interactions: Map<String, api.IInteraction>;
+  protected whoList: IActivityDetails[];
+  protected whatList: IActivityDetails[];
+  protected subject: string;
+  protected currentInteraction: api.IInteraction;
+  protected ActivityMap: Map<string, IActivity>;
+  protected autoSave: Subject<void> = new Subject();
+  protected searchRecordList: api.IRecordItem[];
+  protected searchReturnedSingleResult: boolean;
+  protected searchResultWasReturned: boolean;
+  protected phoneNumberFormat: string;
   constructor(private loggerService: LoggerService) {
     super(loggerService.logger);
     this.loggerService.logger.logDebug('AMCSalesforceHomeComponent: constructor start');
