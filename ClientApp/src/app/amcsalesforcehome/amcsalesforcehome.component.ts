@@ -53,7 +53,7 @@ export class AMCSalesforceHomeComponent extends Application implements OnInit {
     });
     this.bridgeEventsService.subscribe('setActivityDetails', this.setActivityDetails);
     const config = await api.initializeComplete(this.logger);
-    this.phoneNumberFormat = String(config.variables['Phone number format']).toLowerCase();
+    this.phoneNumberFormat = String(config.variables['PhoneNumberFormat']).toLowerCase();
     this.loggerService.logger.logDebug('AMCSalesforceHomeComponent: ngOnInit complete');
   }
   protected formatPhoneNumber(number: string, phoneNumberFormat: string) {
