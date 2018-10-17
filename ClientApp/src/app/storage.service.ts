@@ -31,6 +31,9 @@ export class StorageService {
   public ActivityMapContains(interactionId: string): boolean {
     return this.ActivityMap.has(interactionId);
   }
+  public removeActivity(interactionId: string) {
+    delete this.ActivityMap[interactionId];
+  }
   public getSubject(): string {
     return this.subject;
   }
@@ -86,6 +89,9 @@ export class StorageService {
   }
   public setsearchRecordList(searchRecords: api.IRecordItem[]) {
     this.searchRecordList.push(searchRecords);
+  }
+  public clearSearchRecordList() {
+    this.searchRecordList = [];
   }
   public whoListContains(whoObject) {
     for (let i = 0; i < this.whoList.length; i++) {

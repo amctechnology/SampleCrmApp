@@ -308,19 +308,20 @@ export class AMCSalesforceHomeComponent extends Application implements OnInit {
         this.storageService.setSubject('Call [' + interaction.details.fields.Phone.Value + ']');
         this.storageService.setActivityMap(interaction.interactionId, this.createActivity(interaction));
         this.loggerService.logger.logDebug('AMCSalesforceHomeComponent: Autosave activity: ' +
-          JSON.stringify(this.storageService.getActivityMap(this.storageService.getCurrentInteraction.interactionId)));
+          JSON.stringify(this.storageService.getActivity(this.storageService.getCurrentInteraction().interactionId)));
         this.autoSave.next();
 
         return searchRecord;
-      } else if (interaction.state === api.InteractionStates.Disconnected && this.currentInteraction.interactionId === interactionId) {
+      } else if (interaction.state === api.InteractionStates.Disconnected &&
+        this.storageService.getCurrentInteraction().interactionId === interactionId) {
         this.loggerService.logger.logDebug('AMCSalesforceHomeComponent: Disconnect interaction received: ' +
           JSON.stringify(interaction));
         delete this.scenarioInteractionMappings[scenarioIdInt][interactionId];
-        delete this.ActivityMap[interactionId];
-        this.currentInteraction = null;
-        this.searchResultWasReturned = false;
+        this.storageService.removeActivity(interactionId);
+        this.storageService.setCurrentInteraction(null);
+        this.storageService.setSearchResultWasReturned(false);
         this.interactionDisconnected.next(true);
-        this.searchRecordList = [];
+        this.storageService.clearSearchRecordList();
         if (Object.keys(this.scenarioInteractionMappings[scenarioIdInt]).length === 0) {
           delete this.scenarioInteractionMappings[scenarioIdInt];
         }
@@ -367,15 +368,15 @@ export class AMCSalesforceHomeComponent extends Application implements OnInit {
   protected setActivityDetails(eventObject) {
     this.loggerService.logger.logDebug('AMCSalesforceHomeComponent: Activity details received from bridge: '
       + JSON.stringify(eventObject));
-    if (this.currentInteraction) {
+    if (this.storageService.getCurrentInteraction()) {
       if (eventObject.objectType === 'Contact' || eventObject.objectType === 'Lead') {
-        if (!this.whoListContains(eventObject)) {
-          this.whoList.push(eventObject);
+        if (!this.storageService.whoListContains(eventObject)) {
+          this.storageService.setWhoList(eventObject);
           this.autoSave.next();
         }
       } else if (eventObject.objectId !== undefined) {
-        if (!this.whatListContains(eventObject)) {
-          this.whatList.push(eventObject);
+        if (!this.storageService.whatListContains(eventObject)) {
+          this.storageService.setWhatList(eventObject);
           this.autoSave.next();
         }
       }
@@ -387,9 +388,9 @@ export class AMCSalesforceHomeComponent extends Application implements OnInit {
     this.loggerService.logger.logDebug('AMCSalesforceHomeComponent: Screenpop new Salesforce object of type: '
       + JSON.stringify(entityType));
     let params: ICreateNewSObjectParams;
-    if (this.currentInteraction) {
-      if (this.ActivityMap.has(this.currentInteraction.interactionId)) {
-        const activity = this.ActivityMap.get(this.currentInteraction.interactionId);
+    if (this.storageService.getCurrentInteraction()) {
+      if (this.storageService.ActivityMapContains(this.storageService.getCurrentInteraction().interactionId)) {
+        const activity = this.storageService.getActivity(this.storageService.getCurrentInteraction().interactionId);
         params = this.buildParams(entityType, activity);
       }
     } else {
@@ -407,7 +408,7 @@ export class AMCSalesforceHomeComponent extends Application implements OnInit {
       opportunityFields: {},
       leadFields: {}
     };
-    if (this.currentInteraction) {
+    if (this.storageService.getCurrentInteraction()) {
       if (entityType === 'Case') {
         if (activity.WhatObject.objectType === 'Account') {
           params.caseFields.AccountId = activity.WhatObject.objectId;
@@ -424,7 +425,7 @@ export class AMCSalesforceHomeComponent extends Application implements OnInit {
         params.opportunityFields.Description = activity.Description;
         params.opportunityFields.StageName = 'Prospecting';
       } else if (entityType === 'Lead') {
-        params.leadFields.Phone = this.currentInteraction.details.fields.Phone.Value;
+        params.leadFields.Phone = this.storageService.getCurrentInteraction().details.fields.Phone.Value;
         params.leadFields.Description = activity.Description;
       }
     }
