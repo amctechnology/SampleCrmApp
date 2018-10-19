@@ -32,7 +32,7 @@
   border-right: 1px solid #939598;
   border-bottom-left-radius: 3px !IMPORTANT;
   border-bottom-right-radius: 3px !IMPORTANT;
-  height: 30px
+  height: auto;
 }
 
 .quickNotesBotton {
@@ -41,8 +41,7 @@
   color: white;
   height: 70%;
   width: 20px;
-  padding-left: 4px;
-  margin-left: 2%;
+  margin: 2px;
   outline: none;
   font-size: 70%;
 
@@ -57,14 +56,11 @@
   cursor: pointer;
   background-color: #6cb047;
   color: #ffffff;
-  padding-right: 5px;
-  margin-right: 2px;
   border-radius: 4px;
   font-size: 98%;
 }
 
 .callBody {
-  /* border: 1px solid #939598; */
   border-top: 0;
   position: relative;
 }
@@ -121,7 +117,7 @@
   text-align: left !IMPORTANT;
   white-space: nowrap !IMPORTANT;
   text-overflow: ellipsis !IMPORTANT;
-  margin: 0 0% 0 0;
+  margin: 0 5px 0 0;
 }
 
 .activitySubjectTextBoxStyle {
@@ -133,7 +129,7 @@
   box-sizing: border-box;
   -webkit-box-sizing: border-box;
   -moz-box-sizing: border-box;
-  margin: 0 0% 0 0;
+  margin: 0 5px 0 0;
   padding-left: 2px;
 }
 
@@ -176,12 +172,13 @@
   flex: 1 0 0;
   flex-wrap: wrap;
   display: flex;
-  margin-top: 5px;
+  margin: 2px;
 }
 
 .submitDiv {
   text-align: right;
-  margin-top: 4px
+  padding-right: 4px;
+
 }
 
 .newEntityImages {
