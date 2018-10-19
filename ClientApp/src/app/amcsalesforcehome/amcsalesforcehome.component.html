@@ -1,8 +1,8 @@
 <div class="body">
-  <app-search-information *ngIf="searchResultWasReturned" (agentSelectedCallerInformation)="agentSelectedCallerInformation($event)"
-    [searchReturnedSingleResult]="searchReturnedSingleResult" [searchRecordList]="searchRecordList"></app-search-information>
-  <app-activity *ngIf="currentInteraction" [subject]="subject" [autoSave]="autoSave" [interactionDisconnected]="interactionDisconnected"
-    [whoList]="whoList" [whatList]="whatList" [currentInteraction]="currentInteraction" [ActivityMap]="ActivityMap"
+  <app-search-information *ngIf="storageService.searchResultWasReturned" (agentSelectedCallerInformation)="agentSelectedCallerInformation($event)"
+    [searchReturnedSingleResult]="storageService.searchReturnedSingleResult" [searchRecordList]="storageService.searchRecordList"></app-search-information>
+  <app-activity *ngIf="storageService.currentInteraction" [autoSave]="autoSave" [interactionDisconnected]="interactionDisconnected"
+    [whoList]="storageService.whoList" [whatList]="storageService.whatList" [currentInteraction]="storageService.currentInteraction"
     (ActivitySave)="saveActivity($event)"></app-activity>
   <app-create (CreateNewEntity)="createNewEntity($event)"></app-create>
 </div>

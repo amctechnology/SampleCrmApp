@@ -6,6 +6,7 @@ import { IActivity } from './../Model/IActivity';
 import { IActivityDetails } from './../Model/IActivityDetails';
 import { ICreateNewSObjectParams } from './../Model/ICreateNewSObjectParams';
 import { LoggerService } from './../logger.service';
+import { StorageService } from '../Storage.service';
 @Component({
   selector: 'app-activity',
   templateUrl: './activity.component.html',
@@ -15,10 +16,8 @@ export class ActivityComponent implements OnInit {
   @Input() whoList: Array<IActivityDetails>;
   @Input() whatList: Array<IActivityDetails>;
   @Input() currentInteraction: api.IInteraction;
-  @Input() ActivityMap: Map<string, IActivity>;
   @Input() interactionDisconnected: Subject<boolean>;
   @Input() autoSave: Subject<void>;
-  @Input() subject: string;
   @Output() ActivitySave: EventEmitter<IActivity> = new EventEmitter<IActivity>();
   @Output() childComponentLogger: EventEmitter<string> = new EventEmitter<string>();
 
@@ -28,17 +27,12 @@ export class ActivityComponent implements OnInit {
   currentCallNotes: string;
   quickCommentList: string[];
 
-  constructor(private loggerService: LoggerService) {
+  constructor(private loggerService: LoggerService, protected storageService: StorageService) {
     this.loggerService.logger.logDebug('activity: Constructor start');
     this.quickCommentList = ['Left voicemail: ',
       'Scheduled follow up: ', 'Transferred to: ',
       'Sent email ', 'Number of agents: ',
       'Selling points: '];
-    this.currentWhatObject = null;
-    this.currentWhoObject = null;
-    this.subject = '';
-    this.currentCallNotes = '';
-    this.ActivityMap = new Map();
     this.isActivityMaximized = true;
     this.loggerService.logger.logDebug('activity: Constructor complete');
   }
@@ -54,55 +48,45 @@ export class ActivityComponent implements OnInit {
   }
   protected activitySave(clearActivityFields) {
     if (this.currentInteraction) {
-      const activity = this.ActivityMap.get(this.currentInteraction.interactionId);
-      activity.CallDurationInSeconds = this.getSecondsElapsed(activity.TimeStamp).toString();
-
-      if (this.currentWhatObject === null) {
+      this.storageService.activity.CallDurationInSeconds = this.getSecondsElapsed(this.storageService.activity.TimeStamp).toString();
+      if (this.storageService.activity.WhatObject === null) {
         if (this.whatList.length !== 0) {
-          activity.WhatObject = this.whatList[0];
+          this.storageService.activity.WhatObject = this.whatList[0];
         }
-      } else {
-        activity.WhatObject = this.currentWhatObject;
       }
-      if (this.currentWhoObject === null) {
+      if (this.storageService.activity.WhoObject === null) {
         if (this.whoList.length !== 0) {
-          activity.WhoObject = this.whoList[0];
+          this.storageService.activity.WhoObject = this.whoList[0];
         }
-      } else {
-        activity.WhoObject = this.currentWhoObject;
       }
-      activity.Description = this.currentCallNotes;
-      activity.CallType = this.getInteractionDirection(this.currentInteraction.direction);
-      activity.Subject = this.subject;
+      this.storageService.activity.CallType = this.getInteractionDirection(this.currentInteraction.direction);
       if (clearActivityFields) {
-        activity.Status = 'Completed';
-        this.subject = null;
-        this.currentCallNotes = null;
-        this.ActivitySave.emit(activity);
+        this.storageService.activity.Status = 'Completed';
+        this.ActivitySave.emit(this.storageService.activity);
       } else {
-        this.ActivitySave.emit(activity);
+        this.ActivitySave.emit(this.storageService.activity);
       }
-      this.loggerService.logger.logDebug('activity: Save activity: ' + JSON.stringify(activity));
+      this.loggerService.logger.logDebug('activity: Save activity: ' + JSON.stringify(this.storageService.activity));
     }
   }
   protected onNameSelectChange(event) {
-    this.currentWhoObject = this.getWho(event.currentTarget.value);
+    this.storageService.activity.WhoObject = this.getWho(event.currentTarget.value);
     this.loggerService.logger.logDebug('activity: Call from select box value changed: ' + JSON.stringify(this.currentWhoObject));
     this.activitySave(false);
   }
   protected onRelatedToChange(event) {
-    this.currentWhatObject = this.getWhat(event.currentTarget.value);
+    this.storageService.activity.WhatObject = this.getWhat(event.currentTarget.value);
     this.loggerService.logger.logDebug('activity: Related to select box value changed: ' + JSON.stringify(this.currentWhatObject));
     this.activitySave(false);
   }
   protected onSubjectChange(event) {
-    this.subject = event.srcElement.value;
-    this.loggerService.logger.logDebug('activity: Subject value changed: ' + JSON.stringify(this.subject));
+    this.storageService.setSubject(this.storageService.currentInteraction.interactionId, event.srcElement.value);
+    this.loggerService.logger.logDebug('activity: Subject value changed: ' + JSON.stringify(this.storageService.activity.Subject));
     this.activitySave(false);
   }
   protected onCallNotesChange(event) {
-    this.currentCallNotes = event.srcElement.value.trim();
-    this.loggerService.logger.logDebug('activity: Call notes value changed: ' + JSON.stringify(this.currentCallNotes));
+    this.storageService.setDescription(this.storageService.currentInteraction.interactionId, event.srcElement.value.trim());
+    this.loggerService.logger.logDebug('activity: Call notes value changed: ' + JSON.stringify(this.storageService.activity.Description));
     this.activitySave(false);
   }
   protected getInteractionDirection(directionNumber) {
@@ -115,6 +99,9 @@ export class ActivityComponent implements OnInit {
   }
   protected getSecondsElapsed(startDate): number {
     const EndDate = new Date();
+    if (typeof startDate === 'string') {
+      startDate = new Date(startDate);
+    }
     return Math.round((EndDate.getTime() - startDate.getTime()) / 1000);
   }
   protected getWho(id): IActivityDetails {
@@ -132,7 +119,7 @@ export class ActivityComponent implements OnInit {
     }
   }
   protected loadQuickComment(value) {
-    this.currentCallNotes = this.quickCommentList[value];
+    this.storageService.setDescription(this.storageService.currentInteraction.interactionId, this.quickCommentList[value]);
   }
 
   protected parseWhoObject(whoObject: IActivityDetails): string {

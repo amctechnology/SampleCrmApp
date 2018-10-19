@@ -22,13 +22,13 @@
         </div>
         <div class="editor displayDiv">
           <label class="displayLabels" title="Subject">Subject</label>
-          <input class="activitySubjectTextBoxStyle displayData" (change)="onSubjectChange($event)" title="{{subject}}"
-            type="text" value="{{subject}}">
+          <input class="activitySubjectTextBoxStyle displayData" (change)="onSubjectChange($event)" title="{{storageService.activity.Subject}}"
+            type="text" value="{{storageService.activity.Subject}}">
         </div>
         <div class="editor displayDiv">
           <div class="callNotesContainer">
             <div class="textAreaDiv">
-              <textarea value="{{currentCallNotes}}" placeholder="Click to add a comment" class="activityCommentsTextBoxStyle"
+              <textarea value="{{storageService.activity.Description}}" placeholder="Click to add a comment" class="activityCommentsTextBoxStyle"
                 (change)="onCallNotesChange($event)" cols="20" rows="2" title=""></textarea>
             </div>
             <div class="notesBottonBorder">
@@ -43,7 +43,6 @@
               </div>
             </div>
           </div>
-
         </div>
       </form>
     </div>

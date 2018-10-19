@@ -20,7 +20,9 @@ export class AMCSalesforceHomeComponent extends Application implements OnInit {
   protected phoneNumberFormat: string;
   constructor(private loggerService: LoggerService, protected storageService: StorageService) {
     super(loggerService.logger);
+    // localStorage.clear();
     this.loggerService.logger.logDebug('AMCSalesforceHomeComponent: constructor start');
+    this.storageService.syncWithLocalStorage();
     this.phoneNumberFormat = null;
     this.appName = 'Salesforce';
     this.bridgeScripts = this.bridgeScripts.concat([
@@ -251,19 +253,20 @@ export class AMCSalesforceHomeComponent extends Application implements OnInit {
 
   protected async saveActivity(activity): Promise<string> {
     this.loggerService.logger.logDebug('AMCSalesforceHomeComponent: Save activity: ' + JSON.stringify(activity));
-    if (this.storageService.ActivityMapContains(activity.InteractionId)) {
+    if (this.storageService.activityListContains(activity.InteractionId)) {
       activity.ActivityId = this.storageService.getActivity(activity.InteractionId).ActivityId;
     }
     if (activity.Status === 'Completed') {
       this.storageService.clearWhoList();
       this.storageService.clearWhatList();
+      this.storageService.removeActivity(activity.InteractionId);
     }
     this.loggerService.logger.logDebug('AMCSalesforceHomeComponent: Sending activity: ' + JSON.stringify(activity) +
       ' to bridge to be saved');
     activity = await this.bridgeEventsService.sendEvent('saveActivity', activity);
     this.loggerService.logger.logDebug('AMCSalesforceHomeComponent: Updated activity received ' +
       ' from bridge: ' + JSON.stringify(activity));
-    this.storageService.setActivityMap(activity.InteractionId, activity);
+    this.storageService.updateActivity(activity);
     return Promise.resolve(activity.ActivityId);
   }
   protected formatDate(date: Date): string {
@@ -285,12 +288,12 @@ export class AMCSalesforceHomeComponent extends Application implements OnInit {
       const scenarioIdInt = interaction.scenarioId;
       let isNewScenarioId = false;
       interaction.details.fields.Phone.Value = this.formatPhoneNumber(interaction.details.fields.Phone.Value, this.phoneNumberFormat);
-      if (!this.scenarioInteractionMappings.hasOwnProperty(scenarioIdInt) && this.storageService.getCurrentInteraction === null) {
+      if (!this.scenarioInteractionMappings.hasOwnProperty(scenarioIdInt) && this.storageService.getCurrentInteraction() === null) {
         this.scenarioInteractionMappings[scenarioIdInt] = {};
         isNewScenarioId = true;
         this.scenarioInteractionMappings[scenarioIdInt][interactionId] = true;
       }
-      if (this.shouldPreformScreenpop(interaction, isNewScenarioId) && this.storageService.getCurrentInteraction === null) {
+      if (this.shouldPreformScreenpop(interaction, isNewScenarioId) && this.storageService.getCurrentInteraction() === null) {
         this.loggerService.logger.logDebug('AMCSalesforceHomeComponent: screenpop for new interaction: ' +
           JSON.stringify(interaction));
         const searchRecord = await this.preformScreenpop(interaction);
@@ -305,8 +308,8 @@ export class AMCSalesforceHomeComponent extends Application implements OnInit {
           this.storageService.setSearchResultWasReturned(true);
         }
         this.storageService.setCurrentInteraction(interaction);
-        this.storageService.setSubject('Call [' + interaction.details.fields.Phone.Value + ']');
-        this.storageService.setActivityMap(interaction.interactionId, this.createActivity(interaction));
+        this.storageService.addActivity(this.createActivity(interaction));
+        this.storageService.setSubject(interactionId, 'Call [' + interaction.details.fields.Phone.Value + ']');
         this.loggerService.logger.logDebug('AMCSalesforceHomeComponent: Autosave activity: ' +
           JSON.stringify(this.storageService.getActivity(this.storageService.getCurrentInteraction().interactionId)));
         this.autoSave.next();
@@ -316,8 +319,9 @@ export class AMCSalesforceHomeComponent extends Application implements OnInit {
         this.storageService.getCurrentInteraction().interactionId === interactionId) {
         this.loggerService.logger.logDebug('AMCSalesforceHomeComponent: Disconnect interaction received: ' +
           JSON.stringify(interaction));
-        delete this.scenarioInteractionMappings[scenarioIdInt][interactionId];
-        this.storageService.removeActivity(interactionId);
+        if (this.scenarioInteractionMappings[scenarioIdInt]) {
+          delete this.scenarioInteractionMappings[scenarioIdInt][interactionId];
+        }
         this.storageService.setCurrentInteraction(null);
         this.storageService.setSearchResultWasReturned(false);
         this.interactionDisconnected.next(true);
@@ -389,7 +393,7 @@ export class AMCSalesforceHomeComponent extends Application implements OnInit {
       + JSON.stringify(entityType));
     let params: ICreateNewSObjectParams;
     if (this.storageService.getCurrentInteraction()) {
-      if (this.storageService.ActivityMapContains(this.storageService.getCurrentInteraction().interactionId)) {
+      if (this.storageService.activityListContains(this.storageService.getCurrentInteraction().interactionId)) {
         const activity = this.storageService.getActivity(this.storageService.getCurrentInteraction().interactionId);
         params = this.buildParams(entityType, activity);
       }
