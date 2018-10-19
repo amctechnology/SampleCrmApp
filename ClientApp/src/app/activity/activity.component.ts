@@ -70,12 +70,13 @@ export class ActivityComponent implements OnInit {
     }
   }
   protected onNameSelectChange(event) {
-    this.storageService.activity.WhoObject = this.getWho(event.currentTarget.value);
+    this.storageService.setActivityWhoObject(this.storageService.currentInteraction.interactionId, this.getWho(event.currentTarget.value));
     this.loggerService.logger.logDebug('activity: Call from select box value changed: ' + JSON.stringify(this.currentWhoObject));
     this.activitySave(false);
   }
   protected onRelatedToChange(event) {
-    this.storageService.activity.WhatObject = this.getWhat(event.currentTarget.value);
+    this.storageService.setActivityWhatObject(this.storageService.currentInteraction.interactionId,
+      this.getWhat(event.currentTarget.value));
     this.loggerService.logger.logDebug('activity: Related to select box value changed: ' + JSON.stringify(this.currentWhatObject));
     this.activitySave(false);
   }
@@ -120,6 +121,7 @@ export class ActivityComponent implements OnInit {
   }
   protected loadQuickComment(value) {
     this.storageService.setDescription(this.storageService.currentInteraction.interactionId, this.quickCommentList[value]);
+    this.activitySave(false);
   }
 
   protected parseWhoObject(whoObject: IActivityDetails): string {

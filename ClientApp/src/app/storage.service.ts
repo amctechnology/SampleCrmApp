@@ -85,6 +85,26 @@ export class StorageService {
       }
     }
   }
+  public setActivityWhoObject(interactionId: string, whoObject: IActivityDetails) {
+    for (let i = 0; i < this.activityList.length; i++) {
+      if (this.activityList[i].InteractionId === interactionId) {
+        this.activityList[i].WhoObject = whoObject;
+        this.activity = this.activityList[i];
+        this.storeToLocalStorage();
+        break;
+      }
+    }
+  }
+  public setActivityWhatObject(interactionId: string, whatObject: IActivityDetails) {
+    for (let i = 0; i < this.activityList.length; i++) {
+      if (this.activityList[i].InteractionId === interactionId) {
+        this.activityList[i].WhatObject = whatObject;
+        this.activity = this.activityList[i];
+        this.storeToLocalStorage();
+        break;
+      }
+    }
+  }
   public getSearchResultWasReturned(): boolean {
     return this.searchResultWasReturned;
   }

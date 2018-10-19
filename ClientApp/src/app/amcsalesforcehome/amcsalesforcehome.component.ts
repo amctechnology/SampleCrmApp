@@ -300,10 +300,10 @@ export class AMCSalesforceHomeComponent extends Application implements OnInit {
         this.storageService.setsearchRecordList(searchRecord.toJSON());
         this.loggerService.logger.logDebug('AMCSalesforceHomeComponent: Search results: ' +
           JSON.stringify(searchRecord.toJSON()));
-        if (this.storageService.getsearchRecordList.length > 1) {
+        if (this.storageService.getsearchRecordList().length > 1) {
           this.storageService.setSearchReturnedSingleResult(false);
           this.storageService.setSearchResultWasReturned(true);
-        } else if (this.storageService.getsearchRecordList.length === 1) {
+        } else if (this.storageService.getsearchRecordList().length === 1) {
           this.storageService.setSearchReturnedSingleResult(true);
           this.storageService.setSearchResultWasReturned(true);
         }
