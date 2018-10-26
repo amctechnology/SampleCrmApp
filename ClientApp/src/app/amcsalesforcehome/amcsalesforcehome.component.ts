@@ -50,11 +50,6 @@ export class AMCSalesforceHomeComponent extends Application implements OnInit {
       localStorage.clear();
     });
   }
-  protected syncLocalStorage() {
-    if (localStorage.getItem('onInteraction')) {
-      this.storageService.syncWithLocalStorage();
-    }
-  }
   protected formatPhoneNumber(number: string, phoneNumberFormat: string) {
     let numberIndex = 0;
     let formatIndex = 0;
