@@ -2,7 +2,7 @@ import { Component, OnInit, Output, EventEmitter } from '@angular/core';
 import * as api from '@amc/application-api';
 import { Application, BridgeEventsService } from '@amc/applicationangularframework';
 import { bind } from 'bind-decorator';
-import { InteractionDirectionTypes, IInteraction } from '@amc/application-api';
+import { InteractionDirectionTypes, IInteraction, registerOnLogout } from '@amc/application-api';
 import { Subject } from 'rxjs/Subject';
 import { IActivity } from './../Model/IActivity';
 import { IActivityDetails } from './../Model/IActivityDetails';
@@ -42,11 +42,17 @@ export class AMCSalesforceHomeComponent extends Application implements OnInit {
     this.bridgeEventsService.subscribe('setActivityDetails', this.setActivityDetails);
     const config = await api.initializeComplete(this.logger);
     this.phoneNumberFormat = String(config.variables['PhoneNumberFormat']).toLowerCase();
+    registerOnLogout(this.removeLocalStorageOnLogout);
     this.loggerService.logger.logDebug('AMCSalesforceHomeComponent: ngOnInit complete');
+  }
+  protected removeLocalStorageOnLogout(reason?: string): Promise<any> {
+    return new Promise((resolve, reject) => {
+      localStorage.clear();
+    });
   }
   protected syncLocalStorage() {
     if (localStorage.getItem('onInteraction')) {
-
+      this.storageService.syncWithLocalStorage();
     }
   }
   protected formatPhoneNumber(number: string, phoneNumberFormat: string) {
@@ -324,6 +330,7 @@ export class AMCSalesforceHomeComponent extends Application implements OnInit {
         }
         this.storageService.setCurrentInteraction(null);
         this.storageService.setSearchResultWasReturned(false);
+        this.storageService.clearActivity();
         this.interactionDisconnected.next(true);
         this.storageService.clearSearchRecordList();
         if (Object.keys(this.scenarioInteractionMappings[scenarioIdInt]).length === 0) {

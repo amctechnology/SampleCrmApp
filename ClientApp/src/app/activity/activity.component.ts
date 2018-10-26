@@ -49,12 +49,12 @@ export class ActivityComponent implements OnInit {
   protected activitySave(clearActivityFields) {
     if (this.currentInteraction) {
       this.storageService.activity.CallDurationInSeconds = this.getSecondsElapsed(this.storageService.activity.TimeStamp).toString();
-      if (this.storageService.activity.WhatObject === null) {
+      if (this.storageService.activity.WhatObject.objectType === '') {
         if (this.whatList.length !== 0) {
           this.storageService.activity.WhatObject = this.whatList[0];
         }
       }
-      if (this.storageService.activity.WhoObject === null) {
+      if (this.storageService.activity.WhoObject.objectType === '') {
         if (this.whoList.length !== 0) {
           this.storageService.activity.WhoObject = this.whoList[0];
         }

@@ -105,6 +105,9 @@ export class StorageService {
       }
     }
   }
+  public clearActivity() {
+    this.activity = null;
+  }
   public getSearchResultWasReturned(): boolean {
     return this.searchResultWasReturned;
   }
