@@ -325,9 +325,9 @@ export class AMCSalesforceHomeComponent extends Application implements OnInit {
         }
         this.storageService.setCurrentInteraction(null);
         this.storageService.setSearchResultWasReturned(false);
-        this.storageService.clearActivity();
         this.interactionDisconnected.next(true);
         this.storageService.clearSearchRecordList();
+        this.storageService.clearActivity();
         if (Object.keys(this.scenarioInteractionMappings[scenarioIdInt]).length === 0) {
           delete this.scenarioInteractionMappings[scenarioIdInt];
         }
