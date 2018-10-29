@@ -13,9 +13,6 @@ import { StorageService } from '../Storage.service';
   styleUrls: ['./activity.component.css']
 })
 export class ActivityComponent implements OnInit {
-  @Input() whoList: Array<IActivityDetails>;
-  @Input() whatList: Array<IActivityDetails>;
-  @Input() currentInteraction: api.IInteraction;
   @Input() interactionDisconnected: Subject<boolean>;
   @Input() autoSave: Subject<void>;
   @Output() ActivitySave: EventEmitter<IActivity> = new EventEmitter<IActivity>();
@@ -47,19 +44,19 @@ export class ActivityComponent implements OnInit {
     });
   }
   protected activitySave(clearActivityFields) {
-    if (this.currentInteraction) {
+    if (this.storageService.currentInteraction) {
       this.storageService.activity.CallDurationInSeconds = this.getSecondsElapsed(this.storageService.activity.TimeStamp).toString();
       if (this.storageService.activity.WhatObject.objectType === '') {
-        if (this.whatList.length !== 0) {
-          this.storageService.activity.WhatObject = this.whatList[0];
+        if (this.storageService.whatList.length !== 0) {
+          this.storageService.activity.WhatObject = this.storageService.whatList[0];
         }
       }
       if (this.storageService.activity.WhoObject.objectType === '') {
-        if (this.whoList.length !== 0) {
-          this.storageService.activity.WhoObject = this.whoList[0];
+        if (this.storageService.whoList.length !== 0) {
+          this.storageService.activity.WhoObject = this.storageService.whoList[0];
         }
       }
-      this.storageService.activity.CallType = this.getInteractionDirection(this.currentInteraction.direction);
+      this.storageService.activity.CallType = this.getInteractionDirection(this.storageService.getCurrentInteraction().direction);
       if (clearActivityFields) {
         this.storageService.activity.Status = 'Completed';
         this.ActivitySave.emit(this.storageService.activity);
@@ -106,16 +103,16 @@ export class ActivityComponent implements OnInit {
     return Math.round((EndDate.getTime() - startDate.getTime()) / 1000);
   }
   protected getWho(id): IActivityDetails {
-    for (let i = 0; i < this.whoList.length; i++) {
-      if (this.whoList[i].objectId === id) {
-        return this.whoList[i];
+    for (let i = 0; i < this.storageService.whoList.length; i++) {
+      if (this.storageService.whoList[i].objectId === id) {
+        return this.storageService.whoList[i];
       }
     }
   }
   protected getWhat(id): IActivityDetails {
-    for (let i = 0; i < this.whatList.length; i++) {
-      if (this.whatList[i].objectId === id) {
-        return this.whatList[i];
+    for (let i = 0; i < this.storageService.whatList.length; i++) {
+      if (this.storageService.whatList[i].objectId === id) {
+        return this.storageService.whatList[i];
       }
     }
   }
