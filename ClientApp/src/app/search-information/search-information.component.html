@@ -8,13 +8,13 @@
   </div>
   <div class="callBody">
     <div *ngIf="!searchReturnedSingleResult">
-      <select class="searchResultSelect" data-resetperactivity="false" (change)='onAgentSelectedCallerInformation($event)'>
+      <select class="multipleSearchResultSelect" data-resetperactivity="false" (change)='onAgentSelectedCallerInformation($event)'>
         <option *ngFor="let searchRecord of searchRecordList" id="{{searchRecord.id}}" value="{{searchRecord.id}}">{{parseSearchRecordForName(searchRecord)}}</option>
       </select>
     </div>
     <div *ngIf="searchReturnedSingleResult">
-      <input readonly class="searchResultInput" *ngFor="let searchRecord of searchRecordList" id="{{searchRecord.id}}"
-        value="{{parseSearchRecordForName(searchRecord)}}">
+      <input readonly class="singleSearchResultSelect" *ngFor="let searchRecord of searchRecordList" id="{{searchRecord.id}}"
+        value="{{parseSearchRecordForName(searchRecord)}}" (click)='onAgentSelectedCallerInformation($event)'>
     </div>
   </div>
 </div>

@@ -18,9 +18,15 @@ export class SearchInformationComponent {
     this.loggerService.logger.logDebug('searchInformationComponent: Constructor complete');
   }
   protected onAgentSelectedCallerInformation(event) {
-    this.loggerService.logger.logDebug('searchInformationComponent: Agent selected caller info: ' +
-      event.currentTarget.value);
-    this.agentSelectedCallerInformation.emit(event.currentTarget.value);
+    if (event.currentTarget.id !== '') {
+      this.loggerService.logger.logDebug('searchInformationComponent: Agent selected caller info: ' +
+        event.currentTarget.id);
+      this.agentSelectedCallerInformation.emit(event.currentTarget.id);
+    } else {
+      this.loggerService.logger.logDebug('searchInformationComponent: Agent selected caller info: ' +
+        event.currentTarget.value);
+      this.agentSelectedCallerInformation.emit(event.currentTarget.value);
+    }
   }
   protected parseSearchRecordForName(searchRecord) {
     const keys = Object.keys(searchRecord.fields);
