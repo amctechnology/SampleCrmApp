@@ -19,9 +19,6 @@ export class ActivityComponent implements OnInit {
   @Output() childComponentLogger: EventEmitter<string> = new EventEmitter<string>();
 
   isActivityMaximized: boolean;
-  currentWhoObject: IActivityDetails;
-  currentWhatObject: IActivityDetails;
-  currentCallNotes: string;
   quickCommentList: string[];
 
   constructor(private loggerService: LoggerService, protected storageService: StorageService) {
@@ -68,13 +65,14 @@ export class ActivityComponent implements OnInit {
   }
   protected onNameSelectChange(event) {
     this.storageService.setActivityWhoObject(this.storageService.currentInteraction.interactionId, this.getWho(event.currentTarget.value));
-    this.loggerService.logger.logDebug('activity: Call from select box value changed: ' + JSON.stringify(this.currentWhoObject));
+    this.loggerService.logger.logDebug('activity: Call from select box value changed: ' +
+      JSON.stringify(event.currentTarget.value));
     this.activitySave(false);
   }
   protected onRelatedToChange(event) {
     this.storageService.setActivityWhatObject(this.storageService.currentInteraction.interactionId,
       this.getWhat(event.currentTarget.value));
-    this.loggerService.logger.logDebug('activity: Related to select box value changed: ' + JSON.stringify(this.currentWhatObject));
+    this.loggerService.logger.logDebug('activity: Related to select box value changed: ' + JSON.stringify(event.currentTarget.value));
     this.activitySave(false);
   }
   protected onSubjectChange(event) {

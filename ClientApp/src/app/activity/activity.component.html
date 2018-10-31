@@ -11,13 +11,13 @@
         <div class="editor displayDiv">
           <label class="displayLabels" title="Call From">Name</label>
           <select class="dropDownListStyle displayData" data-resetperactivity="false" (change)="onNameSelectChange($event)">
-            <option *ngFor="let who of whoList" value="{{who.objectId}}">{{parseWhoObject(who)}}</option>
+            <option *ngFor="let who of storageService.whoList" value="{{who.objectId}}">{{parseWhoObject(who)}}</option>
           </select>
         </div>
         <div class="editor displayDiv">
           <label class="displayLabels" title="Related To">Related To</label>
           <select class="dropDownListStyle displayData" (change)="onRelatedToChange($event)" data-resetperactivity="false">
-            <option *ngFor="let what of whatList" value="{{what.objectId}}">{{parseWhatObject(what)}}</option>
+            <option *ngFor="let what of storageService.whatList" value="{{what.objectId}}">{{parseWhatObject(what)}}</option>
           </select>
         </div>
         <div class="editor displayDiv">
