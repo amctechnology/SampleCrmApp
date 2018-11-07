@@ -246,12 +246,16 @@ export class AMCSalesforceHomeComponent extends Application implements OnInit {
       const interactionId = interaction.interactionId;
       const scenarioIdInt = interaction.scenarioId;
       let isNewScenarioId = false;
-      if (!this.scenarioInteractionMappings.hasOwnProperty(scenarioIdInt) && this.currentInteraction === null) {
+      if (!this.scenarioInteractionMappings.hasOwnProperty(scenarioIdInt)
+        && !this.currentInteraction
+        && interaction.state !== api.InteractionStates.Disconnected) {
         this.scenarioInteractionMappings[scenarioIdInt] = {};
         isNewScenarioId = true;
         this.scenarioInteractionMappings[scenarioIdInt][interactionId] = true;
       }
-      if (this.shouldPreformScreenpop(interaction, isNewScenarioId) && this.currentInteraction === null) {
+      if (this.shouldPreformScreenpop(interaction, isNewScenarioId)
+        && !this.currentInteraction
+        && interaction.state !== api.InteractionStates.Disconnected) {
         this.loggerService.logger.logDebug('AMCSalesforceHomeComponent: screenpop for new interaction: ' +
           JSON.stringify(interaction));
         const searchRecord = await this.preformScreenpop(interaction);
@@ -273,15 +277,20 @@ export class AMCSalesforceHomeComponent extends Application implements OnInit {
         this.autoSave.next();
 
         return searchRecord;
-      } else if (interaction.state === api.InteractionStates.Disconnected && this.currentInteraction.interactionId === interactionId) {
+      } else if (interaction.state === api.InteractionStates.Disconnected) {
         this.loggerService.logger.logDebug('AMCSalesforceHomeComponent: Disconnect interaction received: ' +
           JSON.stringify(interaction));
+        if (this.currentInteraction && this.currentInteraction.interactionId === interactionId) {
+          this.currentInteraction = null;
+          this.searchResultWasReturned = false;
+          try {
+            this.interactionDisconnected.next(true);
+          } catch (e) { }
+          this.searchRecordList = [];
+        }
+
         delete this.scenarioInteractionMappings[scenarioIdInt][interactionId];
-        delete this.ActivityMap[interactionId];
-        this.currentInteraction = null;
-        this.searchResultWasReturned = false;
-        this.interactionDisconnected.next(true);
-        this.searchRecordList = [];
+
         if (Object.keys(this.scenarioInteractionMappings[scenarioIdInt]).length === 0) {
           delete this.scenarioInteractionMappings[scenarioIdInt];
         }
