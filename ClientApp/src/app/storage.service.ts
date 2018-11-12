@@ -3,6 +3,8 @@ import { InteractionDirectionTypes, IInteraction } from '@amc/application-api';
 import { Subject } from 'rxjs/Subject';
 import { IActivity } from './Model/IActivity';
 import { IActivityDetails } from './Model/IActivityDetails';
+import { Injectable } from '@angular/core';
+@Injectable()
 export class StorageService {
   public whoList: IActivityDetails[];
   public whatList: IActivityDetails[];

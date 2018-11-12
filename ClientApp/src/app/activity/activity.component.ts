@@ -6,7 +6,7 @@ import { IActivity } from './../Model/IActivity';
 import { IActivityDetails } from './../Model/IActivityDetails';
 import { ICreateNewSObjectParams } from './../Model/ICreateNewSObjectParams';
 import { LoggerService } from './../logger.service';
-import { StorageService } from '../Storage.service';
+import { StorageService } from '../storage.service';
 @Component({
   selector: 'app-activity',
   templateUrl: './activity.component.html',

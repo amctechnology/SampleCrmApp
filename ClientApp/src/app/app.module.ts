@@ -10,7 +10,7 @@ import { ActivityComponent } from './activity/activity.component';
 import { CreateComponent } from './create/create.component';
 import { SearchInformationComponent } from './search-information/search-information.component';
 import { LoggerService } from './logger.service';
-import { StorageService } from './Storage.service';
+import { StorageService } from './storage.service';
 
 
 @NgModule({

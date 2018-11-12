@@ -8,7 +8,7 @@ import { IActivity } from './../Model/IActivity';
 import { IActivityDetails } from './../Model/IActivityDetails';
 import { ICreateNewSObjectParams } from './../Model/ICreateNewSObjectParams';
 import { LoggerService } from './../logger.service';
-import { StorageService } from '../Storage.service';
+import { StorageService } from '../storage.service';
 @Component({
   selector: 'app-amcsalesforcehome',
   templateUrl: './amcsalesforcehome.component.html',
@@ -122,7 +122,6 @@ export class AMCSalesforceHomeComponent extends Application implements OnInit {
             recordItem.setField(fieldName, fieldName, fieldName, crmResults[id][fieldName]);
           }
         }
-
         result.addSearchRecord(recordItem);
       }
     }
