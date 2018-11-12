@@ -179,6 +179,14 @@ export class StorageService {
     }
     return false;
   }
+  public onInteractionDisconnect() {
+    this.setCurrentInteraction(null);
+    this.clearSearchRecordList();
+    this.clearActivity();
+    this.setSearchResultWasReturned(false);
+    this.clearWhatList();
+    this.clearWhoList();
+  }
   protected storeToLocalStorage() {
     localStorage.setItem('scenario', JSON.stringify({
       activityList: this.activityList,
