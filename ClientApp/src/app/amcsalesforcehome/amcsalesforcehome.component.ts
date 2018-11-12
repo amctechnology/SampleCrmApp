@@ -288,12 +288,16 @@ export class AMCSalesforceHomeComponent extends Application implements OnInit {
       const scenarioIdInt = interaction.scenarioId;
       let isNewScenarioId = false;
       interaction.details.fields.Phone.Value = this.formatPhoneNumber(interaction.details.fields.Phone.Value, this.phoneNumberFormat);
-      if (!this.scenarioInteractionMappings.hasOwnProperty(scenarioIdInt) && this.storageService.getCurrentInteraction() === null) {
+      if (!this.scenarioInteractionMappings.hasOwnProperty(scenarioIdInt)
+        && !this.storageService.getCurrentInteraction()
+        && interaction.state !== api.InteractionStates.Disconnected) {
         this.scenarioInteractionMappings[scenarioIdInt] = {};
         isNewScenarioId = true;
         this.scenarioInteractionMappings[scenarioIdInt][interactionId] = true;
       }
-      if (this.shouldPreformScreenpop(interaction, isNewScenarioId) && this.storageService.getCurrentInteraction() === null) {
+      if (this.shouldPreformScreenpop(interaction, isNewScenarioId)
+        && !this.storageService.getCurrentInteraction()
+        && interaction.state !== api.InteractionStates.Disconnected) {
         this.loggerService.logger.logDebug('AMCSalesforceHomeComponent: screenpop for new interaction: ' +
           JSON.stringify(interaction));
         const searchRecord = await this.preformScreenpop(interaction);
