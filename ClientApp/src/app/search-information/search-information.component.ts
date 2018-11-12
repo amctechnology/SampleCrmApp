@@ -8,7 +8,7 @@ import { StorageService } from '../storage.service';
   styleUrls: ['./search-information.component.css']
 })
 export class SearchInformationComponent {
-  @Output() agentSelectedCallerInformation: EventEmitter<string> = new EventEmitter();
+  @Output() agentSelectedCallerInformation: EventEmitter<any> = new EventEmitter();
   isSearchInformationMaximized: boolean;
   imageLocation: string;
   constructor(private loggerService: LoggerService, protected storageService: StorageService) {
@@ -17,7 +17,7 @@ export class SearchInformationComponent {
     this.loggerService.logger.logDebug('searchInformationComponent: Constructor complete');
   }
   protected onAgentSelectedCallerInformation(event) {
-    if (event.currentTarget.id !== '') {
+    if (this.storageService.searchReturnedSingleResult) {
       this.loggerService.logger.logDebug('searchInformationComponent: Agent selected caller info: ' +
         event.currentTarget.id);
       this.agentSelectedCallerInformation.emit(event.currentTarget.id);

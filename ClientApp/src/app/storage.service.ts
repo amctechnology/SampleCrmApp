@@ -3,6 +3,7 @@ import { InteractionDirectionTypes, IInteraction } from '@amc/application-api';
 import { Subject } from 'rxjs/Subject';
 import { IActivity } from './Model/IActivity';
 import { IActivityDetails } from './Model/IActivityDetails';
+import { bind } from 'bind-decorator';
 import { Injectable } from '@angular/core';
 @Injectable()
 export class StorageService {
@@ -14,6 +15,7 @@ export class StorageService {
   public searchRecordList: api.IRecordItem[];
   public searchReturnedSingleResult: boolean;
   public searchResultWasReturned: boolean;
+  public currentTicketId: string;
   constructor() {
     this.activityList = [];
     this.currentInteraction = null;
@@ -22,6 +24,14 @@ export class StorageService {
     this.searchReturnedSingleResult = null;
     this.whatList = [];
     this.whoList = [];
+    this.currentTicketId = '';
+  }
+  public setCurrentTicketId(id) {
+    this.currentTicketId = id;
+    this.storeToLocalStorage();
+  }
+  public getCurrentTicketId() {
+    return this.currentTicketId;
   }
   public getActivity(interactionId: string): IActivity {
     for (let i = 0; i < this.activityList.length; i++) {
@@ -132,7 +142,7 @@ export class StorageService {
   }
   public whatListContains(whatObject: IActivityDetails): boolean {
     for (let i = 0; i < this.whatList.length; i++) {
-      if (this.whatList[i].objectId === whatObject.objectId) {
+      if (this.whatList[i] && (this.whatList[i].objectId === whatObject.objectId)) {
         return true;
       }
     }
@@ -163,6 +173,13 @@ export class StorageService {
   public getsearchRecordList(): api.IRecordItem[] {
     return this.searchRecordList;
   }
+  public getSearchRecord(id) {
+    for (let i = 0; i < this.searchRecordList.length; i++) {
+      if (this.searchRecordList[i].id === id) {
+        return this.searchRecordList[i];
+      }
+    }
+  }
   public setsearchRecordList(searchRecords: api.IRecordItem[]) {
     this.searchRecordList = searchRecords;
     this.storeToLocalStorage();
@@ -173,11 +190,15 @@ export class StorageService {
   }
   public whoListContains(whoObject) {
     for (let i = 0; i < this.whoList.length; i++) {
-      if (this.whoList[i].objectId === whoObject.objectId) {
+      if (this.whoList[i] && (this.whoList[i].objectId === whoObject.objectId)) {
         return true;
       }
     }
     return false;
+  }
+  public clearDescription() {
+    this.activity.Description = '';
+    this.storeToLocalStorage();
   }
   public onInteractionDisconnect() {
     this.setCurrentInteraction(null);
@@ -196,7 +217,8 @@ export class StorageService {
       searchResultWasReturned: this.searchResultWasReturned,
       searchReturnedSingleResult: this.searchReturnedSingleResult,
       whatList: this.whatList,
-      whoList: this.whoList
+      whoList: this.whoList,
+      currentTicketId: this.currentTicketId
     }));
   }
   public syncWithLocalStorage() {
@@ -210,6 +232,7 @@ export class StorageService {
       this.searchReturnedSingleResult = browserStorage.searchReturnedSingleResult;
       this.whatList = browserStorage.whatList;
       this.whoList = browserStorage.whoList;
+      this.currentTicketId = browserStorage.currentTicketId;
     }
   }
 }

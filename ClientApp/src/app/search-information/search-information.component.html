@@ -7,7 +7,7 @@
       title="Collapse">
   </div>
   <div class="callBody">
-    <div *ngIf="!searchReturnedSingleResult">
+    <div *ngIf="!storageService.searchReturnedSingleResult">
       <select class="multipleSearchResultSelect" data-resetperactivity="false" (change)='onAgentSelectedCallerInformation($event)'>
         <option *ngFor="let searchRecord of storageService.searchRecordList" id="{{searchRecord.id}}" value="{{searchRecord.id}}">{{parseSearchRecordForName(searchRecord)}}</option>
       </select>
