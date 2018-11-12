@@ -10,6 +10,8 @@ import { ActivityComponent } from './activity/activity.component';
 import { CreateComponent } from './create/create.component';
 import { SearchInformationComponent } from './search-information/search-information.component';
 import { LoggerService } from './logger.service';
+import { StorageService } from './storage.service';
+
 
 @NgModule({
   declarations: [
@@ -17,7 +19,8 @@ import { LoggerService } from './logger.service';
     AMCSalesforceHomeComponent,
     ActivityComponent,
     CreateComponent,
-    SearchInformationComponent,
+    SearchInformationComponent
+
 
   ],
   imports: [
@@ -28,7 +31,7 @@ import { LoggerService } from './logger.service';
       { path: '', component: AMCSalesforceHomeComponent, pathMatch: 'full' }
     ])
   ],
-  providers: [LoggerService],
+  providers: [LoggerService, StorageService],
   bootstrap: [AppComponent]
 })
 export class AppModule { }

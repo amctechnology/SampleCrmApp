@@ -223,6 +223,11 @@ class SalesforceBridge extends Bridge {
       if (this.isLightning) {
         const screenPopObject = {
           callback: result => {
+            if (!result.returnValue) {
+              this.eventService.sendEvent('logDebug', 'bridge: No results returned from screenpop request, error: ' +
+                JSON.stringify(result.errors) + ' PhoneNumberFormat Needs to be configured for CRM');
+              reject({});
+            }
             resolve(result.returnValue);
           },
           searchParams: queryString,

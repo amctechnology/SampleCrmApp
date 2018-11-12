@@ -1,26 +1,31 @@
 import { Component, OnInit, Input, Output, EventEmitter } from '@angular/core';
 import * as api from '@amc/application-api';
 import { LoggerService } from './../logger.service';
+import { StorageService } from '../storage.service';
 @Component({
   selector: 'app-search-information',
   templateUrl: './search-information.component.html',
   styleUrls: ['./search-information.component.css']
 })
 export class SearchInformationComponent {
-  @Input() searchReturnedSingleResult: boolean;
-  @Input() searchRecordList: Array<api.IRecordItem>;
-  @Output() agentSelectedCallerInformation: EventEmitter<string> = new EventEmitter();
+  @Output() agentSelectedCallerInformation: EventEmitter<any> = new EventEmitter();
   isSearchInformationMaximized: boolean;
   imageLocation: string;
-  constructor(private loggerService: LoggerService) {
+  constructor(private loggerService: LoggerService, protected storageService: StorageService) {
     this.loggerService.logger.logDebug('searchInformationComponent: Constructor start');
     this.isSearchInformationMaximized = true;
     this.loggerService.logger.logDebug('searchInformationComponent: Constructor complete');
   }
   protected onAgentSelectedCallerInformation(event) {
-    this.loggerService.logger.logDebug('searchInformationComponent: Agent selected caller info: ' +
-      event.currentTarget.value);
-    this.agentSelectedCallerInformation.emit(event.currentTarget.value);
+    if (this.storageService.searchReturnedSingleResult) {
+      this.loggerService.logger.logDebug('searchInformationComponent: Agent selected caller info: ' +
+        event.currentTarget.id);
+      this.agentSelectedCallerInformation.emit(event.currentTarget.id);
+    } else {
+      this.loggerService.logger.logDebug('searchInformationComponent: Agent selected caller info: ' +
+        event.currentTarget.value);
+      this.agentSelectedCallerInformation.emit(event.currentTarget.value);
+    }
   }
   protected parseSearchRecordForName(searchRecord) {
     const keys = Object.keys(searchRecord.fields);
@@ -37,9 +42,9 @@ export class SearchInformationComponent {
     return name;
   }
   protected getRecord(id) {
-    for (let i = 0; i < this.searchRecordList.length; i++) {
-      if (this.searchRecordList[i].id === id) {
-        return this.searchRecordList[i];
+    for (let i = 0; i < this.storageService.searchRecordList.length; i++) {
+      if (this.storageService.searchRecordList[i].id === id) {
+        return this.storageService.searchRecordList[i];
       }
     }
   }
