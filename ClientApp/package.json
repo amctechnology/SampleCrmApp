@@ -4,12 +4,13 @@
   "license": "MIT",
   "scripts": {
     "ng": "ng",
-    "build:ssr": "npm run build -- --app=ssr --output-hashing=media",
+    "build:ssr": "npm run build-prod -- --app=ssr --output-hashing=media",
     "test": "karma start ./karma.conf.js",
     "test-ci": "karma start ./karma.conf.ci.js",
     "lint": "ng lint",
     "e2e": "protractor ./protractor.conf.js",
     "build": "webpack",
+    "build-prod": "webpack -p",
     "start": "webpack-dev-server",
     "pree2e": "webdriver-manager update --standalone false --gecko false --quiet"
   },
