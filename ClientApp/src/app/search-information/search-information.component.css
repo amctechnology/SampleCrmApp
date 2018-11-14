@@ -1,5 +1,4 @@
 .callHeader {
-  /* border: 1px solid #939598 !important; */
   background-color: #F4F5FB !important;
   width: 100% !important;
   margin-top: 0px !important;
@@ -17,7 +16,6 @@
   margin: 4px 5% 0 0px;
   font-family: Arial;
   white-space: nowrap;
-  /*overflow: hidden;*/
   text-overflow: ellipsis;
   border: 0;
   padding-top: 2px;
@@ -25,19 +23,20 @@
   -webkit-box-sizing: border-box;
   -moz-box-sizing: border-box;
 }
- .callBody {
-  /* border: 1px solid #939598; */
+
+.callBody {
   border-top: 0;
   position: relative;
 }
 
 .callDisplay {
   margin-bottom: 8px;
-  display:grid;
+  display: grid;
   background-color: #ffffff;
+  display: grid;
 }
 
-.searchResultSelect {
+.multipleSearchResultSelect {
   border: 1px solid #939598 !IMPORTANT;
   border-radius: 3px !IMPORTANT;
   width: 96% !IMPORTANT;
@@ -48,17 +47,14 @@
   margin: 5px 0% 5px 6px;
 }
 
-.searchResultInput {
-  border: 1px solid #939598 !IMPORTANT;
-  border-radius: 3px !IMPORTANT;
+.singleSearchResultSelect {
+  border: 0px !IMPORTANT;
   width: 96% !IMPORTANT;
   height: 20px !IMPORTANT;
   text-align: left !IMPORTANT;
-  box-sizing: border-box;
-  -webkit-box-sizing: border-box;
-  -moz-box-sizing: border-box;
+  white-space: nowrap !IMPORTANT;
+  text-overflow: ellipsis !IMPORTANT;
   margin: 5px 0% 5px 6px;
-  padding-left:2px;
 }
 
 .displayLabels {
@@ -73,7 +69,6 @@
   margin: 4px 5% 0 0px;
   font-family: Arial;
   white-space: nowrap;
-  /*overflow: hidden;*/
   text-overflow: ellipsis;
   border: 0;
   padding-top: 2px;
@@ -86,4 +81,8 @@
   width: 20px;
   height: 20px;
   float: right;
+}
+
+.headerLabel {
+  margin-left: 10px
 }

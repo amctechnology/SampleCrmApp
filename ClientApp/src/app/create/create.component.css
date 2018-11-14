@@ -1,5 +1,4 @@
 .callHeader {
-  /* border: 1px solid #939598 !important; */
   background-color: #F4F5FB !important;
   width: 100% !important;
   margin-top: 0px !important;
@@ -27,35 +26,38 @@
   margin-bottom: 8px;
   margin-top: 2px;
   cursor: pointer;
-  padding-left:5px;
+  padding-left: 5px;
 }
 
-.createNewLabel
- {
+.createNewLabel {
   display: inline-block;
- }
+  margin-left: 5%;
+  margin-right: 5%;
+}
 
-
- .container {
+.container {
   padding-right: 0px;
   padding-left: 0px;
   font-size: 10px;
   text-align: center;
- }
+}
 
- .callBody {
-  /* border: 1px solid #939598; */
+.callBody {
   border-top: 0;
-
 }
 
 .callDisplay {
-  display:grid;
+  display: grid;
   background-color: #ffffff;
+  display: grid;
 }
 
 .ViewResizeImage {
   width: 20px;
   height: 20px;
   float: right;
+}
+
+.headerLabel {
+  margin-left: 10px
 }

@@ -8,8 +8,9 @@ import { AppComponent } from './app.component';
 import { AMCSalesforceHomeComponent } from './amcsalesforcehome/amcsalesforcehome.component';
 import { ActivityComponent } from './activity/activity.component';
 import { CreateComponent } from './create/create.component';
-import { RecentComponent } from './recent/recent.component';
 import { SearchInformationComponent } from './search-information/search-information.component';
+import { LoggerService } from './logger.service';
+import { StorageService } from './storage.service';
 
 
 @NgModule({
@@ -18,8 +19,8 @@ import { SearchInformationComponent } from './search-information/search-informat
     AMCSalesforceHomeComponent,
     ActivityComponent,
     CreateComponent,
-    RecentComponent,
-    SearchInformationComponent,
+    SearchInformationComponent
+
 
   ],
   imports: [
@@ -30,6 +31,7 @@ import { SearchInformationComponent } from './search-information/search-informat
       { path: '', component: AMCSalesforceHomeComponent, pathMatch: 'full' }
     ])
   ],
+  providers: [LoggerService, StorageService],
   bootstrap: [AppComponent]
 })
 export class AppModule { }

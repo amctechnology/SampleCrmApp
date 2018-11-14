@@ -1,33 +1,28 @@
-
-<div *ngIf = "maximizeCreate" class="callDisplay" style="display: grid;" >
+<div *ngIf="isCreateMaximized" class="callDisplay">
   <div class="editor callHeader">
-      <label style="margin-left: 10px">
-          <b>Create New</b>
-      </label>
-      <img class="ViewResizeImage" src="assets/images/section_expand.png" (click)="resizeCreate('collapse')"title = "Collapse">
-    </div>
-  <div  class="callBody">
-    <div class = "container">
-          <div class = "createNewLabel" (click) = 'createNewEntity("Case")' title="Case">
-          <img class="createEntityImages"  src="/assets/images/Create_Case2.png" >
-          <label for="Case"  >Case</label>
-        </div>
-        <div class = "createNewLabel" (click) = 'createNewEntity("Lead")' title="Lead">
-          <img class="createEntityImages" title="Lead" src="/assets/images/Create_Lead2.png" (click) = 'createNewEntity("Lead")'>
-          <label for="Lead" title="Lead" >Lead</label>
-        </div>
-        <div class = "createNewLabel" (click) = 'createNewEntity("Opportunity")' title="Opportunity">
-          <img class="createEntityImages"  src="/assets/images/Create_Opportunity2.png" >
-          <label  for="Opportunity"  >Opportunity</label>
-        </div>
+    <label class="headerLabel">
+      <b>Create New</b>
+    </label>
+    <img class="ViewResizeImage" src="assets/images/section_collapse.png" (click)="isCreateMaximized = false" title="Collapse">
+  </div>
+  <div class="callBody">
+    <div class="container">
+      <div class="createNewLabel" (click)="createNewEntity('Case')" title="Case">
+        <img class="createEntityImages" src="/assets/images/Create_Case2.png">
+      </div>
+      <div class="createNewLabel" (click)="createNewEntity('Lead')" title="Lead">
+        <img class="createEntityImages" title="Lead" src="/assets/images/Create_Lead2.png" (click)="createNewEntity('Lead')">
+      </div>
+      <div class="createNewLabel" (click)="createNewEntity('Opportunity')" title="Opportunity">
+        <img class="createEntityImages" src="/assets/images/Create_Opportunity2.png">
+      </div>
     </div>
   </div>
 </div>
-
-<div *ngIf = "!maximizeCreate" class="callDisplay" >
+<div *ngIf="!isCreateMaximized" class="callDisplay">
   <div class="editor callHeader">
-      <label style="margin-left: 10px">
-          <b>Create New</b>
-      </label>
-      <img class="ViewResizeImage" src="assets/images/section_expand.png" (click)="resizeCreate('expand')" title = "Expand">
+    <label class="headerLabel">
+      <b>Create New</b>
+    </label>
+    <img class="ViewResizeImage" src="assets/images/section_expand.png" (click)="isCreateMaximized = true" title="Expand">
   </div>

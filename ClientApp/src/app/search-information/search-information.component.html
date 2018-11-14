@@ -1,27 +1,29 @@
-<div *ngIf = "maximizeSearchInformation" class="callDisplay" style="display: grid;">
+<div *ngIf="isSearchInformationMaximized" class="callDisplay">
   <div class="editor callHeader">
-    <label style="margin-left: 10px">
+    <label class="headerLabel">
       <b>Caller Information</b>
     </label>
-    <img class="ViewResizeImage" src="assets/images/section_expand.png" (click)="resizeSearchInformation('collapse')" title = "Collapse">
+    <img class="ViewResizeImage" src="assets/images/section_collapse.png" (click)="isSearchInformationMaximized = false"
+      title="Collapse">
   </div>
   <div class="callBody">
-    <div *ngIf="!singleResult">
-      <select class="searchResultSelect" data-resetperactivity="false" (change)='onSearchSelectChange($event)'>
-        <option *ngFor="let searchRecord of searchRecordList" id="{{searchRecord.id}}" value="{{searchRecord.id}}">{{parseSearchRecordForName(searchRecord)}}</option>
+    <div *ngIf="!storageService.searchReturnedSingleResult">
+      <select class="multipleSearchResultSelect" data-resetperactivity="false" (change)='onAgentSelectedCallerInformation($event)'>
+        <option *ngFor="let searchRecord of storageService.searchRecordList" id="{{searchRecord.id}}" value="{{searchRecord.id}}">{{parseSearchRecordForName(searchRecord)}}</option>
       </select>
     </div>
-    <div *ngIf="singleResult">
-      <input readonly class="searchResultInput" *ngFor="let searchRecord of searchRecordList" id="{{searchRecord.id}}"
-        value="{{parseSearchRecordForName(searchRecord)}}">
+    <div *ngIf="storageService.searchReturnedSingleResult">
+      <input readonly class="singleSearchResultSelect" *ngFor="let searchRecord of storageService.searchRecordList" id="{{searchRecord.id}}"
+        value="{{parseSearchRecordForName(searchRecord)}}" (click)='onAgentSelectedCallerInformation($event)'>
     </div>
   </div>
 </div>
 
-<div *ngIf = "!maximizeSearchInformation" class="callDisplay" >
+<div *ngIf="!isSearchInformationMaximized" class="callDisplay">
   <div class="editor callHeader">
-      <label style="margin-left: 10px">
-          <b>Create New</b>
-      </label>
-      <img class="ViewResizeImage" src="assets/images/section_expand.png" (click)="resizeSearchInformation('expand')" title = "Expand">
+    <label class="headerLabel">
+      <b>Caller Information</b>
+    </label>
+    <img class="ViewResizeImage" src="assets/images/section_expand.png" (click)="isSearchInformationMaximized = true"
+      title="Expand">
   </div>
