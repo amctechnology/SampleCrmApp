@@ -2,7 +2,7 @@ import { Component, OnInit, Output, EventEmitter } from '@angular/core';
 import * as api from '@amc/application-api';
 import { Application, BridgeEventsService } from '@amc/applicationangularframework';
 import { bind } from 'bind-decorator';
-import { InteractionDirectionTypes, IInteraction, registerOnLogout } from '@amc/application-api';
+import { InteractionDirectionTypes, IInteraction, registerOnLogout, ChannelTypes } from '@amc/application-api';
 import { Subject } from 'rxjs/Subject';
 import { IActivity } from './../Model/IActivity';
 import { IActivityDetails } from './../Model/IActivityDetails';
@@ -18,6 +18,7 @@ export class AMCSalesforceHomeComponent extends Application implements OnInit {
   protected interactionDisconnected: Subject<boolean> = new Subject();
   protected autoSave: Subject<void> = new Subject();
   protected phoneNumberFormat: string;
+  protected searchHierarchy: any;
   constructor(private loggerService: LoggerService, protected storageService: StorageService) {
     super(loggerService.logger);
     // localStorage.clear();
@@ -42,6 +43,8 @@ export class AMCSalesforceHomeComponent extends Application implements OnInit {
     this.bridgeEventsService.subscribe('setActivityDetails', this.setActivityDetails);
     const config = await api.initializeComplete(this.logger);
     this.phoneNumberFormat = String(config.variables['PhoneNumberFormat']).toLowerCase();
+    // this.searchHierarchy = config.variables['searchHierarchy'];
+    // this.bridgeEventsService.sendEvent('setSearchHierarchy', this.searchHierarchy);
     registerOnLogout(this.removeLocalStorageOnLogout);
     this.loggerService.logger.logDebug('AMCSalesforceHomeComponent: ngOnInit complete');
   }
@@ -287,7 +290,9 @@ export class AMCSalesforceHomeComponent extends Application implements OnInit {
       const interactionId = interaction.interactionId;
       const scenarioIdInt = interaction.scenarioId;
       let isNewScenarioId = false;
-      interaction.details.fields.Phone.Value = this.formatPhoneNumber(interaction.details.fields.Phone.Value, this.phoneNumberFormat);
+      if (interaction.channelType === 0) {
+        interaction.details.fields.Phone.Value = this.formatPhoneNumber(interaction.details.fields.Phone.Value, this.phoneNumberFormat);
+      }
       if (!this.scenarioInteractionMappings.hasOwnProperty(scenarioIdInt)
         && !this.storageService.getCurrentInteraction()
         && interaction.state !== api.InteractionStates.Disconnected) {
@@ -313,11 +318,11 @@ export class AMCSalesforceHomeComponent extends Application implements OnInit {
         }
         this.storageService.setCurrentInteraction(interaction);
         this.storageService.addActivity(this.createActivity(interaction));
-        this.storageService.setSubject(interactionId, 'Call [' + interaction.details.fields.Phone.Value + ']');
+
+        this.storageService.setSubject(interactionId, this.setSubject(interaction) + ' [' + interaction.details.fields.Phone.Value + ']');
         this.loggerService.logger.logDebug('AMCSalesforceHomeComponent: Autosave activity: ' +
           JSON.stringify(this.storageService.getActivity(this.storageService.getCurrentInteraction().interactionId)));
         this.autoSave.next();
-
         return searchRecord;
       } else if (interaction.state === api.InteractionStates.Disconnected &&
         this.storageService.getCurrentInteraction().interactionId === interactionId) {
@@ -338,6 +343,11 @@ export class AMCSalesforceHomeComponent extends Application implements OnInit {
       throw msg;
     }
     return;
+  }
+
+  protected setSubject(interaction) {
+    const channelType = ChannelTypes[interaction.channelType];
+    return channelType;
   }
   protected createActivity(interaction: api.IInteraction): IActivity {
     const date = new Date();

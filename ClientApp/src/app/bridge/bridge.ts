@@ -1,5 +1,5 @@
 import { Bridge, BridgeEventsService } from '@amc/applicationangularframework';
-import { InteractionDirectionTypes } from '@amc/application-api';
+import { InteractionDirectionTypes, ChannelTypes } from '@amc/application-api';
 import { bind } from 'bind-decorator';
 import { safeJSONParse } from '../utils';
 import { Subject } from 'rxjs/Subject';
@@ -15,6 +15,7 @@ class SalesforceBridge extends Bridge {
   private currentOnFocusEvent: ISalesforceClassicOnFocusEvent | ISalesforceLightningOnFocusEvent;
   activity: IActivity = null;
   layoutObjectList: string[];
+  searchHierarchy: any;
 
   constructor() {
     super();
@@ -29,6 +30,7 @@ class SalesforceBridge extends Bridge {
     this.eventService.subscribe('saveActivity', this.saveActivity);
     this.eventService.subscribe('createNewEntity', this.createNewEntity);
     this.eventService.subscribe('agentSelectedCallerInformation', this.tryScreenpop);
+    this.eventService.subscribe('setSearchHierarchy', result => { this.searchHierarchy = result; });
   }
 
   async afterScriptsLoad(): Promise<any> {
@@ -182,9 +184,29 @@ class SalesforceBridge extends Bridge {
     this.eventService.sendEvent('logVerbose', 'bridge: screenpopHandler START: ' + event);
     try {
       let screenpopRecords = null;
+
       if (event.id && event.type) {
         screenpopRecords = await this.tryScreenpop(event.id);
       }
+
+      // if (event.cadFields) {
+      //   if (screenpopRecords == null && event.cadFields.length > 0) {
+      //     for (const i of event.cadFields) {
+      //       screenpopRecords = await this.tryCadSearch(event.cadFields[0].entity, event.cadFields[0].value, event.cadFields[0].field);
+      //       if (screenpopRecords != null) { break; }
+      //     }
+      //   }
+      // }
+      // if (event.phoneNumbers) {
+      //   if (screenpopRecords == null && event.phoneNumbers.length > 0) {
+      //     for (const phoneNumber of event.phoneNumbers) {
+      //       screenpopRecords = await this.trySearch(phoneNumber, 'callType', event.cadString);
+      //       if (screenpopRecords != null) { break; }
+      //     }
+      //   }
+      // }
+
+
       if (screenpopRecords == null && event.phoneNumbers.length > 0) {
         screenpopRecords = await this.trySearch(event.phoneNumbers[0], InteractionDirectionTypes.Inbound, event.cadString);
       }
