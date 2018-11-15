@@ -124,6 +124,8 @@ console.log('*******************************************************************
 const publicPath = "/";
 
 module.exports = (env) => {
+  const production = env && env.production;
+
   let app = {
     "resolve": {
       "extensions": [
@@ -163,7 +165,7 @@ module.exports = (env) => {
     "output": {
       "path": outputPath,
       "publicPath": publicPath,
-      "filename": "[name].bundle.js",
+      "filename": production ? "[name].[hash].bundle.js" : "[name].bundle.js",
       "chunkFilename": "[id].chunk.js",
       "crossOriginLoading": "anonymous"
     },
@@ -173,8 +175,8 @@ module.exports = (env) => {
           enforce: 'pre',
           test: /\.js$/,
           loader: 'source-map-loader',
-          exclude: [/\.ngfactory\.js$/,/\.ngstyle\.js$/ ]
-         },
+          exclude: [/\.ngfactory\.js$/, /\.ngstyle\.js$/]
+        },
         {
           "test": /\.html$/,
           "loader": "raw-loader"
@@ -557,7 +559,7 @@ module.exports = (env) => {
     "output": {
       "path": outputPath,
       "publicPath": publicPath,
-      "filename": "[name].bundle.js",
+      "filename": production ? "[name].[hash].bundle.js" : "[name].bundle.js",
       "chunkFilename": "[id].chunk.js",
       "crossOriginLoading": "anonymous"
     },
@@ -567,8 +569,8 @@ module.exports = (env) => {
           enforce: 'pre',
           test: /\.js$/,
           loader: 'source-map-loader',
-          exclude: [/\.ngfactory\.js$/,/\.ngstyle\.js$/ ]
-         },
+          exclude: [/\.ngfactory\.js$/, /\.ngstyle\.js$/]
+        },
         {
           "test": /\.ts$/,
           "loader": "@ngtools/webpack",
