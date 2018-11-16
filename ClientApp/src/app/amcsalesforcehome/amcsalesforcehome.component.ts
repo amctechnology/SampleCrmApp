@@ -319,7 +319,7 @@ export class AMCSalesforceHomeComponent extends Application implements OnInit {
         this.storageService.setCurrentInteraction(interaction);
         this.storageService.addActivity(this.createActivity(interaction));
 
-        this.storageService.setSubject(interactionId, this.setSubject(interaction) + ' [' + interaction.details.fields.Phone.Value + ']');
+        this.storageService.setSubject(interactionId, this.setSubject(interaction));
         this.loggerService.logger.logDebug('AMCSalesforceHomeComponent: Autosave activity: ' +
           JSON.stringify(this.storageService.getActivity(this.storageService.getCurrentInteraction().interactionId)));
         this.autoSave.next();
@@ -348,8 +348,8 @@ export class AMCSalesforceHomeComponent extends Application implements OnInit {
   protected setSubject(interaction) {
     const channelType = ChannelTypes[interaction.channelType];
     const excludedDetails = ['FullName'];
-    for (const key in Object.keys(interaction.details.fields)) {
-      if (excludedDetails.indexOf(key) > -1) {
+    for (const key of Object.keys(interaction.details.fields)) {
+      if (excludedDetails.indexOf(key) < 0) {
         return channelType + '[' + interaction.details.fields[key].Value + ']';
       }
     }

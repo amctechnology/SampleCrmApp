@@ -105,7 +105,6 @@ class SalesforceBridge extends Bridge {
   @bind
   async onFocusListener(event) {
     if (event !== this.currentOnFocusEvent) {
-      console.log(this.searchLayout);
       this.currentOnFocusEvent = event;
       this.eventService.sendEvent('logDebug', 'bridge: onFocus event: ' + JSON.stringify(event));
       const entity = {
@@ -261,7 +260,9 @@ class SalesforceBridge extends Bridge {
           apexClass: 'AMCOpenCTINS.ObjectRetrieval',
           methodName: 'getObject',
           methodParams: finalquery,
-          callback: function (response) { resolve(response); }
+          callback: function (response) {
+            resolve(response.returnValue);
+          }
         };
         sforce.opencti.runApex(cadSearchRequest);
       });
