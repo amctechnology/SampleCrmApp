@@ -347,7 +347,13 @@ export class AMCSalesforceHomeComponent extends Application implements OnInit {
 
   protected setSubject(interaction) {
     const channelType = ChannelTypes[interaction.channelType];
-    return channelType;
+    const excludedDetails = ['FullName'];
+    for (const key in Object.keys(interaction.details.fields)) {
+      if (excludedDetails.indexOf(key) > -1) {
+        return channelType + '[' + interaction.details.fields[key].Value + ']';
+      }
+    }
+    return '';
   }
   protected createActivity(interaction: api.IInteraction): IActivity {
     const date = new Date();

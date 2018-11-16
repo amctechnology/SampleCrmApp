@@ -1,5 +1,5 @@
 import { Bridge, BridgeEventsService } from '@amc/applicationangularframework';
-import { InteractionDirectionTypes, ChannelTypes } from '@amc/application-api';
+import { InteractionDirectionTypes, ChannelTypes, SearchRecords } from '@amc/application-api';
 import { bind } from 'bind-decorator';
 import { safeJSONParse } from '../utils';
 import { Subject } from 'rxjs/Subject';
@@ -15,6 +15,7 @@ class SalesforceBridge extends Bridge {
   private currentOnFocusEvent: ISalesforceClassicOnFocusEvent | ISalesforceLightningOnFocusEvent;
   activity: IActivity = null;
   layoutObjectList: string[];
+  searchLayout: any;
   searchHierarchy: any;
 
   constructor() {
@@ -57,8 +58,10 @@ class SalesforceBridge extends Bridge {
   protected buildLayoutObjectList(result) {
     if (this.isLightning) {
       this.layoutObjectList = Object.keys(result.returnValue.Inbound.objects);
+      this.searchLayout = result.returnValue.Inbound.objects;
     } else {
       this.layoutObjectList = Object.keys(JSON.parse(result.result).Inbound.objects);
+      this.searchLayout = JSON.parse(result.result).Inbound.objects;
     }
     this.eventService.sendEvent('logInformation', 'bridge: Sofphone layout: ' + this.layoutObjectList);
   }
@@ -102,6 +105,7 @@ class SalesforceBridge extends Bridge {
   @bind
   async onFocusListener(event) {
     if (event !== this.currentOnFocusEvent) {
+      console.log(this.searchLayout);
       this.currentOnFocusEvent = event;
       this.eventService.sendEvent('logDebug', 'bridge: onFocus event: ' + JSON.stringify(event));
       const entity = {
@@ -184,31 +188,28 @@ class SalesforceBridge extends Bridge {
     this.eventService.sendEvent('logVerbose', 'bridge: screenpopHandler START: ' + event);
     try {
       let screenpopRecords = null;
-
       if (event.id && event.type) {
         screenpopRecords = await this.tryScreenpop(event.id);
+        return screenpopRecords;
       }
-
-      // if (event.cadFields) {
-      //   if (screenpopRecords == null && event.cadFields.length > 0) {
-      //     for (const i of event.cadFields) {
-      //       screenpopRecords = await this.tryCadSearch(event.cadFields[0].entity, event.cadFields[0].value, event.cadFields[0].field);
-      //       if (screenpopRecords != null) { break; }
-      //     }
-      //   }
-      // }
-      // if (event.phoneNumbers) {
-      //   if (screenpopRecords == null && event.phoneNumbers.length > 0) {
-      //     for (const phoneNumber of event.phoneNumbers) {
-      //       screenpopRecords = await this.trySearch(phoneNumber, 'callType', event.cadString);
-      //       if (screenpopRecords != null) { break; }
-      //     }
-      //   }
-      // }
-
-
-      if (screenpopRecords == null && event.phoneNumbers.length > 0) {
-        screenpopRecords = await this.trySearch(event.phoneNumbers[0], InteractionDirectionTypes.Inbound, event.cadString);
+      if (event.cadFields) {
+        if (screenpopRecords == null && event.cadFields.length > 0) {
+          for (const cadField of event.cadFields) {
+            screenpopRecords = await this.cadSearch(cadField);
+            if (screenpopRecords != null) {
+              screenpopRecords = this.trySearch(cadField.value, InteractionDirectionTypes.Inbound, event.cadString, true);
+              break;
+            }
+          }
+        }
+      }
+      if (event.phoneNumbers) {
+        if (screenpopRecords == null && event.phoneNumbers.length > 0) {
+          for (const phoneNumber of event.phoneNumbers) {
+            screenpopRecords = await this.trySearch(phoneNumber, InteractionDirectionTypes.Inbound, event.cadString);
+            if (screenpopRecords != null) { break; }
+          }
+        }
       }
       return screenpopRecords;
     } catch (e) {
@@ -238,7 +239,35 @@ class SalesforceBridge extends Bridge {
       }
     });
   }
+  @bind
+  protected cadSearch(cad): Promise<any> {
+    const entityType = cad.entity;
+    if (this.searchLayout.hasOwnProperty(entityType)) {
+      return new Promise((resolve, reject) => {
+        const fields = this.searchLayout[entityType];
+        let finalfields = 'fields=';
+        for (let index = 0; index < fields.length; index++) {
+          if (index !== fields.length - 1) {
+            finalfields = finalfields + fields[index].apiName + ',';
+          } else {
+            finalfields = finalfields + fields[index].apiName;
+          }
+        }
+        const finalObject = 'SFObject=' + entityType;
+        const finalKey = 'key=' + cad.field;
+        const finalValue = 'value=' + cad.value;
+        const finalquery = finalfields + '&' + finalObject + '&' + finalKey + '&' + finalValue;
+        const cadSearchRequest = {
+          apexClass: 'AMCOpenCTINS.ObjectRetrieval',
+          methodName: 'getObject',
+          methodParams: finalquery,
+          callback: function (response) { resolve(response); }
+        };
+        sforce.opencti.runApex(cadSearchRequest);
+      });
 
+    }
+  }
   private trySearch(queryString: string, callDirection: InteractionDirectionTypes, cadString: string, shouldScreenpop: boolean = true)
     : Promise<any> {
     return new Promise((resolve, reject) => {

@@ -11,6 +11,7 @@ export class SearchInformationComponent {
   @Output() agentSelectedCallerInformation: EventEmitter<any> = new EventEmitter();
   isSearchInformationMaximized: boolean;
   imageLocation: string;
+  lastCallerId: any;
   constructor(private loggerService: LoggerService, protected storageService: StorageService) {
     this.loggerService.logger.logDebug('searchInformationComponent: Constructor start');
     this.isSearchInformationMaximized = true;
@@ -22,9 +23,12 @@ export class SearchInformationComponent {
         event.currentTarget.id);
       this.agentSelectedCallerInformation.emit(event.currentTarget.id);
     } else {
-      this.loggerService.logger.logDebug('searchInformationComponent: Agent selected caller info: ' +
-        event.currentTarget.value);
-      this.agentSelectedCallerInformation.emit(event.currentTarget.value);
+      if (this.lastCallerId !== event.currentTarget.value) {
+        this.loggerService.logger.logDebug('searchInformationComponent: Agent selected caller info: ' +
+          event.currentTarget.value);
+        this.agentSelectedCallerInformation.emit(event.currentTarget.value);
+        this.lastCallerId = event.currentTarget.value;
+      }
     }
   }
   protected parseSearchRecordForName(searchRecord) {
