@@ -264,11 +264,9 @@ export class AMCSalesforceHomeComponent extends Application implements OnInit {
       this.storageService.clearWhatList();
       this.storageService.removeActivity(activity.InteractionId);
     }
-    this.loggerService.logger.logDebug('AMCSalesforceHomeComponent: Sending activity: ' + JSON.stringify(activity) +
-      ' to bridge to be saved');
+    this.loggerService.logger.logDebug(`AMCSalesforceHomeComponent: Sending activity: ${JSON.stringify(activity)} to bridge to be saved`);
     activity = await this.bridgeEventsService.sendEvent('saveActivity', activity);
-    this.loggerService.logger.logDebug('AMCSalesforceHomeComponent: Updated activity received ' +
-      ' from bridge: ' + JSON.stringify(activity));
+    this.loggerService.logger.logDebug(`AMCSalesforceHomeComponent: Updated activity received from bridge: ${JSON.stringify(activity)}`);
     this.storageService.updateActivity(activity);
     return Promise.resolve(activity.ActivityId);
   }
@@ -285,7 +283,7 @@ export class AMCSalesforceHomeComponent extends Application implements OnInit {
     return year + '-' + month + '-' + day;
   }
   protected async onInteraction(interaction: api.IInteraction): Promise<api.SearchRecords> {
-    this.loggerService.logger.logDebug('AMCSalesforceHomeComponent: Interaction recieved: ' + JSON.stringify(interaction));
+    this.loggerService.logger.logDebug(`AMCSalesforceHomeComponent: Interaction recieved: ${JSON.stringify(interaction)}`);
     try {
       const interactionId = interaction.interactionId;
       const scenarioIdInt = interaction.scenarioId;
@@ -303,12 +301,10 @@ export class AMCSalesforceHomeComponent extends Application implements OnInit {
       if (this.shouldPreformScreenpop(interaction, isNewScenarioId)
         && !this.storageService.getCurrentInteraction()
         && interaction.state !== api.InteractionStates.Disconnected) {
-        this.loggerService.logger.logDebug('AMCSalesforceHomeComponent: screenpop for new interaction: ' +
-          JSON.stringify(interaction));
+        this.loggerService.logger.logDebug(`AMCSalesforceHomeComponent: screenpop for new interaction: ${JSON.stringify(interaction)}`);
         const searchRecord = await this.preformScreenpop(interaction);
         this.storageService.setsearchRecordList(searchRecord.toJSON());
-        this.loggerService.logger.logDebug('AMCSalesforceHomeComponent: Search results: ' +
-          JSON.stringify(searchRecord.toJSON()));
+        this.loggerService.logger.logDebug(`AMCSalesforceHomeComponent: Search results: ${JSON.stringify(searchRecord.toJSON())}`);
         if (this.storageService.getsearchRecordList().length > 1) {
           this.storageService.setSearchReturnedSingleResult(false);
           this.storageService.setSearchResultWasReturned(true);
@@ -320,14 +316,13 @@ export class AMCSalesforceHomeComponent extends Application implements OnInit {
         this.storageService.addActivity(this.createActivity(interaction));
 
         this.storageService.setSubject(interactionId, this.setSubject(interaction));
-        this.loggerService.logger.logDebug('AMCSalesforceHomeComponent: Autosave activity: ' +
-          JSON.stringify(this.storageService.getActivity(this.storageService.getCurrentInteraction().interactionId)));
+        this.loggerService.logger.logDebug(`AMCSalesforceHomeComponent: Autosave activity:
+        ${JSON.stringify(this.storageService.getActivity(this.storageService.getCurrentInteraction().interactionId))}`);
         this.autoSave.next();
         return searchRecord;
       } else if (interaction.state === api.InteractionStates.Disconnected &&
         this.storageService.getCurrentInteraction().interactionId === interactionId) {
-        this.loggerService.logger.logDebug('AMCSalesforceHomeComponent: Disconnect interaction received: ' +
-          JSON.stringify(interaction));
+        this.loggerService.logger.logDebug(`AMCSalesforceHomeComponent: Disconnect interaction received: ${SON.stringify(interaction)}`);
         if (this.scenarioInteractionMappings[scenarioIdInt]) {
           delete this.scenarioInteractionMappings[scenarioIdInt][interactionId];
         }
@@ -338,7 +333,7 @@ export class AMCSalesforceHomeComponent extends Application implements OnInit {
         }
       }
     } catch (e) {
-      const msg = 'Error in onInteraction! Exception details: ' + e.message;
+      const msg = `Error in onInteraction! Exception details: ${e.message}`;
       this.logger.logError(msg);
       throw msg;
     }
@@ -386,14 +381,13 @@ export class AMCSalesforceHomeComponent extends Application implements OnInit {
       ActivityId: '',
       InteractionId: interaction.interactionId
     };
-    this.loggerService.logger.logDebug('AMCSalesforceHomeComponent: Create new activity: ' + JSON.stringify(activity));
+    this.loggerService.logger.logDebug(`AMCSalesforceHomeComponent: Create new activity: ${JSON.stringify(activity)}`);
     return activity;
   }
 
   @bind
   protected setActivityDetails(eventObject) {
-    this.loggerService.logger.logDebug('AMCSalesforceHomeComponent: Activity details received from bridge: '
-      + JSON.stringify(eventObject));
+    this.loggerService.logger.logDebug(`AMCSalesforceHomeComponent: Activity details received from bridge: ${JSON.stringify(eventObject)}`);
     if (this.storageService.getCurrentInteraction()) {
       if (eventObject.objectType === 'Contact' || eventObject.objectType === 'Lead') {
         if (!this.storageService.whoListContains(eventObject)) {
@@ -411,8 +405,8 @@ export class AMCSalesforceHomeComponent extends Application implements OnInit {
   }
   @bind
   protected createNewEntity(entityType) {
-    this.loggerService.logger.logDebug('AMCSalesforceHomeComponent: Screenpop new Salesforce object of type: '
-      + JSON.stringify(entityType));
+    this.loggerService.logger.logDebug(`AMCSalesforceHomeComponent: Screenpop new Salesforce object of type:
+    ${JSON.stringify(entityType)}`);
     let params: ICreateNewSObjectParams;
     if (this.storageService.getCurrentInteraction()) {
       if (this.storageService.activityListContains(this.storageService.getCurrentInteraction().interactionId)) {
@@ -422,8 +416,8 @@ export class AMCSalesforceHomeComponent extends Application implements OnInit {
     } else {
       params = this.buildParams(entityType, null);
     }
-    this.loggerService.logger.logDebug('AMCSalesforceHomeComponent: Send screenpop request to bridge with params: '
-      + JSON.stringify(params));
+    this.loggerService.logger.logDebug(`AMCSalesforceHomeComponent: Send screenpop request to bridge with params:
+    ${JSON.stringify(params)}`);
     this.bridgeEventsService.sendEvent('createNewEntity', params);
   }
 

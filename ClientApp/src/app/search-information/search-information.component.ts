@@ -19,13 +19,11 @@ export class SearchInformationComponent {
   }
   protected onAgentSelectedCallerInformation(event) {
     if (this.storageService.searchReturnedSingleResult) {
-      this.loggerService.logger.logDebug('searchInformationComponent: Agent selected caller info: ' +
-        event.currentTarget.id);
+      this.loggerService.logger.logDebug(`searchInformationComponent: Agent selected caller info: ${event.currentTarget.id}`);
       this.agentSelectedCallerInformation.emit(event.currentTarget.id);
     } else {
       if (this.lastCallerId !== event.currentTarget.value) {
-        this.loggerService.logger.logDebug('searchInformationComponent: Agent selected caller info: ' +
-          event.currentTarget.value);
+        this.loggerService.logger.logDebug(`searchInformationComponent: Agent selected caller info: ${event.currentTarget.value}`);
         this.agentSelectedCallerInformation.emit(event.currentTarget.value);
         this.lastCallerId = event.currentTarget.value;
       }

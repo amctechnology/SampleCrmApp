@@ -63,7 +63,7 @@ class SalesforceBridge extends Bridge {
       this.layoutObjectList = Object.keys(JSON.parse(result.result).Inbound.objects);
       this.searchLayout = JSON.parse(result.result).Inbound.objects;
     }
-    this.eventService.sendEvent('logInformation', 'bridge: Sofphone layout: ' + this.layoutObjectList);
+    this.eventService.sendEvent('logInformation', `bridge: Sofphone layout: ${this.layoutObjectList}`);
   }
   @bind
   isToolbarVisible() {
@@ -106,7 +106,7 @@ class SalesforceBridge extends Bridge {
   async onFocusListener(event) {
     if (event !== this.currentOnFocusEvent) {
       this.currentOnFocusEvent = event;
-      this.eventService.sendEvent('logDebug', 'bridge: onFocus event: ' + JSON.stringify(event));
+      this.eventService.sendEvent('logDebug', `bridge: onFocus event: ${JSON.stringify(event)}`);
       const entity = {
         objectType: '',
         displayName: '',
@@ -184,7 +184,7 @@ class SalesforceBridge extends Bridge {
 
   @bind
   async screenpopHandler(event): Promise<any> {
-    this.eventService.sendEvent('logVerbose', 'bridge: screenpopHandler START: ' + event);
+    this.eventService.sendEvent('logVerbose', `bridge: screenpopHandler START: ${event}`);
     try {
       let screenpopRecords = null;
       if (event.id && event.type) {
@@ -212,7 +212,7 @@ class SalesforceBridge extends Bridge {
       }
       return screenpopRecords;
     } catch (e) {
-      this.eventService.sendEvent('logError', 'bridge: screenpopHandler ERROR=' + e);
+      this.eventService.sendEvent('logError', `bridge: screenpopHandler ERROR= ${e}`);
       throw e;
     }
   }
@@ -252,10 +252,10 @@ class SalesforceBridge extends Bridge {
             finalfields = finalfields + fields[index].apiName;
           }
         }
-        const finalObject = 'SFObject=' + entityType;
-        const finalKey = 'key=' + cad.field;
-        const finalValue = 'value=' + cad.value;
-        const finalquery = finalfields + '&' + finalObject + '&' + finalKey + '&' + finalValue;
+        const finalObject = `SFObject=${entityType}`;
+        const finalKey = `key=${cad.field}`;
+        const finalValue = `value=${cad.value}`;
+        const finalquery = `${finalfields}&${finalObject}&${finalKey}&${finalValue}`;
         const cadSearchRequest = {
           apexClass: 'AMCOpenCTINS.ObjectRetrieval',
           methodName: 'getObject',
@@ -276,8 +276,8 @@ class SalesforceBridge extends Bridge {
         const screenPopObject = {
           callback: result => {
             if (!result.returnValue) {
-              this.eventService.sendEvent('logDebug', 'bridge: No results returned from screenpop request, error: ' +
-                JSON.stringify(result.errors) + ' PhoneNumberFormat Needs to be configured for CRM');
+              this.eventService.sendEvent('logDebug', `bridge: No results returned from screenpop request, error:
+              ${JSON.stringify(result.errors)}; PhoneNumberFormat Needs to be configured for CRM`);
               reject({});
             }
             resolve(result.returnValue);
@@ -410,7 +410,7 @@ class SalesforceBridge extends Bridge {
   }
   @bind
   protected saveActivity(activity: IActivity): Promise<IActivity> {
-    this.eventService.sendEvent('logDebug', 'bridge: Activity from home received to save: ' + JSON.stringify(activity));
+    this.eventService.sendEvent('logDebug', `bridge: Activity from home received to save: ${JSON.stringify(activity)}`);
     if (this.isLightning) {
       return new Promise((resolve, reject) => {
         const activityObject: object = {
@@ -427,12 +427,12 @@ class SalesforceBridge extends Bridge {
           },
           callback: result => {
             if (result.success) {
-              this.eventService.sendEvent('logDebug', 'Activity ' + JSON.stringify(activity) +
-                ' saved in Lightning, sending updated activity back to home');
+              this.eventService.sendEvent('logDebug', `Activity ${JSON.stringify(activity)}
+              saved in Lightning, sending updated activity back to home`);
               resolve(activity);
             } else {
-              this.eventService.sendEvent('logDebug', 'bridge: Activity ' + JSON.stringify(activity) +
-                ' could not be saved, error: ' + JSON.stringify(result.errors['0'].details.fieldErrors));
+              this.eventService.sendEvent('logDebug', `bridge: Activity ${JSON.stringify(activity)}
+              could not be saved, error: ${JSON.stringify(result.errors['0'].details.fieldErrors)}`);
             }
           }
         };
@@ -444,18 +444,17 @@ class SalesforceBridge extends Bridge {
     }
     return new Promise((resolve, reject) => {
       let activityString = '';
-      activityString = 'WhoId=' + activity.WhoObject.objectId + '&WhatId=' + activity.WhatObject.objectId + '&CallType=' +
-        activity.CallType + '&CallDurationInSeconds=' + activity.CallDurationInSeconds + '&Subject=' +
-        activity.Subject + '&Description=' + activity.Description + '&Status=' + activity.Status +
-        '&ActivityDate=' + activity.ActivityDate;
+      activityString = `WhoId=${activity.WhoObject.objectId}&WhatId=${activity.WhatObject.objectId}
+      &CallType=${activity.CallType}&CallDurationInSeconds=${activity.CallDurationInSeconds}
+      &Subject=${activity.Subject}&Description=${activity.Description}&Status=${activity.Status}
+      &ActivityDate=${activity.ActivityDate}`;
       if (activity.ActivityId) {
         activityString = activityString + '&Id=' + activity.ActivityId;
       }
       sforce.interaction.saveLog('Task', activityString, result => {
         activity.ActivityId = result.result;
         console.log('Activity ID = ' + result.result);
-        this.eventService.sendEvent('logDebug', 'bridge: Activity ' + JSON.stringify(activity) +
-          ' saved in Classic');
+        this.eventService.sendEvent('logDebug', `bridge: Activity ${JSON.stringify(activity)} saved in Classic`);
         resolve(activity);
       });
     });
@@ -463,8 +462,7 @@ class SalesforceBridge extends Bridge {
   @bind
   protected createNewEntity(params: ICreateNewSObjectParams) {
     let URL = '';
-    this.eventService.sendEvent('logDebug', 'bridge: New Salesforce object requested with ' +
-      'params: ' + JSON.stringify(params));
+    this.eventService.sendEvent('logDebug', `bridge: New Salesforce object requested with params: ${JSON.stringify(params)}`);
     if (this.isLightning) {
       const screenPopObject: IScreenPopObject = {
         type: sforce.opencti.SCREENPOP_TYPE.NEW_RECORD_MODAL,
@@ -474,11 +472,11 @@ class SalesforceBridge extends Bridge {
         },
         callback: (result: ISaveLogResult) => {
           if (result.success) {
-            this.eventService.sendEvent('logDebug', 'bridge: Salesforce object with params: ' +
-              JSON.stringify(params) + ' screenpop successful: ' + result.returnValue);
+            this.eventService.sendEvent('logDebug', `bridge: Salesforce object with params:
+            ${JSON.stringify(params)} screenpop successful: ${result.returnValue}`);
           } else {
-            this.eventService.sendEvent('logDebug', 'bridge: Salesforce object with params: ' +
-              JSON.stringify(params) + ' screenpop unsuccessful: ' + result.errors);
+            this.eventService.sendEvent('logDebug', `bridge: Salesforce object with params:
+            ${JSON.stringify(params)} screenpop unsuccessful ${result.errors}`);
           }
         }
       };
@@ -500,11 +498,11 @@ class SalesforceBridge extends Bridge {
       }
       sforce.interaction.screenPop(URL, true, function (result) {
         if (result) {
-          this.eventService.sendEvent('logDebug', 'bridge: Salesforce object with params: ' +
-            JSON.stringify(params) + ' screenpop successful');
+          this.eventService.sendEvent('logDebug', `bridge: Salesforce object with params:
+          ${JSON.stringify(params)} screenpop successful`);
         } else {
-          this.eventService.sendEvent('logDebug', 'bridge: Salesforce object with params: ' +
-            JSON.stringify(params) + ' screenpop unsuccessful');
+          this.eventService.sendEvent('logDebug', `bridge: Salesforce object with params:
+          ${JSON.stringify(params)} screenpop unsuccessful`);
         }
       });
     }

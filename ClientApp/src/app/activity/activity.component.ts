@@ -60,29 +60,28 @@ export class ActivityComponent implements OnInit {
       } else {
         this.ActivitySave.emit(this.storageService.activity);
       }
-      this.loggerService.logger.logDebug('activity: Save activity: ' + JSON.stringify(this.storageService.activity));
+      this.loggerService.logger.logDebug(`activity: Save activity: ${JSON.stringify(this.storageService.activity)}`);
     }
   }
   protected onNameSelectChange(event) {
     this.storageService.setActivityWhoObject(this.storageService.currentInteraction.interactionId, this.getWho(event.currentTarget.value));
-    this.loggerService.logger.logDebug('activity: Call from select box value changed: ' +
-      JSON.stringify(event.currentTarget.value));
+    this.loggerService.logger.logDebug(`activity: Call from select box value changed: ${JSON.stringify(event.currentTarget.value)}`);
     this.activitySave(false);
   }
   protected onRelatedToChange(event) {
     this.storageService.setActivityWhatObject(this.storageService.currentInteraction.interactionId,
       this.getWhat(event.currentTarget.value));
-    this.loggerService.logger.logDebug('activity: Related to select box value changed: ' + JSON.stringify(event.currentTarget.value));
+    this.loggerService.logger.logDebug(`activity: Related to select box value changed: ${JSON.stringify(event.currentTarget.value)}`);
     this.activitySave(false);
   }
   protected onSubjectChange(event) {
     this.storageService.setSubject(this.storageService.currentInteraction.interactionId, event.srcElement.value);
-    this.loggerService.logger.logDebug('activity: Subject value changed: ' + JSON.stringify(this.storageService.activity.Subject));
+    this.loggerService.logger.logDebug(`activity: Subject value changed: ${JSON.stringify(this.storageService.activity.Subject)}`);
     this.activitySave(false);
   }
   protected onCallNotesChange(event) {
     this.storageService.setDescription(this.storageService.currentInteraction.interactionId, event.srcElement.value.trim());
-    this.loggerService.logger.logDebug('activity: Call notes value changed: ' + JSON.stringify(this.storageService.activity.Description));
+    this.loggerService.logger.logDebug(`activity: Call notes value changed: ${JSON.stringify(this.storageService.activity.Description)}`);
     this.activitySave(false);
   }
   protected getInteractionDirection(directionNumber) {
