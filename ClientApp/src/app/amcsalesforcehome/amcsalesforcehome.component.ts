@@ -319,7 +319,7 @@ export class AMCSalesforceHomeComponent extends Application implements OnInit {
         this.storageService.setCurrentInteraction(interaction);
         this.storageService.addActivity(this.createActivity(interaction));
 
-        // this.storageService.setSubject(interactionId, this.setSubject(interaction));
+        this.storageService.setSubject(interactionId, this.setSubject(interaction));
         this.loggerService.logger.logDebug('AMCSalesforceHomeComponent: Autosave activity: ' +
           JSON.stringify(this.storageService.getActivity(this.storageService.getCurrentInteraction().interactionId)));
         this.autoSave.next();
