@@ -319,7 +319,7 @@ export class AMCSalesforceHomeComponent extends Application implements OnInit {
         this.storageService.setCurrentInteraction(interaction);
         this.storageService.addActivity(this.createActivity(interaction));
 
-        this.storageService.setSubject(interactionId, this.setSubject(interaction));
+        // this.storageService.setSubject(interactionId, this.setSubject(interaction));
         this.loggerService.logger.logDebug('AMCSalesforceHomeComponent: Autosave activity: ' +
           JSON.stringify(this.storageService.getActivity(this.storageService.getCurrentInteraction().interactionId)));
         this.autoSave.next();
@@ -345,15 +345,19 @@ export class AMCSalesforceHomeComponent extends Application implements OnInit {
     return;
   }
 
-  protected setSubject(interaction) {
+  protected setSubject(interaction: IInteraction) {
     const channelType = ChannelTypes[interaction.channelType];
-    const excludedDetails = ['FullName'];
-    for (const key of Object.keys(interaction.details.fields)) {
-      if (excludedDetails.indexOf(key) < 0) {
-        return channelType + '[' + interaction.details.fields[key].Value + ']';
+    if (interaction.details.fields) {
+      const fields = interaction.details.fields;
+      if (fields.Email) {
+        return `${channelType}[${fields.Email.Value}]`;
+      } else if (fields.Phone) {
+        return `${channelType}[${fields.Phone.Value}]`;
+      } else if (fields.FullName) {
+        return `${channelType}[${fields.FullName.Value}]`;
       }
     }
-    return '';
+    return 'Unknown';
   }
   protected createActivity(interaction: api.IInteraction): IActivity {
     const date = new Date();
