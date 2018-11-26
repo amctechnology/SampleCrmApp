@@ -322,7 +322,7 @@ export class AMCSalesforceHomeComponent extends Application implements OnInit {
         return searchRecord;
       } else if (interaction.state === api.InteractionStates.Disconnected &&
         this.storageService.getCurrentInteraction().interactionId === interactionId) {
-        this.loggerService.logger.logDebug(`AMCSalesforceHomeComponent: Disconnect interaction received: ${SON.stringify(interaction)}`);
+        this.loggerService.logger.logDebug(`AMCSalesforceHomeComponent: Disconnect interaction received: ${JSON.stringify(interaction)}`);
         if (this.scenarioInteractionMappings[scenarioIdInt]) {
           delete this.scenarioInteractionMappings[scenarioIdInt][interactionId];
         }
@@ -354,6 +354,21 @@ export class AMCSalesforceHomeComponent extends Application implements OnInit {
     }
     return 'Unknown';
   }
+
+  protected getContactSource(interaction: IInteraction) {
+    if (interaction.details.fields) {
+      const fields = interaction.details.fields;
+      if (fields.Email) {
+        return { sourceType: 'Email', source: fields.Email.Value };
+      } else if (fields.Phone) {
+        return { sourceType: 'Phone', source: fields.Phone.Value };
+      } else if (fields.FullName) {
+        return { sourceType: 'Name', source: fields.FullName.Value };
+      }
+    }
+    return { sourceType: 'Name', source: '' };
+  }
+
   protected createActivity(interaction: api.IInteraction): IActivity {
     const date = new Date();
     const activity: IActivity = {
@@ -379,7 +394,8 @@ export class AMCSalesforceHomeComponent extends Application implements OnInit {
       ActivityDate: this.formatDate(date),
       TimeStamp: date,
       ActivityId: '',
-      InteractionId: interaction.interactionId
+      InteractionId: interaction.interactionId,
+      contactSource: this.getContactSource(interaction)
     };
     this.loggerService.logger.logDebug(`AMCSalesforceHomeComponent: Create new activity: ${JSON.stringify(activity)}`);
     return activity;
@@ -445,7 +461,8 @@ export class AMCSalesforceHomeComponent extends Application implements OnInit {
         params.opportunityFields.Description = activity.Description;
         params.opportunityFields.StageName = 'Prospecting';
       } else if (entityType === 'Lead') {
-        params.leadFields.Phone = this.storageService.getCurrentInteraction().details.fields.Phone.Value;
+        params.leadFields[this.storageService.activity.contactSource.sourceType] =
+          this.storageService.activity.contactSource.source;
         params.leadFields.Description = activity.Description;
       }
     }
