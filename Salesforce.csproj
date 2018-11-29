@@ -47,7 +47,8 @@
     <!-- In development, the dist files won't exist on the first run or when cloning to
          a different machine, so rebuild them if not already present. -->
     <Message Importance="high" Text="Performing first-run Webpack build..." />
-    <Exec WorkingDirectory="$(SpaRoot)" Command="npm run build" />
+    <Exec WorkingDirectory="$(SpaRoot)" Command="npm run build" Condition="'$(Configuration)' == 'Debug'"/>
+    <Exec WorkingDirectory="$(SpaRoot)" Command="npm run build-prod" Condition="'$(Configuration)' == 'Release'"/>
   </Target>
 
   <Target Name="PublishRunWebpack" AfterTargets="ComputeFilesToPublish">
