@@ -204,6 +204,14 @@ class SalesforceBridge extends Bridge {
           if (screenpopRecords != null) { break; }
         }
       }
+      if (event.otherFields) {
+        if (event.otherFields.Email && screenpopRecords == null) {
+          screenpopRecords = await this.trySearch(event.otherFields.Email.value, InteractionDirectionTypes.Inbound, event.cadString);
+        }
+        if (event.otherFields.FullName && screenpopRecords == null) {
+          screenpopRecords = await this.trySearch(event.otherFields.FullName.value, InteractionDirectionTypes.Inbound, event.cadString);
+        }
+      }
       return screenpopRecords;
     } catch (e) {
       this.eventService.sendEvent('logError', `bridge: screenpopHandler ERROR= ${e}`);
