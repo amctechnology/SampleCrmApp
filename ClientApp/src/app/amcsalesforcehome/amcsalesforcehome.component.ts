@@ -18,10 +18,8 @@ export class AMCSalesforceHomeComponent extends Application implements OnInit {
   protected interactionDisconnected: Subject<boolean> = new Subject();
   protected autoSave: Subject<void> = new Subject();
   protected phoneNumberFormat: string;
-  protected searchHierarchy: any;
   constructor(private loggerService: LoggerService, protected storageService: StorageService) {
     super(loggerService.logger);
-    // localStorage.clear();
     this.loggerService.logger.logDebug('AMCSalesforceHomeComponent: constructor start');
     this.storageService.syncWithLocalStorage();
     this.phoneNumberFormat = null;
@@ -43,8 +41,6 @@ export class AMCSalesforceHomeComponent extends Application implements OnInit {
     this.bridgeEventsService.subscribe('setActivityDetails', this.setActivityDetails);
     const config = await api.initializeComplete(this.logger);
     this.phoneNumberFormat = String(config.variables['PhoneNumberFormat']).toLowerCase();
-    // this.searchHierarchy = config.variables['searchHierarchy'];
-    // this.bridgeEventsService.sendEvent('setSearchHierarchy', this.searchHierarchy);
     registerOnLogout(this.removeLocalStorageOnLogout);
     this.loggerService.logger.logDebug('AMCSalesforceHomeComponent: ngOnInit complete');
   }
@@ -288,7 +284,7 @@ export class AMCSalesforceHomeComponent extends Application implements OnInit {
       const interactionId = interaction.interactionId;
       const scenarioIdInt = interaction.scenarioId;
       let isNewScenarioId = false;
-      if (interaction.channelType === 0) {
+      if (interaction.channelType === ChannelTypes.Telephony) {
         interaction.details.fields.Phone.Value = this.formatPhoneNumber(interaction.details.fields.Phone.Value, this.phoneNumberFormat);
       }
       if (!this.scenarioInteractionMappings.hasOwnProperty(scenarioIdInt)
@@ -315,7 +311,7 @@ export class AMCSalesforceHomeComponent extends Application implements OnInit {
         this.storageService.setCurrentInteraction(interaction);
         this.storageService.addActivity(this.createActivity(interaction));
 
-        this.storageService.setSubject(interactionId, this.setSubject(interaction));
+        this.storageService.setSubject(interactionId, this.buildSubjectText(interaction));
         this.loggerService.logger.logDebug(`AMCSalesforceHomeComponent: Autosave activity:
         ${JSON.stringify(this.storageService.getActivity(this.storageService.getCurrentInteraction().interactionId))}`);
         this.autoSave.next();
@@ -340,7 +336,7 @@ export class AMCSalesforceHomeComponent extends Application implements OnInit {
     return;
   }
 
-  protected setSubject(interaction: IInteraction) {
+  protected buildSubjectText(interaction: IInteraction) {
     const channelType = ChannelTypes[interaction.channelType];
     if (interaction.details.fields) {
       const fields = interaction.details.fields;

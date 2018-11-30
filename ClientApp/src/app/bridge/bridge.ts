@@ -16,7 +16,6 @@ class SalesforceBridge extends Bridge {
   activity: IActivity = null;
   layoutObjectList: string[];
   searchLayout: any;
-  searchHierarchy: any;
 
   constructor() {
     super();
@@ -31,7 +30,6 @@ class SalesforceBridge extends Bridge {
     this.eventService.subscribe('saveActivity', this.saveActivity);
     this.eventService.subscribe('createNewEntity', this.createNewEntity);
     this.eventService.subscribe('agentSelectedCallerInformation', this.tryScreenpop);
-    this.eventService.subscribe('setSearchHierarchy', result => { this.searchHierarchy = result; });
   }
 
   async afterScriptsLoad(): Promise<any> {
@@ -189,25 +187,21 @@ class SalesforceBridge extends Bridge {
       let screenpopRecords = null;
       if (event.id && event.type) {
         screenpopRecords = await this.tryScreenpop(event.id);
-        return screenpopRecords;
       }
-      if (event.cadFields) {
-        if (screenpopRecords == null && event.cadFields.length > 0) {
-          for (const cadField of event.cadFields) {
-            screenpopRecords = await this.cadSearch(cadField);
-            if (screenpopRecords != null) {
-              screenpopRecords = this.trySearch(cadField.value, InteractionDirectionTypes.Inbound, event.cadString, true);
-              break;
-            }
+      if (event.cadFields && screenpopRecords == null && event.cadFields.length > 0) {
+
+        for (const cadField of event.cadFields) {
+          screenpopRecords = await this.cadSearch(cadField);
+          if (screenpopRecords != null) {
+            screenpopRecords = this.trySearch(cadField.value, InteractionDirectionTypes.Inbound, event.cadString, true);
+            break;
           }
         }
       }
-      if (event.phoneNumbers) {
-        if (screenpopRecords == null && event.phoneNumbers.length > 0) {
-          for (const phoneNumber of event.phoneNumbers) {
-            screenpopRecords = await this.trySearch(phoneNumber, InteractionDirectionTypes.Inbound, event.cadString);
-            if (screenpopRecords != null) { break; }
-          }
+      if (event.phoneNumbers && screenpopRecords == null && event.phoneNumbers.length > 0) {
+        for (const phoneNumber of event.phoneNumbers) {
+          screenpopRecords = await this.trySearch(phoneNumber, InteractionDirectionTypes.Inbound, event.cadString);
+          if (screenpopRecords != null) { break; }
         }
       }
       return screenpopRecords;
