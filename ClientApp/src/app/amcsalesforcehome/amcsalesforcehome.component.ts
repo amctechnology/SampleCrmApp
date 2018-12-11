@@ -250,7 +250,7 @@ export class AMCSalesforceHomeComponent extends Application implements OnInit {
   }
 
   protected async saveActivity(activity): Promise<string> {
-    this.loggerService.logger.logDebug('AMCSalesforceHomeComponent: Save activity: ' + JSON.stringify(activity));
+    this.loggerService.logger.logDebug('AMCSalesforceHomeComponent: Save activity: ' + JSON.stringify(activity), 3021);
     if (this.storageService.activityListContains(activity.InteractionId)) {
       activity.ActivityId = this.storageService.getActivity(activity.InteractionId).ActivityId;
     }
@@ -259,9 +259,11 @@ export class AMCSalesforceHomeComponent extends Application implements OnInit {
       this.storageService.clearWhatList();
       this.storageService.removeActivity(activity.InteractionId);
     }
-    this.loggerService.logger.logDebug(`AMCSalesforceHomeComponent: Sending activity: ${JSON.stringify(activity)} to bridge to be saved`);
+    this.loggerService.logger.logDebug(`AMCSalesforceHomeComponent: Sending activity: ${JSON.stringify(activity)} to bridge to be saved`
+      , 3021);
     activity = await this.bridgeEventsService.sendEvent('saveActivity', activity);
-    this.loggerService.logger.logDebug(`AMCSalesforceHomeComponent: Updated activity received from bridge: ${JSON.stringify(activity)}`);
+    this.loggerService.logger.logDebug(`AMCSalesforceHomeComponent: Updated activity received from bridge: ${JSON.stringify(activity)}`
+      , 3021);
     this.storageService.updateActivity(activity);
     return Promise.resolve(activity.ActivityId);
   }
