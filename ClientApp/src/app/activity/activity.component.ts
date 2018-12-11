@@ -30,7 +30,7 @@ export class ActivityComponent implements OnInit {
   }
   ngOnInit() {
     this.interactionDisconnected.subscribe(() => {
-      this.loggerService.logger.logDebug('create: Interaction disconnected event received');
+      this.loggerService.logger.logDebug('create: Interaction disconnected event received', api.ErrorCode.DISCONEECTED_INTERACTION);
       this.activitySave(true);
     });
     this.autoSave.subscribe(() => {
@@ -58,28 +58,29 @@ export class ActivityComponent implements OnInit {
       } else {
         this.ActivitySave.emit(this.storageService.activity);
       }
-      this.loggerService.logger.logDebug(`activity: Save activity: ${JSON.stringify(this.storageService.activity)}`);
+      this.loggerService.logger.logDebug(`activity: Save activity: ${JSON.stringify(this.storageService.activity)}`, 3021);
     }
   }
   protected onNameSelectChange(event) {
     this.storageService.setActivityWhoObject(this.storageService.currentInteraction.interactionId, this.getWho(event.currentTarget.value));
-    this.loggerService.logger.logDebug(`activity: Call from select box value changed: ${JSON.stringify(event.currentTarget.value)}`);
+    this.loggerService.logger.logDebug(`activity: Call from select box value changed: ${JSON.stringify(event.currentTarget.value)}`, 3021);
     this.activitySave(false);
   }
   protected onRelatedToChange(event) {
     this.storageService.setActivityWhatObject(this.storageService.currentInteraction.interactionId,
       this.getWhat(event.currentTarget.value));
-    this.loggerService.logger.logDebug(`activity: Related to select box value changed: ${JSON.stringify(event.currentTarget.value)}`);
+    this.loggerService.logger.logDebug(`activity: Related to select box value changed: ${JSON.stringify(event.currentTarget.value)}`, 3021);
     this.activitySave(false);
   }
   protected onSubjectChange(event) {
     this.storageService.setSubject(this.storageService.currentInteraction.interactionId, event.srcElement.value);
-    this.loggerService.logger.logDebug(`activity: Subject value changed: ${JSON.stringify(this.storageService.activity.Subject)}`);
+    this.loggerService.logger.logDebug(`activity: Subject value changed: ${JSON.stringify(this.storageService.activity.Subject)}`, 3021);
     this.activitySave(false);
   }
   protected onCallNotesChange(event) {
     this.storageService.setDescription(this.storageService.currentInteraction.interactionId, event.srcElement.value.trim());
-    this.loggerService.logger.logDebug(`activity: Call notes value changed: ${JSON.stringify(this.storageService.activity.Description)}`);
+    this.loggerService.logger.logDebug(`activity: Call notes value changed: ${JSON.stringify(this.storageService.activity.Description)}`
+      , 3021);
     this.activitySave(false);
   }
   protected getInteractionDirection(directionNumber) {
