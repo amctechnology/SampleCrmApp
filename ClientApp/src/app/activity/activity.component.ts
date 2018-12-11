@@ -1,10 +1,8 @@
 import { Component, OnInit, Input, Output, EventEmitter } from '@angular/core';
 import * as api from '@amc/application-api';
-import { Observable } from 'rxjs/Observable';
 import { Subject } from 'rxjs/Subject';
 import { IActivity } from './../Model/IActivity';
 import { IActivityDetails } from './../Model/IActivityDetails';
-import { ICreateNewSObjectParams } from './../Model/ICreateNewSObjectParams';
 import { LoggerService } from './../logger.service';
 import { StorageService } from '../storage.service';
 @Component({
@@ -31,11 +29,11 @@ export class ActivityComponent implements OnInit {
     this.loggerService.logger.logDebug('activity: Constructor complete');
   }
   ngOnInit() {
-    this.interactionDisconnected.subscribe(event => {
+    this.interactionDisconnected.subscribe(() => {
       this.loggerService.logger.logDebug('create: Interaction disconnected event received');
       this.activitySave(true);
     });
-    this.autoSave.subscribe(event => {
+    this.autoSave.subscribe(() => {
       this.loggerService.logger.logDebug('create: Auto save event received');
       this.activitySave(false);
     });

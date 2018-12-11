@@ -1,5 +1,4 @@
-import { Component, OnInit, Input, Output, EventEmitter } from '@angular/core';
-import * as api from '@amc/application-api';
+import { Component, Output, EventEmitter } from '@angular/core';
 import { LoggerService } from './../logger.service';
 import { StorageService } from '../storage.service';
 @Component({

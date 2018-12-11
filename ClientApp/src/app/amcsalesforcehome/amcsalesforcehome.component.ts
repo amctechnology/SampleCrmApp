@@ -1,11 +1,10 @@
-import { Component, OnInit, Output, EventEmitter } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import * as api from '@amc/application-api';
-import { Application, BridgeEventsService } from '@amc/applicationangularframework';
+import { Application } from '@amc/applicationangularframework';
 import { bind } from 'bind-decorator';
-import { InteractionDirectionTypes, IInteraction, registerOnLogout, ChannelTypes } from '@amc/application-api';
+import { IInteraction, registerOnLogout, ChannelTypes } from '@amc/application-api';
 import { Subject } from 'rxjs/Subject';
 import { IActivity } from './../Model/IActivity';
-import { IActivityDetails } from './../Model/IActivityDetails';
 import { ICreateNewSObjectParams } from './../Model/ICreateNewSObjectParams';
 import { LoggerService } from './../logger.service';
 import { StorageService } from '../storage.service';
@@ -44,8 +43,8 @@ export class AMCSalesforceHomeComponent extends Application implements OnInit {
     registerOnLogout(this.removeLocalStorageOnLogout);
     this.loggerService.logger.logDebug('AMCSalesforceHomeComponent: ngOnInit complete');
   }
-  protected removeLocalStorageOnLogout(reason?: string): Promise<any> {
-    return new Promise((resolve, reject) => {
+  protected removeLocalStorageOnLogout(): Promise<any> {
+    return new Promise(() => {
       localStorage.clear();
     });
   }
