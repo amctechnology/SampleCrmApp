@@ -11,4 +11,8 @@ export interface IActivity {
   TimeStamp: Date;
   ActivityId: string;
   InteractionId: string;
+  contactSource: {
+    sourceType: string;
+    source: string;
+  };
 }

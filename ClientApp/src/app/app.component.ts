@@ -1,4 +1,4 @@
-import { Component, AfterViewChecked, OnInit, ElementRef } from '@angular/core';
+import { Component, AfterViewChecked, ElementRef } from '@angular/core';
 import * as applicationAPI from '@amc/application-api';
 @Component({
   selector: 'app-root',
