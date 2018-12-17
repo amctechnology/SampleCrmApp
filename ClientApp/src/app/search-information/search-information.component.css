@@ -55,6 +55,7 @@
   white-space: nowrap !IMPORTANT;
   text-overflow: ellipsis !IMPORTANT;
   margin: 5px 0% 5px 6px;
+  cursor: pointer;
 }
 
 .displayLabels {
