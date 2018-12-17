@@ -21,7 +21,6 @@ export class ActivityComponent implements OnInit {
 
   constructor(private loggerService: LoggerService, protected storageService: StorageService) {
     this.loggerService.logger.logDebug('activity: Constructor start');
-    this.quickCommentList = this.quickCommentList;
     this.isActivityMaximized = true;
     this.loggerService.logger.logDebug('activity: Constructor complete');
   }
