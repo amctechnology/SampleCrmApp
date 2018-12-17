@@ -45,6 +45,7 @@
   white-space: nowrap !IMPORTANT;
   text-overflow: ellipsis !IMPORTANT;
   margin: 5px 0% 5px 6px;
+  cursor: pointer;
 }
 
 .singleSearchResultSelect {
@@ -82,6 +83,7 @@
   width: 20px;
   height: 20px;
   float: right;
+  cursor: pointer;
 }
 
 .headerLabel {
