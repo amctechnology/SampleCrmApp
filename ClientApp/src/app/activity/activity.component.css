@@ -58,6 +58,7 @@
   color: #ffffff;
   border-radius: 4px;
   font-size: 98%;
+  margin-bottom: 2px
 }
 
 .callBody {
@@ -118,6 +119,7 @@
   white-space: nowrap !IMPORTANT;
   text-overflow: ellipsis !IMPORTANT;
   margin: 0 5px 0 0;
+  cursor: pointer;
 }
 
 .activitySubjectTextBoxStyle {
@@ -209,6 +211,7 @@ body {
   width: 20px;
   height: 20px;
   float: right;
+  cursor: pointer;
 }
 
 .headerLabel {
