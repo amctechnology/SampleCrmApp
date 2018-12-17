@@ -1,6 +1,6 @@
 <div class="body">
   <app-search-information *ngIf="storageService.searchResultWasReturned" (agentSelectedCallerInformation)="agentSelectedCallerInformation($event)"></app-search-information>
   <app-activity *ngIf="storageService.currentInteraction" [autoSave]="autoSave" [interactionDisconnected]="interactionDisconnected"
-    (ActivitySave)="saveActivity($event)"></app-activity>
+    (ActivitySave)="saveActivity($event)" [quickCommentList]="quickCommentList"></app-activity>
   <app-create (CreateNewEntity)="createNewEntity($event)"></app-create>
 </div>

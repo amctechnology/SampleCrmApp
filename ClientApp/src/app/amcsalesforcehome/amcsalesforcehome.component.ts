@@ -17,6 +17,7 @@ export class AMCSalesforceHomeComponent extends Application implements OnInit {
   protected interactionDisconnected: Subject<boolean> = new Subject();
   protected autoSave: Subject<void> = new Subject();
   protected phoneNumberFormat: string;
+  protected quickCommentList: string[];
   constructor(private loggerService: LoggerService, protected storageService: StorageService) {
     super(loggerService.logger);
     this.loggerService.logger.logDebug('AMCSalesforceHomeComponent: constructor start');
@@ -40,6 +41,7 @@ export class AMCSalesforceHomeComponent extends Application implements OnInit {
     this.bridgeEventsService.subscribe('setActivityDetails', this.setActivityDetails);
     const config = await api.initializeComplete(this.logger);
     this.phoneNumberFormat = String(config.variables['PhoneNumberFormat']).toLowerCase();
+    this.quickCommentList = <string[]>config.variables['QuickComments'];
     registerOnLogout(this.removeLocalStorageOnLogout);
     this.loggerService.logger.logDebug('AMCSalesforceHomeComponent: ngOnInit complete');
   }

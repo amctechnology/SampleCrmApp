@@ -13,18 +13,15 @@ import { StorageService } from '../storage.service';
 export class ActivityComponent implements OnInit {
   @Input() interactionDisconnected: Subject<boolean>;
   @Input() autoSave: Subject<void>;
+  @Input() quickCommentList: string[];
   @Output() ActivitySave: EventEmitter<IActivity> = new EventEmitter<IActivity>();
   @Output() childComponentLogger: EventEmitter<string> = new EventEmitter<string>();
 
   isActivityMaximized: boolean;
-  quickCommentList: string[];
 
   constructor(private loggerService: LoggerService, protected storageService: StorageService) {
     this.loggerService.logger.logDebug('activity: Constructor start');
-    this.quickCommentList = ['Left voicemail: ',
-      'Scheduled follow up: ', 'Transferred to: ',
-      'Sent email ', 'Number of agents: ',
-      'Selling points: '];
+    this.quickCommentList = this.quickCommentList;
     this.isActivityMaximized = true;
     this.loggerService.logger.logDebug('activity: Constructor complete');
   }
