@@ -1,5 +1,4 @@
-import { Component, OnInit, Input, Output, EventEmitter } from '@angular/core';
-import * as api from '@amc/application-api';
+import { Component, Output, EventEmitter } from '@angular/core';
 import { LoggerService } from './../logger.service';
 import { StorageService } from '../storage.service';
 @Component({
@@ -11,6 +10,7 @@ export class SearchInformationComponent {
   @Output() agentSelectedCallerInformation: EventEmitter<any> = new EventEmitter();
   isSearchInformationMaximized: boolean;
   imageLocation: string;
+  lastCallerId: string;
   constructor(private loggerService: LoggerService, protected storageService: StorageService) {
     this.loggerService.logger.logDebug('searchInformationComponent: Constructor start');
     this.isSearchInformationMaximized = true;
@@ -18,13 +18,14 @@ export class SearchInformationComponent {
   }
   protected onAgentSelectedCallerInformation(event) {
     if (this.storageService.searchReturnedSingleResult) {
-      this.loggerService.logger.logDebug('searchInformationComponent: Agent selected caller info: ' +
-        event.currentTarget.id);
+      this.loggerService.logger.logDebug(`searchInformationComponent: Agent selected caller info: ${event.currentTarget.id}`);
       this.agentSelectedCallerInformation.emit(event.currentTarget.id);
     } else {
-      this.loggerService.logger.logDebug('searchInformationComponent: Agent selected caller info: ' +
-        event.currentTarget.value);
-      this.agentSelectedCallerInformation.emit(event.currentTarget.value);
+      if (this.lastCallerId !== event.currentTarget.value) {
+        this.loggerService.logger.logDebug(`searchInformationComponent: Agent selected caller info: ${event.currentTarget.value}`);
+        this.agentSelectedCallerInformation.emit(event.currentTarget.value);
+        this.lastCallerId = event.currentTarget.value;
+      }
     }
   }
   protected parseSearchRecordForName(searchRecord) {

@@ -16,8 +16,7 @@ export class CreateComponent implements OnInit {
   ngOnInit() {
   }
   protected createNewEntity(type) {
-    this.loggerService.logger.logDebug('create: request screenpop for new Salesforce object type: ' +
-      type);
+    this.loggerService.logger.logDebug(`create: request screenpop for new Salesforce object type: ${type}`);
     this.CreateNewEntity.emit(type);
   }
 }
