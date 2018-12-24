@@ -32,6 +32,7 @@ export class AMCSalesforceHomeComponent extends Application implements OnInit {
     ]);
     this.loggerService.logger.logDebug('AMCSalesforceHomeComponent: constructor complete');
   }
+
   async ngOnInit() {
     await super.ngOnInit();
     this.loggerService.logger.logDebug('AMCSalesforceHomeComponent: ngOnInit start');
@@ -50,6 +51,7 @@ export class AMCSalesforceHomeComponent extends Application implements OnInit {
       localStorage.clear();
     });
   }
+
   protected formatPhoneNumber(number: string, phoneNumberFormat: string) {
     let numberIndex = 0;
     let formatIndex = 0;
@@ -88,6 +90,7 @@ export class AMCSalesforceHomeComponent extends Application implements OnInit {
     }
     return this.reverse(formattedNumber);
   }
+
   protected reverse(input: string): string {
     let reverse = '';
     for (let i = 0; i < input.length; i++) {
