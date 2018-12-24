@@ -292,7 +292,7 @@ export class AMCSalesforceHomeComponent extends Application implements OnInit {
       const interactionId = interaction.interactionId;
       const scenarioIdInt = interaction.scenarioId;
       let isNewScenarioId = false;
-      if (interaction.channelType === ChannelTypes.Telephony) {
+      if (interaction.channelType === ChannelTypes.Telephony || interaction.channelType === ChannelTypes.SMS) {
         interaction.details.fields.Phone.Value = this.formatPhoneNumber(interaction.details.fields.Phone.Value, this.phoneNumberFormat);
       }
       if (!this.scenarioInteractionMappings.hasOwnProperty(scenarioIdInt)
