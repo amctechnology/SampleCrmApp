@@ -1,6 +1,6 @@
 import { Injectable, isDevMode } from '@angular/core';
 import { Logger, LogSource, LogLevel } from '@amc/application-api';
-import { environment } from '../environments/environment';
+import { environment } from '../environments/environment.prod';
 
 @Injectable()
 export class LoggerService {
@@ -8,7 +8,6 @@ export class LoggerService {
   public logger: Logger;
   constructor() {
     this.logger = new Logger(LogSource.SalesforceApp, false, environment.apiUrl);
-    this.logger.logLevel = LogLevel.Debug;
   }
 
 }
