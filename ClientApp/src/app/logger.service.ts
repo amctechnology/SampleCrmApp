@@ -1,6 +1,6 @@
 import { Injectable, isDevMode } from '@angular/core';
 import { Logger, LogSource, LogLevel } from '@amc/application-api';
-import { environment } from '../environments/environment.prod';
+import { environment } from '../environments/environment';
 
 @Injectable()
 export class LoggerService {
