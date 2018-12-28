@@ -4,7 +4,7 @@
   "license": "MIT",
   "scripts": {
     "ng": "ng",
-    "build:ssr": "npm run build-prod -- --app=ssr --output-hashing=media",
+    "build:ssr": "npm run build -- --app=ssr --output-hashing=media",
     "test": "karma start ./karma.conf.js",
     "test-ci": "karma start ./karma.conf.ci.js",
     "lint": "ng lint",
@@ -18,8 +18,6 @@
   "dependencies": {
     "@amc/application-api": "0.0.38",
     "@amc/applicationangularframework": "^1.0.71",
-    "@amc/channel-api": "0.0.29",
-    "@angular-devkit/build-angular": "^0.11.3",
     "@angular/animations": "^5.2.0",
     "@angular/common": "^5.2.0",
     "@angular/compiler": "^5.2.0",
@@ -30,7 +28,6 @@
     "@angular/platform-browser-dynamic": "^5.2.0",
     "@angular/platform-server": "^5.2.0",
     "@angular/router": "^5.2.0",
-    "@ngtools/webpack": "1.10.2",
     "@nguniversal/module-map-ngfactory-loader": "^5.0.0-beta.5",
     "aspnet-prerendering": "^3.0.1",
     "bootstrap": "^3.3.7",
