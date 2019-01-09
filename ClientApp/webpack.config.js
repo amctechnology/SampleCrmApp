@@ -23,6 +23,7 @@ const baseHref = "";
 const deployUrl = "";
 const projectRoot = process.cwd();
 const maximumInlineSize = 10;
+const hash = Date.now().toString(16);
 const postcssPlugins = function (loader) {
   return [
     postcssImports({
@@ -165,7 +166,7 @@ module.exports = (env) => {
     "output": {
       "path": outputPath,
       "publicPath": publicPath,
-      "filename": production ? "[name].[hash].bundle.js" : "[name].bundle.js",
+      "filename": production ? `[name].${hash}.bundle.js` : "[name].bundle.js",
       "chunkFilename": "[id].chunk.js",
       "crossOriginLoading": "anonymous"
     },
@@ -488,7 +489,7 @@ module.exports = (env) => {
       new SourceMapDevToolPlugin({
         "filename": "[file].map[query]",
         "moduleFilenameTemplate": "[resource-path]",
-        "fallbackModuleFilenameTemplate": "[resource-path]?[hash]",
+        "fallbackModuleFilenameTemplate": `[resource-path]?${hash}`,
         "sourceRoot": "webpack:///"
       }),
       new CommonsChunkPlugin({
@@ -559,7 +560,7 @@ module.exports = (env) => {
     "output": {
       "path": outputPath,
       "publicPath": publicPath,
-      "filename": production ? "[name].[hash].bundle.js" : "[name].bundle.js",
+      "filename": production ? `[name].${hash}.bundle.js` : "[name].bundle.js",
       "chunkFilename": "[id].chunk.js",
       "crossOriginLoading": "anonymous"
     },
@@ -608,7 +609,7 @@ module.exports = (env) => {
       new SourceMapDevToolPlugin({
         "filename": "[file].map[query]",
         "moduleFilenameTemplate": "[resource-path]",
-        "fallbackModuleFilenameTemplate": "[resource-path]?[hash]",
+        "fallbackModuleFilenameTemplate": `[resource-path]?${hash}`,
         "sourceRoot": "webpack:///"
       }),
       new NamedModulesPlugin({}),
@@ -642,4 +643,3 @@ module.exports = (env) => {
 
   return [bridge, app];
 }
-
