@@ -1,13 +1,14 @@
 import { Injectable, isDevMode } from '@angular/core';
 import { Logger, LogSource, LogLevel } from '@amc/application-api';
-import { environment } from '../environments/environment';
+import { ConfigurationService } from './configuration.service';
 
 @Injectable()
 export class LoggerService {
-
   public logger: Logger;
-  constructor() {
-    this.logger = new Logger(LogSource.SalesforceApp, false, environment.apiUrl);
+  constructor(private configService: ConfigurationService) {
+  }
+  intialize() {
+    this.logger = new Logger(LogSource.SalesforceApp, false, this.configService.config.apiUrl);
   }
 
 }

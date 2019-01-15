@@ -5,6 +5,5 @@
 
 export const environment = {
   production: false,
-  hmr: true,
-  apiUrl: 'https://api-dev.contactcanvas.com'
+  hmr: true
 };
