@@ -107,9 +107,9 @@ namespace Salesforce
 
             app.UseMvc(routes =>
             {
-                routes.MapSpaFallbackRoute(
-                  name: "spa-fallback",
-                  defaults: new { controller = "Home", action = "Index" });
+                routes.MapRoute(
+                     name: "default",
+                     template: "{controller}/{action=Index}/{id?}");
             });
         }
         private static bool IsProduction()
