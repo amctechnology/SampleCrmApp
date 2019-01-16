@@ -1,9 +1,7 @@
 import * as api from '@amc/application-api';
-import { InteractionDirectionTypes, IInteraction } from '@amc/application-api';
-import { Subject } from 'rxjs/Subject';
+import { IInteraction } from '@amc/application-api';
 import { IActivity } from './Model/IActivity';
 import { IActivityDetails } from './Model/IActivityDetails';
-import { bind } from 'bind-decorator';
 import { Injectable } from '@angular/core';
 @Injectable()
 export class StorageService {

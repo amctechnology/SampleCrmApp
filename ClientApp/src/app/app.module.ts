@@ -1,5 +1,5 @@
 import { BrowserModule } from '@angular/platform-browser';
-import { NgModule } from '@angular/core';
+import { NgModule, APP_INITIALIZER } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { HttpClientModule } from '@angular/common/http';
 import { RouterModule } from '@angular/router';
@@ -11,6 +11,7 @@ import { CreateComponent } from './create/create.component';
 import { SearchInformationComponent } from './search-information/search-information.component';
 import { LoggerService } from './logger.service';
 import { StorageService } from './storage.service';
+import { ConfigurationService } from './configuration.service';
 
 
 @NgModule({
@@ -20,8 +21,6 @@ import { StorageService } from './storage.service';
     ActivityComponent,
     CreateComponent,
     SearchInformationComponent
-
-
   ],
   imports: [
     BrowserModule.withServerTransition({ appId: 'ng-cli-universal' }),
@@ -31,7 +30,19 @@ import { StorageService } from './storage.service';
       { path: '', component: AMCSalesforceHomeComponent, pathMatch: 'full' }
     ])
   ],
-  providers: [LoggerService, StorageService],
+  providers: [ConfigurationService,
+    {
+      provide: APP_INITIALIZER,
+      useFactory: (configService: ConfigurationService, loggerService: LoggerService) =>
+        async () => {
+          await configService.loadConfigurationData();
+          loggerService.intialize();
+        },
+      deps: [ConfigurationService, LoggerService],
+      multi: true
+    },
+    LoggerService,
+    StorageService],
   bootstrap: [AppComponent]
 })
 export class AppModule { }

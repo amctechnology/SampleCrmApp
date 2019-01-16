@@ -14,6 +14,7 @@ using System;
 using Salesforce.Models;
 using System.Net;
 using System.Security.Claims;
+using SalesforceCloudCore.Models;
 
 namespace Salesforce
 {
@@ -31,6 +32,8 @@ namespace Salesforce
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            services.AddOptions();
+            services.Configure<ClientConfiguration>(Configuration.GetSection("ClientConfiguration"));
             services.AddMvc();
 
             services.AddAuthentication(options =>
@@ -104,9 +107,9 @@ namespace Salesforce
 
             app.UseMvc(routes =>
             {
-                routes.MapSpaFallbackRoute(
-                  name: "spa-fallback",
-                  defaults: new { controller = "Home", action = "Index" });
+                routes.MapRoute(
+                     name: "default",
+                     template: "{controller}/{action=Index}/{id?}");
             });
         }
         private static bool IsProduction()
