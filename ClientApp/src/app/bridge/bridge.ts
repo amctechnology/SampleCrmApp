@@ -446,10 +446,10 @@ class SalesforceBridge extends Bridge {
     }
     return new Promise((resolve, reject) => {
       let activityString = '';
-      activityString = `WhoId=${activity.WhoObject.objectId}&WhatId=${activity.WhatObject.objectId}
-      &CallType=${activity.CallType}&CallDurationInSeconds=${activity.CallDurationInSeconds}
-      &Subject=${activity.Subject}&Description=${activity.Description}&Status=${activity.Status}
-      &ActivityDate=${activity.ActivityDate}`;
+      activityString = `WhoId=${activity.WhoObject.objectId}&WhatId=${activity.WhatObject.objectId}` +
+        `&CallType=${activity.CallType}&CallDurationInSeconds=${activity.CallDurationInSeconds}` +
+        `&Subject=${activity.Subject}&Description=${activity.Description}&Status=${activity.Status}` +
+        `&ActivityDate=${activity.ActivityDate}`;
       if (activity.ActivityId) {
         activityString = activityString + '&Id=' + activity.ActivityId;
       }
