@@ -1,13 +1,9 @@
-import { Bridge, BridgeEventsService } from '@amc/applicationangularframework';
-import { InteractionDirectionTypes, ChannelTypes, SearchRecords } from '@amc/application-api';
+import { Bridge } from '@amc/applicationangularframework';
+import { InteractionDirectionTypes } from '@amc/davinci-api';
 import { bind } from 'bind-decorator';
 import { safeJSONParse } from '../utils';
-import { Subject } from 'rxjs/Subject';
-import { OnInit } from '@angular/core';
 import { IActivity } from './../Model/IActivity';
-import { IActivityDetails } from './../Model/IActivityDetails';
 import { ICreateNewSObjectParams } from './../Model/ICreateNewSObjectParams';
-import { LoggerService } from './../logger.service';
 declare var sforce: any;
 
 class SalesforceBridge extends Bridge {
@@ -24,7 +20,6 @@ class SalesforceBridge extends Bridge {
     this.layoutObjectList = [];
     this.VerifyMode();
     this.initialize();
-    this.eventService.subscribe('getUserInfo', this.getUserInfo);
     this.eventService.subscribe('getSearchLayout', this.getSearchLayout);
     this.eventService.subscribe('isToolbarVisible', this.isToolbarVisible);
     this.eventService.subscribe('saveActivity', this.saveActivity);
@@ -152,31 +147,6 @@ class SalesforceBridge extends Bridge {
     this.eventService.sendEvent('clickToDial', {
       number: entity.number,
       records: records
-    });
-  }
-
-  @bind
-  async getUserInfo() {
-    return new Promise((resolve, reject) => {
-      if (this.isLightning) {
-        sforce.opencti.runApex({
-          apexClass: 'UserInfo',
-          methodName: 'getUserName',
-          methodParams: '',
-          callback: result => {
-            resolve(result.returnValue.runApex);
-          }
-        });
-      } else {
-        sforce.interaction.runApex(
-          'UserInfo',
-          'getUserName',
-          '',
-          result => {
-            resolve(result.result);
-          }
-        );
-      }
     });
   }
 
