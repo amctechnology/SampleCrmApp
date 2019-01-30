@@ -1,8 +1,8 @@
 import { Component, OnInit } from '@angular/core';
-import * as api from '@amc/application-api';
+import * as api from '@amc/davinci-api';
 import { Application } from '@amc/applicationangularframework';
 import { bind } from 'bind-decorator';
-import { IInteraction, registerOnLogout, ChannelTypes } from '@amc/application-api';
+import { IInteraction, registerOnLogout, ChannelTypes } from '@amc/davinci-api';
 import { Subject } from 'rxjs/Subject';
 import { IActivity } from './../Model/IActivity';
 import { ICreateNewSObjectParams } from './../Model/ICreateNewSObjectParams';
@@ -129,10 +129,6 @@ export class AMCSalesforceHomeComponent extends Application implements OnInit {
       }
     }
     return result;
-  }
-
-  protected getUserInfoHandler() {
-    return this.bridgeEventsService.sendEvent('getUserInfo');
   }
 
   protected async getSearchLayout() {
