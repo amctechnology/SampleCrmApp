@@ -1,5 +1,5 @@
 import { Component, AfterViewChecked, ElementRef } from '@angular/core';
-import * as applicationAPI from '@amc/application-api';
+import * as applicationAPI from '@amc/davinci-api';
 @Component({
   selector: 'app-root',
   templateUrl: './app.component.html',

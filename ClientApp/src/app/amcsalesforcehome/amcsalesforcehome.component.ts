@@ -1,8 +1,8 @@
 import { Component, OnInit } from '@angular/core';
-import * as api from '@amc/application-api';
+import * as api from '@amc/davinci-api';
 import { Application } from '@amc/applicationangularframework';
 import { bind } from 'bind-decorator';
-import { IInteraction, registerOnLogout, ChannelTypes } from '@amc/application-api';
+import { IInteraction, registerOnLogout, ChannelTypes } from '@amc/davinci-api';
 import { Subject } from 'rxjs/Subject';
 import { IActivity } from './../Model/IActivity';
 import { ICreateNewSObjectParams } from './../Model/ICreateNewSObjectParams';
@@ -129,10 +129,6 @@ export class AMCSalesforceHomeComponent extends Application implements OnInit {
       }
     }
     return result;
-  }
-
-  protected getUserInfoHandler() {
-    return this.bridgeEventsService.sendEvent('getUserInfo');
   }
 
   protected async getSearchLayout() {
@@ -327,17 +323,19 @@ export class AMCSalesforceHomeComponent extends Application implements OnInit {
           , api.ErrorCode.ACTIVITY);
         this.autoSave.next();
         return searchRecord;
-      } else if (interaction.state === api.InteractionStates.Disconnected &&
-        this.storageService.getCurrentInteraction().interactionId === interactionId) {
+      } else if (interaction.state === api.InteractionStates.Disconnected) {
         this.loggerService.logger.logDebug(`AMCSalesforceHomeComponent: Disconnect interaction received: ${JSON.stringify(interaction)}`
           , api.ErrorCode.DISCONEECTED_INTERACTION);
         if (this.scenarioInteractionMappings[scenarioIdInt]) {
           delete this.scenarioInteractionMappings[scenarioIdInt][interactionId];
         }
-        this.interactionDisconnected.next(true);
-        this.storageService.onInteractionDisconnect();
         if (Object.keys(this.scenarioInteractionMappings[scenarioIdInt]).length === 0) {
           delete this.scenarioInteractionMappings[scenarioIdInt];
+        }
+
+        if (this.storageService.getCurrentInteraction().interactionId === interactionId) {
+          this.interactionDisconnected.next(true);
+          this.storageService.onInteractionDisconnect();
         }
       }
     } catch (e) {

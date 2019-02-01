@@ -1,5 +1,5 @@
-import * as api from '@amc/application-api';
-import { IInteraction } from '@amc/application-api';
+import * as api from '@amc/davinci-api';
+import { IInteraction } from '@amc/davinci-api';
 import { IActivity } from './Model/IActivity';
 import { IActivityDetails } from './Model/IActivityDetails';
 import { Injectable } from '@angular/core';
