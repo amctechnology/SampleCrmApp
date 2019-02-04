@@ -1,5 +1,5 @@
 import { Injectable, isDevMode } from '@angular/core';
-import { Logger, LogSource, LogLevel } from '@amc/davinci-api';
+import { Logger, LogSource, LogLevel } from '@amc-technology/davinci-api';
 import { ConfigurationService } from './configuration.service';
 
 @Injectable()

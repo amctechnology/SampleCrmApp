@@ -1,8 +1,8 @@
 import { Component, OnInit } from '@angular/core';
-import * as api from '@amc/davinci-api';
-import { Application } from '@amc/applicationangularframework';
+import * as api from '@amc-technology/davinci-api';
+import { Application } from '@amc-technology/applicationangularframework';
 import { bind } from 'bind-decorator';
-import { IInteraction, registerOnLogout, ChannelTypes } from '@amc/davinci-api';
+import { IInteraction, registerOnLogout, ChannelTypes } from '@amc-technology/davinci-api';
 import { Subject } from 'rxjs/Subject';
 import { IActivity } from './../Model/IActivity';
 import { ICreateNewSObjectParams } from './../Model/ICreateNewSObjectParams';
