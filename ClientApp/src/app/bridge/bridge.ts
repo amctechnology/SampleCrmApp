@@ -1,5 +1,5 @@
-import { Bridge } from '@amc/applicationangularframework';
-import { InteractionDirectionTypes } from '@amc/davinci-api';
+import { Bridge } from '@amc-technology/applicationangularframework';
+import { InteractionDirectionTypes } from '@amc-technology/davinci-api';
 import { bind } from 'bind-decorator';
 import { safeJSONParse } from '../utils';
 import { IActivity } from './../Model/IActivity';
@@ -229,7 +229,7 @@ class SalesforceBridge extends Bridge {
         const finalValue = `value=${cad.value}`;
         const finalquery = `${finalfields}&${finalObject}&${finalKey}&${finalValue}`;
         const cadSearchRequest = {
-          apexClass: 'AMCOpenCTINS.ObjectRetrieval',
+          apexClass: 'AMCCloudOpenCTI.ObjectRetrieval',
           methodName: 'getObject',
           methodParams: finalquery,
           callback: function (response) {

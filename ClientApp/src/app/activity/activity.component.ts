@@ -1,5 +1,5 @@
 import { Component, OnInit, Input, Output, EventEmitter } from '@angular/core';
-import * as api from '@amc/davinci-api';
+import * as api from '@amc-technology/davinci-api';
 import { Subject } from 'rxjs/Subject';
 import { IActivity } from './../Model/IActivity';
 import { IActivityDetails } from './../Model/IActivityDetails';

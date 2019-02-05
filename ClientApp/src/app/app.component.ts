@@ -1,5 +1,5 @@
 import { Component, AfterViewChecked, ElementRef } from '@angular/core';
-import * as applicationAPI from '@amc/davinci-api';
+import * as applicationAPI from '@amc-technology/davinci-api';
 @Component({
   selector: 'app-root',
   templateUrl: './app.component.html',
@@ -19,7 +19,7 @@ export class AppComponent implements AfterViewChecked {
     const newHeight = this.getHeight();
     if (newHeight !== this.height) {
       this.height = newHeight;
-      applicationAPI.setSoftphoneHeight(this.height);
+      applicationAPI.setAppHeight(this.height);
     }
   }
   private getHeight(): number {
