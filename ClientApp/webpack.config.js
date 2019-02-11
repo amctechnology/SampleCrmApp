@@ -554,7 +554,7 @@ module.exports = (env) => {
     },
     "entry": {
       "bridge": [
-        "./src/app/bridge/bridge.ts"
+        "./src/app/bridge/bridge-salesforce-app.ts"
       ]
     },
     "output": {
