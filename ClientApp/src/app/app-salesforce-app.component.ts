@@ -5,7 +5,7 @@ import * as applicationAPI from '@amc-technology/davinci-api';
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.css']
 })
-export class AppComponent implements AfterViewChecked {
+export class AppSalesforceAppComponent implements AfterViewChecked {
   height: number;
   el: ElementRef;
   constructor(el: ElementRef) {

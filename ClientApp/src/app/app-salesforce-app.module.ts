@@ -4,7 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { HttpClientModule } from '@angular/common/http';
 import { RouterModule } from '@angular/router';
 
-import { AppComponent } from './app.component';
+import { AppSalesforceAppComponent } from './app-salesforce-app.component';
 import { HomeSalesforceAppComponent } from './home/home-salesforce-app.component';
 import { ActivitySalesforceAppComponent } from './activity/activity-salesforce-app.component';
 import { CreateSalesforceAppComponent } from './create/create-salesforce-app.component';
@@ -16,7 +16,7 @@ import { ConfigurationService } from './configuration.service';
 
 @NgModule({
   declarations: [
-    AppComponent,
+    AppSalesforceAppComponent,
     HomeSalesforceAppComponent,
     ActivitySalesforceAppComponent,
     CreateSalesforceAppComponent,
@@ -43,6 +43,6 @@ import { ConfigurationService } from './configuration.service';
     },
     LoggerService,
     StorageService],
-  bootstrap: [AppComponent]
+  bootstrap: [AppSalesforceAppComponent]
 })
 export class AppModule { }
