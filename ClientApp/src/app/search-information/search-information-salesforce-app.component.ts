@@ -1,12 +1,12 @@
 import { Component, Output, EventEmitter } from '@angular/core';
-import { LoggerService } from './../logger.service';
+import { LoggerService } from '../logger.service';
 import { StorageService } from '../storage.service';
 @Component({
   selector: 'app-search-information',
-  templateUrl: './search-information.component.html',
-  styleUrls: ['./search-information.component.css']
+  templateUrl: './search-information-salesforce-app.component.html',
+  styleUrls: ['./search-information-salesforce-app.component.css']
 })
-export class SearchInformationComponent {
+export class SearchInformationSalesforceAppComponent {
   @Output() agentSelectedCallerInformation: EventEmitter<any> = new EventEmitter();
   isSearchInformationMaximized: boolean;
   imageLocation: string;

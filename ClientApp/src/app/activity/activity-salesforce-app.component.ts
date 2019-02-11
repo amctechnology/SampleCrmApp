@@ -1,16 +1,16 @@
 import { Component, OnInit, Input, Output, EventEmitter } from '@angular/core';
 import * as api from '@amc-technology/davinci-api';
 import { Subject } from 'rxjs/Subject';
-import { IActivity } from './../Model/IActivity';
-import { IActivityDetails } from './../Model/IActivityDetails';
-import { LoggerService } from './../logger.service';
+import { IActivity } from '../Model/IActivity';
+import { IActivityDetails } from '../Model/IActivityDetails';
+import { LoggerService } from '../logger.service';
 import { StorageService } from '../storage.service';
 @Component({
   selector: 'app-activity',
-  templateUrl: './activity.component.html',
-  styleUrls: ['./activity.component.css']
+  templateUrl: './activity-salesforce-app.component.html',
+  styleUrls: ['./activity-salesforce-app.component.css']
 })
-export class ActivityComponent implements OnInit {
+export class ActivitySalesforceAppComponent implements OnInit {
   @Input() interactionDisconnected: Subject<boolean>;
   @Input() autoSave: Subject<void>;
   @Input() quickCommentList: string[];
