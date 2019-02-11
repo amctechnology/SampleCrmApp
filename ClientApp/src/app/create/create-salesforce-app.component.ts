@@ -1,11 +1,11 @@
 import { Component, OnInit, EventEmitter, Output } from '@angular/core';
-import { LoggerService } from './../logger.service';
+import { LoggerService } from '../logger.service';
 @Component({
   selector: 'app-create',
-  templateUrl: './create.component.html',
-  styleUrls: ['./create.component.css']
+  templateUrl: './create-salesforce-app.component.html',
+  styleUrls: ['./create-salesforce-app.component.css']
 })
-export class CreateComponent implements OnInit {
+export class CreateSalesforceAppComponent implements OnInit {
   @Output() CreateNewEntity: EventEmitter<string> = new EventEmitter<string>();
   isCreateMaximized: boolean;
   constructor(private loggerService: LoggerService) {

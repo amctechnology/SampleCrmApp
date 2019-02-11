@@ -2,11 +2,11 @@ import { Bridge } from '@amc-technology/applicationangularframework';
 import { InteractionDirectionTypes } from '@amc-technology/davinci-api';
 import { bind } from 'bind-decorator';
 import { safeJSONParse } from '../utils';
-import { IActivity } from './../Model/IActivity';
-import { ICreateNewSObjectParams } from './../Model/ICreateNewSObjectParams';
+import { IActivity } from '../Model/IActivity';
+import { ICreateNewSObjectParams } from '../Model/ICreateNewSObjectParams';
 declare var sforce: any;
 
-class SalesforceBridge extends Bridge {
+class BridgeSalesforceApp extends Bridge {
   private isLightning = false;
   private currentOnFocusEvent: ISalesforceClassicOnFocusEvent | ISalesforceLightningOnFocusEvent;
   activity: IActivity = null;
@@ -482,7 +482,7 @@ class SalesforceBridge extends Bridge {
 
 }
 
-const bridge = new SalesforceBridge();
+const bridge = new BridgeSalesforceApp();
 
 interface IScreenPopObject {
   type: string;
