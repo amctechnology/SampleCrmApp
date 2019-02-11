@@ -4,16 +4,16 @@ import { Application } from '@amc-technology/applicationangularframework';
 import { bind } from 'bind-decorator';
 import { IInteraction, registerOnLogout, ChannelTypes } from '@amc-technology/davinci-api';
 import { Subject } from 'rxjs/Subject';
-import { IActivity } from './../Model/IActivity';
-import { ICreateNewSObjectParams } from './../Model/ICreateNewSObjectParams';
-import { LoggerService } from './../logger.service';
+import { IActivity } from '../Model/IActivity';
+import { ICreateNewSObjectParams } from '../Model/ICreateNewSObjectParams';
+import { LoggerService } from '../logger.service';
 import { StorageService } from '../storage.service';
 @Component({
-  selector: 'app-amcsalesforcehome',
-  templateUrl: './amcsalesforcehome.component.html',
+  selector: 'app-home',
+  templateUrl: './home-salesforce-app.component.html',
 })
 
-export class AMCSalesforceHomeComponent extends Application implements OnInit {
+export class HomeSalesforceAppComponent extends Application implements OnInit {
   protected interactionDisconnected: Subject<boolean> = new Subject();
   protected autoSave: Subject<void> = new Subject();
   protected phoneNumberFormat: string;
@@ -26,9 +26,9 @@ export class AMCSalesforceHomeComponent extends Application implements OnInit {
     this.appName = 'Salesforce';
     this.bridgeScripts = this.bridgeScripts.concat([
       this.getBridgeURL(),
-      'https://c.na1.visual.force.com/support/api/42.0/interaction.js',
-      'https://na15.salesforce.com/support/console/42.0/integration.js',
-      'https://gs0.lightning.force.com/support/api/42.0/lightning/opencti_min.js'
+      'https://na53.salesforce.com/support/api/44.0/interaction.js',
+      'https://na53.salesforce.com/support/console/44.0/integration.js',
+      'https://na53.lightning.force.com/support/api/44.0/lightning/opencti_min.js'
     ]);
     this.loggerService.logger.logDebug('AMCSalesforceHomeComponent: constructor complete');
   }

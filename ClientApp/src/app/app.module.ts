@@ -5,10 +5,10 @@ import { HttpClientModule } from '@angular/common/http';
 import { RouterModule } from '@angular/router';
 
 import { AppComponent } from './app.component';
-import { AMCSalesforceHomeComponent } from './amcsalesforcehome/amcsalesforcehome.component';
-import { ActivityComponent } from './activity/activity.component';
-import { CreateComponent } from './create/create.component';
-import { SearchInformationComponent } from './search-information/search-information.component';
+import { HomeSalesforceAppComponent } from './home/home-salesforce-app.component';
+import { ActivitySalesforceAppComponent } from './activity/activity-salesforce-app.component';
+import { CreateSalesforceAppComponent } from './create/create-salesforce-app.component';
+import { SearchInformationSalesforceAppComponent } from './search-information/search-information-salesforce-app.component';
 import { LoggerService } from './logger.service';
 import { StorageService } from './storage.service';
 import { ConfigurationService } from './configuration.service';
@@ -17,17 +17,17 @@ import { ConfigurationService } from './configuration.service';
 @NgModule({
   declarations: [
     AppComponent,
-    AMCSalesforceHomeComponent,
-    ActivityComponent,
-    CreateComponent,
-    SearchInformationComponent
+    HomeSalesforceAppComponent,
+    ActivitySalesforceAppComponent,
+    CreateSalesforceAppComponent,
+    SearchInformationSalesforceAppComponent
   ],
   imports: [
     BrowserModule.withServerTransition({ appId: 'ng-cli-universal' }),
     HttpClientModule,
     FormsModule,
     RouterModule.forRoot([
-      { path: '', component: AMCSalesforceHomeComponent, pathMatch: 'full' }
+      { path: '', component: HomeSalesforceAppComponent, pathMatch: 'full' }
     ])
   ],
   providers: [ConfigurationService,
