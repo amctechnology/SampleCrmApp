@@ -328,12 +328,11 @@ export class HomeSalesforceAppComponent extends Application implements OnInit {
           , api.ErrorCode.DISCONEECTED_INTERACTION);
         if (this.scenarioInteractionMappings[scenarioIdInt]) {
           delete this.scenarioInteractionMappings[scenarioIdInt][interactionId];
+          if (Object.keys(this.scenarioInteractionMappings[scenarioIdInt]).length === 0) {
+            delete this.scenarioInteractionMappings[scenarioIdInt];
+          }
         }
-        if (Object.keys(this.scenarioInteractionMappings[scenarioIdInt]).length === 0) {
-          delete this.scenarioInteractionMappings[scenarioIdInt];
-        }
-
-        if (this.storageService.getCurrentInteraction().interactionId === interactionId) {
+        if (this.storageService.getCurrentInteraction() && this.storageService.getCurrentInteraction().interactionId === interactionId) {
           this.interactionDisconnected.next(true);
           this.storageService.onInteractionDisconnect();
         }
