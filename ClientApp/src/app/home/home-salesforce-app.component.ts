@@ -46,6 +46,7 @@ export class HomeSalesforceAppComponent extends Application implements OnInit {
     registerOnLogout(this.removeLocalStorageOnLogout);
     this.loggerService.logger.logDebug('AMCSalesforceHomeComponent: ngOnInit complete');
   }
+
   protected removeLocalStorageOnLogout(): Promise<any> {
     return new Promise(() => {
       localStorage.clear();
@@ -98,7 +99,8 @@ export class HomeSalesforceAppComponent extends Application implements OnInit {
     }
     return reverse;
   }
-  formatCrmResults(crmResults: any): api.SearchRecords {
+
+  protected formatCrmResults(crmResults: any): api.SearchRecords {
     const ignoreFields = ['Name', 'displayName', 'object', 'Id', 'RecordType'];
     const result = new api.SearchRecords();
     for (const id of Object.keys(crmResults)) {
@@ -108,7 +110,6 @@ export class HomeSalesforceAppComponent extends Application implements OnInit {
       } else if (crmResults[id].object && crmResults[id].displayName) {
         recordItem = new api.RecordItem(id, crmResults[id].object, crmResults[id].displayName);
       }
-
       if (recordItem !== null) {
         if (crmResults[id].Name) {
           if (recordItem.getMetadata().Type === 'Account') {
@@ -119,7 +120,6 @@ export class HomeSalesforceAppComponent extends Application implements OnInit {
             recordItem.setField('Name', 'Name', 'Name', crmResults[id].Name);
           }
         }
-
         for (const fieldName of Object.keys(crmResults[id])) {
           if (ignoreFields.indexOf(fieldName) < 0) {
             recordItem.setField(fieldName, fieldName, fieldName, crmResults[id][fieldName]);
@@ -133,22 +133,16 @@ export class HomeSalesforceAppComponent extends Application implements OnInit {
 
   protected async getSearchLayout() {
     const salesforceLayouts = await this.bridgeEventsService.sendEvent('getSearchLayout');
-
     const result = new api.SearchLayouts();
-
     const telephonyLayout = new api.SearchLayout(false, []);
-
-
     if (salesforceLayouts.Internal) {
       telephonyLayout.setInternal(this.parseSearchLayoutEntities(salesforceLayouts.Internal));
     }
-
     if (salesforceLayouts.Inbound) {
       const openInNewWindow =
         salesforceLayouts.Inbound.screenPopSettings &&
         salesforceLayouts.Inbound.screenPopSettings.screenPopOpenWithin &&
         salesforceLayouts.Inbound.screenPopSettings.screenPopOpenWithin !== 'ExistingWindow';
-
       switch (salesforceLayouts.Inbound.screenPopSettings.NoMatch.screenPopType) {
         case 'PopToEntity':
           telephonyLayout.setNoMatch({
@@ -167,7 +161,6 @@ export class HomeSalesforceAppComponent extends Application implements OnInit {
             data: salesforceLayouts.Inbound.screenPopSettings.NoMatch.screenPopData
           });
       }
-
       switch (salesforceLayouts.Inbound.screenPopSettings.SingleMatch.screenPopType) {
         case 'PopToEntity':
           telephonyLayout.setSingleMatch({
@@ -185,7 +178,6 @@ export class HomeSalesforceAppComponent extends Application implements OnInit {
             data: salesforceLayouts.Inbound.screenPopSettings.SingleMatch.screenPopData
           });
       }
-
       switch (salesforceLayouts.Inbound.screenPopSettings.MultipleMatches.screenPopType) {
         case 'PopToEntity':
           telephonyLayout.setMultiMatch({
@@ -203,22 +195,17 @@ export class HomeSalesforceAppComponent extends Application implements OnInit {
             data: salesforceLayouts.Inbound.screenPopSettings.MultipleMatches.screenPopData
           });
       }
-
       telephonyLayout.setInbound(this.parseSearchLayoutEntities(salesforceLayouts.Inbound));
-
       telephonyLayout.setDefault(telephonyLayout.getInbound());
       telephonyLayout.setOpenInNewWindow(openInNewWindow);
     }
-
     if (salesforceLayouts.Outbound) {
       telephonyLayout.setOutbound(this.parseSearchLayoutEntities(salesforceLayouts.Outbound));
     }
-
-
     result.setLayout([api.ChannelTypes.Telephony], telephonyLayout);
     return result;
-
   }
+
   private parseSearchLayoutEntities(salesforceLayout: any): api.ISearchLayoutForEntity[] {
     const layoutsForEntities: api.ISearchLayoutForEntity[] = [];
     for (const entityName of Object.keys(salesforceLayout.objects)) {
@@ -269,6 +256,7 @@ export class HomeSalesforceAppComponent extends Application implements OnInit {
     this.storageService.updateActivity(activity);
     return Promise.resolve(activity.ActivityId);
   }
+
   protected formatDate(date: Date): string {
     let month = '' + (date.getMonth() + 1);
     let day = '' + date.getDate();
@@ -281,6 +269,7 @@ export class HomeSalesforceAppComponent extends Application implements OnInit {
     }
     return year + '-' + month + '-' + day;
   }
+
   protected async onInteraction(interaction: api.IInteraction): Promise<api.SearchRecords> {
     this.loggerService.logger.logDebug(`AMCSalesforceHomeComponent: Interaction recieved: ${JSON.stringify(interaction)}`
       , api.ErrorCode.INTERACTION_EVENT);
@@ -328,12 +317,11 @@ export class HomeSalesforceAppComponent extends Application implements OnInit {
           , api.ErrorCode.DISCONEECTED_INTERACTION);
         if (this.scenarioInteractionMappings[scenarioIdInt]) {
           delete this.scenarioInteractionMappings[scenarioIdInt][interactionId];
+          if (Object.keys(this.scenarioInteractionMappings[scenarioIdInt]).length === 0) {
+            delete this.scenarioInteractionMappings[scenarioIdInt];
+          }
         }
-        if (Object.keys(this.scenarioInteractionMappings[scenarioIdInt]).length === 0) {
-          delete this.scenarioInteractionMappings[scenarioIdInt];
-        }
-
-        if (this.storageService.getCurrentInteraction().interactionId === interactionId) {
+        if (this.storageService.getCurrentInteraction() && this.storageService.getCurrentInteraction().interactionId === interactionId) {
           this.interactionDisconnected.next(true);
           this.storageService.onInteractionDisconnect();
         }
@@ -427,6 +415,7 @@ export class HomeSalesforceAppComponent extends Application implements OnInit {
     }
 
   }
+
   @bind
   protected createNewEntity(entityType) {
     this.loggerService.logger.logDebug(`AMCSalesforceHomeComponent: Screenpop new Salesforce object of type:
@@ -476,6 +465,7 @@ export class HomeSalesforceAppComponent extends Application implements OnInit {
     }
     return params;
   }
+
   protected agentSelectedCallerInformation(id) {
     this.loggerService.logger.logDebug('AMCSalesforceHomeComponent: Screenpop selected caller information');
     this.bridgeEventsService.sendEvent('agentSelectedCallerInformation', id);
