@@ -3,10 +3,10 @@ import { LoggerService } from '../logger.service';
 import { StorageService } from '../storage.service';
 @Component({
   selector: 'app-search-information',
-  templateUrl: './search-information-salesforce-app.component.html',
-  styleUrls: ['./search-information-salesforce-app.component.css']
+  templateUrl: './search-information-salesforce.component.html',
+  styleUrls: ['./search-information-salesforce.component.css']
 })
-export class SearchInformationSalesforceAppComponent {
+export class SearchInformationSalesforceComponent {
   @Output() agentSelectedCallerInformation: EventEmitter<any> = new EventEmitter();
   isSearchInformationMaximized: boolean;
   imageLocation: string;
