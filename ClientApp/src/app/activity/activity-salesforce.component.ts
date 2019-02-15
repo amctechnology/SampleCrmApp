@@ -7,10 +7,10 @@ import { LoggerService } from '../logger.service';
 import { StorageService } from '../storage.service';
 @Component({
   selector: 'app-activity',
-  templateUrl: './activity-salesforce-app.component.html',
-  styleUrls: ['./activity-salesforce-app.component.css']
+  templateUrl: './activity-salesforce.component.html',
+  styleUrls: ['./activity-salesforce.component.css']
 })
-export class ActivitySalesforceAppComponent implements OnInit {
+export class ActivitySalesforceComponent implements OnInit {
   @Input() interactionDisconnected: Subject<boolean>;
   @Input() autoSave: Subject<void>;
   @Input() quickCommentList: string[];

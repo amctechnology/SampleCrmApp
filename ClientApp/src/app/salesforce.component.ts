@@ -2,10 +2,10 @@ import { Component, AfterViewChecked, ElementRef } from '@angular/core';
 import * as applicationAPI from '@amc-technology/davinci-api';
 @Component({
   selector: 'app-root',
-  templateUrl: './app-salesforce-app.component.html',
-  styleUrls: ['./app-salesforce-app.component.css']
+  templateUrl: './salesforce.component.html',
+  styleUrls: ['./salesforce.component.css']
 })
-export class AppSalesforceAppComponent implements AfterViewChecked {
+export class SalesforceComponent implements AfterViewChecked {
   height: number;
   el: ElementRef;
   constructor(el: ElementRef) {
