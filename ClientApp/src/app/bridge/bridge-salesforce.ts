@@ -6,7 +6,7 @@ import { IActivity } from '../Model/IActivity';
 import { ICreateNewSObjectParams } from '../Model/ICreateNewSObjectParams';
 declare var sforce: any;
 
-class BridgeSalesforceApp extends Bridge {
+class BridgeSalesforce extends Bridge {
   private isLightning = false;
   private currentOnFocusEvent: ISalesforceClassicOnFocusEvent | ISalesforceLightningOnFocusEvent;
   activity: IActivity = null;
@@ -482,7 +482,7 @@ class BridgeSalesforceApp extends Bridge {
 
 }
 
-const bridge = new BridgeSalesforceApp();
+const bridge = new BridgeSalesforce();
 
 interface IScreenPopObject {
   type: string;

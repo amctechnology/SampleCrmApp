@@ -10,10 +10,10 @@ import { LoggerService } from '../logger.service';
 import { StorageService } from '../storage.service';
 @Component({
   selector: 'app-home',
-  templateUrl: './home-salesforce-app.component.html',
+  templateUrl: './home-salesforce.component.html',
 })
 
-export class HomeSalesforceAppComponent extends Application implements OnInit {
+export class HomeSalesforceComponent extends Application implements OnInit {
   protected interactionDisconnected: Subject<boolean> = new Subject();
   protected autoSave: Subject<void> = new Subject();
   protected phoneNumberFormat: string;

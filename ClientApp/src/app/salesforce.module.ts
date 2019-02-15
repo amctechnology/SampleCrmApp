@@ -4,11 +4,11 @@ import { FormsModule } from '@angular/forms';
 import { HttpClientModule } from '@angular/common/http';
 import { RouterModule } from '@angular/router';
 
-import { AppSalesforceAppComponent } from './app-salesforce-app.component';
-import { HomeSalesforceAppComponent } from './home/home-salesforce-app.component';
-import { ActivitySalesforceAppComponent } from './activity/activity-salesforce-app.component';
-import { CreateSalesforceAppComponent } from './create/create-salesforce-app.component';
-import { SearchInformationSalesforceAppComponent } from './search-information/search-information-salesforce-app.component';
+import { SalesforceComponent } from './salesforce.component';
+import { HomeSalesforceComponent } from './home/home-salesforce.component';
+import { ActivitySalesforceComponent } from './activity/activity-salesforce.component';
+import { CreateSalesforceComponent } from './create/create-salesforce.component';
+import { SearchInformationSalesforceComponent } from './search-information/search-information-salesforce.component';
 import { LoggerService } from './logger.service';
 import { StorageService } from './storage.service';
 import { ConfigurationService } from './configuration.service';
@@ -16,18 +16,18 @@ import { ConfigurationService } from './configuration.service';
 
 @NgModule({
   declarations: [
-    AppSalesforceAppComponent,
-    HomeSalesforceAppComponent,
-    ActivitySalesforceAppComponent,
-    CreateSalesforceAppComponent,
-    SearchInformationSalesforceAppComponent
+    SalesforceComponent,
+    HomeSalesforceComponent,
+    ActivitySalesforceComponent,
+    CreateSalesforceComponent,
+    SearchInformationSalesforceComponent
   ],
   imports: [
     BrowserModule.withServerTransition({ appId: 'ng-cli-universal' }),
     HttpClientModule,
     FormsModule,
     RouterModule.forRoot([
-      { path: '', component: HomeSalesforceAppComponent, pathMatch: 'full' }
+      { path: '', component: HomeSalesforceComponent, pathMatch: 'full' }
     ])
   ],
   providers: [ConfigurationService,
@@ -43,6 +43,6 @@ import { ConfigurationService } from './configuration.service';
     },
     LoggerService,
     StorageService],
-  bootstrap: [AppSalesforceAppComponent]
+  bootstrap: [SalesforceComponent]
 })
 export class AppModule { }
