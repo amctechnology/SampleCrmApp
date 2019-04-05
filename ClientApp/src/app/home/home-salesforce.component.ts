@@ -24,23 +24,32 @@ export class HomeSalesforceComponent extends Application implements OnInit {
     this.storageService.syncWithLocalStorage();
     this.phoneNumberFormat = null;
     this.appName = 'Salesforce';
-    this.bridgeScripts = this.bridgeScripts.concat([
-      this.getBridgeURL(),
-      'https://na53.salesforce.com/support/api/44.0/interaction.js',
-      'https://na53.salesforce.com/support/console/44.0/integration.js',
-      'https://na53.lightning.force.com/support/api/44.0/lightning/opencti_min.js'
-    ]);
     this.loggerService.logger.logDebug('AMCSalesforceHomeComponent: constructor complete');
   }
 
   async ngOnInit() {
+    const config = await api.getConfig();
+
+    let salesforceOrg = 'https://na53.salesforce.com';
+    if (config.variables['salesforceOrg'] !== undefined && config.variables['salesforceOrg'] !== null
+    && String(config.variables['salesforceOrg']).length > 0) {
+      salesforceOrg = String(config.variables['salesforceOrg']);
+    }
+
+    this.bridgeScripts = this.bridgeScripts.concat([
+      this.getBridgeURL(),
+      salesforceOrg + '/support/api/44.0/interaction.js',
+      salesforceOrg + '/support/console/44.0/integration.js',
+      salesforceOrg + '/support/api/44.0/lightning/opencti_min.js'
+    ]);
+
     await super.ngOnInit();
     this.loggerService.logger.logDebug('AMCSalesforceHomeComponent: ngOnInit start');
     this.bridgeEventsService.subscribe('clickToDial', event => {
       api.clickToDial(event.number, this.formatCrmResults(event.records));
     });
     this.bridgeEventsService.subscribe('setActivityDetails', this.setActivityDetails);
-    const config = await api.initializeComplete(this.logger);
+
     this.phoneNumberFormat = String(config.variables['PhoneNumberFormat']).toLowerCase();
     this.quickCommentList = <string[]>config.variables['QuickComments'];
     registerOnLogout(this.removeLocalStorageOnLogout);
