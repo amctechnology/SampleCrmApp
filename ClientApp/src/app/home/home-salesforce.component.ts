@@ -34,13 +34,25 @@ export class HomeSalesforceComponent extends Application implements OnInit {
   }
 
   async ngOnInit() {
+    const config = await api.getConfig();
+
+    if (config.variables['SalesforceOrg'] !== undefined && config.variables['SalesforceOrg'] !== null
+    && String(config.variables['SalesforceOrg']).length > 0) {
+      this.bridgeScripts = this.bridgeScripts.concat([
+        this.getBridgeURL(),
+        String(config.variables['SalesforceOrg']) + '/support/api/44.0/interaction.js',
+        String(config.variables['SalesforceOrg']) + '/support/console/44.0/integration.js',
+        String(config.variables['SalesforceOrg']) + '/support/api/44.0/lightning/opencti_min.js'
+      ]);
+    }
+
     await super.ngOnInit();
     this.loggerService.logger.logDebug('AMCSalesforceHomeComponent: ngOnInit start');
     this.bridgeEventsService.subscribe('clickToDial', event => {
       api.clickToDial(event.number, this.formatCrmResults(event.records));
     });
     this.bridgeEventsService.subscribe('setActivityDetails', this.setActivityDetails);
-    const config = await api.initializeComplete(this.logger);
+
     this.phoneNumberFormat = String(config.variables['PhoneNumberFormat']).toLowerCase();
     this.quickCommentList = <string[]>config.variables['QuickComments'];
     registerOnLogout(this.removeLocalStorageOnLogout);
