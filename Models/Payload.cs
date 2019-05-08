@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 
-namespace Salesforce.Models {
+namespace SalesforceCloudCore.Models {
     public class Payload {
         public string crm { get; set; }
         public AgentWork agentWork { get; set; }
@@ -42,6 +42,16 @@ namespace Salesforce.Models {
         public string davinciPassword { get; set; }
         public Dictionary<string, string> crm { get; set; }
         public Dictionary<string, string> routingEngine { get; set; }
+        public RoutingConfig () { }
+        public RoutingConfig (string appId, string davinciAccountId, string davinciProfileId, string davinciUsername, string davinciPassword, Dictionary<string, string> crm = null, Dictionary<string, string> routingEngine = null) {
+            this.appId = appId;
+            this.davinciAccountId = davinciAccountId;
+            this.davinciProfileId = davinciProfileId;
+            this.davinciUsername = davinciUsername;
+            this.davinciPassword = davinciPassword;
+            this.crm = crm;
+            this.routingEngine = routingEngine;
+        }
     }
     public class WorkItem {
         public string id { get; set; }
@@ -51,5 +61,11 @@ namespace Salesforce.Models {
         public string status { get; set; }
         public string userName { get; set; }
         public string userId { get; set; }
+        Presence () { }
+        public Presence (string status, string username, string userId) {
+            this.status = status;
+            this.userName = username;
+            this.userId = userId;
+        }
     }
 }

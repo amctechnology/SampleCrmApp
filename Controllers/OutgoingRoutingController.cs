@@ -9,16 +9,14 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Clients.ActiveDirectory;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
-using Salesforce.Models;
+using SalesforceCloudCore.Models;
 
-namespace DynamicsApp.Controllers {
+namespace SalesforceCloudCore.Controllers {
     public class OutgoingRoutingController : Controller {
         private static HttpClient httpClient;
         private static string AccessToken;
-        private AppRoutingConfig appRoutingConfig;
-        public OutgoingRoutingController (AppRoutingConfig appRoutingConfig) {
+        public OutgoingRoutingController () {
             httpClient = new HttpClient ();
-            this.appRoutingConfig = appRoutingConfig;
         }
 
         [HttpPost]
@@ -50,7 +48,7 @@ namespace DynamicsApp.Controllers {
 
         public async Task<string> Authenticate (string tenantId, string applicationId, string webKey, string org) {
             ClientCredential credential = new ClientCredential (applicationId, webKey);
-            string authorityUri = appRoutingConfig.dynamicsBaseAuthUri + tenantId;
+            string authorityUri = "" + tenantId;
             TokenCache tokenCache = new TokenCache ();
             AuthenticationContext context = new AuthenticationContext (authorityUri);
             AuthenticationResult result = await context.AcquireTokenAsync (org, credential);

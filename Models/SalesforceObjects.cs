@@ -1,25 +1,38 @@
+using System;
 using System.Collections.Generic;
 
-namespace Salesforce.Models {
+namespace SalesforceCloudCore.Models {
 
     public class SalesforceObjects {
         public class Presence {
-            string Id { get; set; }
-            string UserId { get; set; }
-            string ServicePresenceStatusId { get; set; }
+            public string Id { get; set; }
+            public string UserId { get; set; }
+            public string ServicePresenceStatusId { get; set; }
         }
         public class PendingServiceRouting {
-            string Id { get; set; }
-            string QueueId { get; set; }
-            string WorkItemId { get; set; }
-            string IsPushed { get; set; }
-            string ServiceChannelId { get; set; }
-            string LastDeclinedAgentSession { get; set; }
+            public string Id { get; set; }
+            public string QueueId { get; set; }
+            public string WorkItemId { get; set; }
+            public string IsPushed { get; set; }
+            public string ServiceChannelId { get; set; }
+            public string LastDeclinedAgentSession { get; set; }
         }
         public class AgentWork {
-            string Id { get; set; }
-            string Status { get; set; }
-            string WorkItemId { get; set; }
+            public string Id { get; set; }
+            public string Status { get; set; }
+            public string WorkItemId { get; set; }
+        }
+        public class ServicePresenceStatus {
+            public string Id { get; set; }
+            public bool IsDeleted { get; set; }
+            public string DeveloperName { get; set; }
+            public string Language { get; set; }
+            public string MasterLabel { get; set; }
+            public DateTime CreatedDate { get; set; }
+            public string CreatedById { get; set; }
+            public DateTime LastModifiedDate { get; set; }
+            public string LastModifiedById { get; set; }
+            public DateTime SystemModstamp { get; set; }
         }
 
     }
