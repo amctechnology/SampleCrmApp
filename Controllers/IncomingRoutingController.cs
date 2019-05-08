@@ -18,49 +18,55 @@ using SalesforceCloudCore.Models;
 namespace SalesforceCloudCore.Controllers {
     [AllowAnonymous]
     public class IncomingRoutingController : Controller {
-        private const string CLIENT_ID = "3MVG9oNqAtcJCF.Flzk4LQzXBamstCErrRDeF6K2e9fnHetMBwW8VHXxj8Gn5Leqx4zus.aCOcBQR6ld_cM7n";
-        private const string CLIENT_SECRET = "F8C05DF2D80077D5D59F9A64BEAC16EC0997C2144C50D111F2B551808094ADF3";
-        private const string CLIENT_USERNAME = "mvandenesse@amctechnology.com";
-        private const string CLIENT_PASSWORD = "Interns2019CHjJDszbMIk6VdZJW6L01oORr";
+        private AppRoutingConfig appRoutingConfig;
         private static HttpClient httpClient;
-        public IncomingRoutingController () {
+        public IncomingRoutingController (AppRoutingConfig appRoutingConfig) {
             httpClient = new HttpClient ();
+            this.appRoutingConfig = appRoutingConfig;
         }
 
         [HttpPost]
         public async Task<IActionResult> Index ([FromBody] PushTopic PushTopic) {
             try {
                 HttpContent HttpContent = null;
-                if (PushTopic.EventType == "presence") {
-                    SalesforceObjects.Presence Presence = JsonConvert.DeserializeObject<SalesforceObjects.Presence> (JsonConvert.SerializeObject (PushTopic.SObject));
-                    AuthenticationResponse AuthenticationResponse = await this.Authenticate ();
-                    if (AuthenticationResponse.access_token == null) {
-                        return StatusCode (401, "Authentication with Salesforce failed!");
-                    } else {
+                AuthenticationResponse AuthenticationResponse = await this.Authenticate (PushTopic);
+                if (AuthenticationResponse.access_token == null) {
+                    return StatusCode (401, "Authentication with Salesforce failed!");
+                } else {
+                    Payload Payload = new Payload ();
+                    Payload.config = new RoutingConfig (PushTopic.Config.appId, PushTopic.Config.davinciAccountId, PushTopic.Config.davinciProfileId, PushTopic.Config.davinciUsername, PushTopic.Config.davinciPassword);
+                    if (PushTopic.EventType == "presence") {
+                        SalesforceObjects.Presence Presence = JsonConvert.DeserializeObject<SalesforceObjects.Presence> (JsonConvert.SerializeObject (PushTopic.SObject));
                         SalesforceObjects.ServicePresenceStatus ServicePresenceStatus = await this.RetrievePresenceName (AuthenticationResponse, Presence);
-                        Dictionary<string, string> User = await this.RetrieveUser (AuthenticationResponse, Presence);
-                        Payload Payload = new Payload ();
-                        Payload.presence = new Presence (ServicePresenceStatus.MasterLabel, User["Name"], Presence.UserId);
-                        Payload.config = new RoutingConfig (PushTopic.Config.appId, PushTopic.Config.davinciAccountId, PushTopic.Config.davinciProfileId, PushTopic.Config.davinciUsername, PushTopic.Config.davinciPassword);
+                        Dictionary<string, object> User = await this.RetrieveUser (AuthenticationResponse, Presence);
+                        Payload.presence = new Presence (ServicePresenceStatus.MasterLabel, User["Name"].ToString (), Presence.UserId);
                         string Content = JsonConvert.SerializeObject (Payload);
                         HttpContent = new StringContent (Content, Encoding.UTF8, "application/json");
+                    } else if (PushTopic.EventType == "pending_service_routing") {
+                        SalesforceObjects.PendingServiceRouting PendingServiceRouting = JsonConvert.DeserializeObject<SalesforceObjects.PendingServiceRouting> (JsonConvert.SerializeObject (PushTopic.SObject));
+                        string SObjectPrefix = PendingServiceRouting.WorkItemId.Substring (0, 3);
+                        Dictionary<string, string> PrefixList = await this.RetrieveSObjects (AuthenticationResponse);
+                        string SObjectType = PrefixList.Where (Prefix => Prefix.Key == SObjectPrefix).FirstOrDefault ().Value;
+                        WorkItem WorkItem = new WorkItem (PendingServiceRouting.WorkItemId, SObjectType);
+                        PendingWork PendingWork = new PendingWork (PendingServiceRouting.Id, PendingServiceRouting.CreatedDate.ToString (), PendingServiceRouting.LastModifiedDate.ToString (), "create", WorkItem);
+                        Payload.pendingWork = PendingWork;
+                        string Content = JsonConvert.SerializeObject (Payload);
+                        HttpContent = new StringContent (Content, Encoding.UTF8, "application/json");
+                    } else if (PushTopic.EventType == "agent_work") {
+
                     }
-                } else if (PushTopic.EventType == "pending_service_routing") {
-
-                } else if (PushTopic.EventType == "agent_work") {
-
+                    var response = httpClient.PostAsync (appRoutingConfig.cloudRoutingUri, HttpContent);
                 }
-                var response = httpClient.PostAsync ("3", HttpContent);
             } catch (Exception ex) {
                 return StatusCode (500, ex.Message);
             }
             return Ok ();
         }
-        public async Task<AuthenticationResponse> Authenticate () {
+        public async Task<AuthenticationResponse> Authenticate (PushTopic PushTopic) {
             try {
                 HttpRequestMessage Authenticate =
                     new HttpRequestMessage (HttpMethod.Post, "https://login.salesforce.com/services/oauth2/token");
-                var AuthString = "grant_type=password&client_id=" + CLIENT_ID + "&client_secret=" + CLIENT_SECRET + "&username=" + CLIENT_USERNAME + "&password=" + CLIENT_PASSWORD;
+                var AuthString = "grant_type=password&client_id=" + PushTopic.Config.ClientId + "&client_secret=" + PushTopic.Config.ClientSecret + "&username=" + PushTopic.Config.ClientUsername + "&password=" + PushTopic.Config.ClientAuth;
                 var httpContent = new StringContent (AuthString, Encoding.UTF8, "application/x-www-form-urlencoded");
                 Authenticate.Content = httpContent;
                 HttpResponseMessage AuthenticateResponse =
@@ -86,14 +92,53 @@ namespace SalesforceCloudCore.Controllers {
                 throw ex;
             }
         }
-        public async Task<Dictionary<string, string>> RetrieveUser (AuthenticationResponse Auth, SalesforceObjects.Presence presence) {
+        public async Task<Dictionary<string, string>> RetrieveSObjects (AuthenticationResponse Auth) {
+            try {
+                HttpRequestMessage RetrieveSObjects =
+                    new HttpRequestMessage (HttpMethod.Get, Auth.instance_url + "/services/data/v45.0/sobjects/");
+                RetrieveSObjects.Headers.Authorization = new AuthenticationHeaderValue ("Bearer", Auth.access_token);
+                HttpResponseMessage RetrieveSObjectsResponse =
+                    await httpClient.SendAsync (RetrieveSObjects);
+                Dictionary<string, object> SObjectsPayload = JsonConvert.DeserializeObject<Dictionary<string, object>> (
+                    await RetrieveSObjectsResponse.Content.ReadAsStringAsync ());
+                Dictionary<string, object>[] SObjects = JsonConvert.DeserializeObject<Dictionary<string, object>[]> (
+                    SObjectsPayload["sobjects"].ToString ());
+                return this.GeneratePrefixList (SObjects);
+            } catch (Exception ex) {
+                throw ex;
+            }
+        }
+        public Dictionary<string, string> GeneratePrefixList (Dictionary<string, object>[] SObjects) {
+            Dictionary<string, string> PrefixList = new Dictionary<string, string> ();
+            foreach (var SObject in SObjects) {
+                try {
+                    PrefixList.Add (SObject["keyPrefix"].ToString (), SObject["name"].ToString ());
+                } catch (Exception ex) { }
+            }
+            return PrefixList;
+        }
+        public async Task<Dictionary<string, object>> RetrieveSObject (AuthenticationResponse Auth, string Type, string Id) {
+            try {
+                HttpRequestMessage RetrieveSObject =
+                    new HttpRequestMessage (HttpMethod.Get, Auth.instance_url + "/services/data/v45.0/sobjects/" + Type + "/" + Id);
+                RetrieveSObject.Headers.Authorization = new AuthenticationHeaderValue ("Bearer", Auth.access_token);
+                HttpResponseMessage RetrieveSObjectResponse =
+                    await httpClient.SendAsync (RetrieveSObject);
+                Dictionary<string, object> SObject = JsonConvert.DeserializeObject<Dictionary<string, object>> (
+                    await RetrieveSObjectResponse.Content.ReadAsStringAsync ());
+                return SObject;
+            } catch (Exception ex) {
+                throw ex;
+            }
+        }
+        public async Task<Dictionary<string, object>> RetrieveUser (AuthenticationResponse Auth, SalesforceObjects.Presence presence) {
             try {
                 HttpRequestMessage RetrieveUser =
                     new HttpRequestMessage (HttpMethod.Get, Auth.instance_url + "/services/data/v45.0/sobjects/User/" + presence.UserId);
                 RetrieveUser.Headers.Authorization = new AuthenticationHeaderValue ("Bearer", Auth.access_token);
                 HttpResponseMessage RetrieveUserResponse =
                     await httpClient.SendAsync (RetrieveUser);
-                Dictionary<string, string> User = JsonConvert.DeserializeObject<Dictionary<string, string>> (
+                Dictionary<string, object> User = JsonConvert.DeserializeObject<Dictionary<string, object>> (
                     await RetrieveUserResponse.Content.ReadAsStringAsync ());
                 return User;
             } catch (Exception ex) {
@@ -117,5 +162,6 @@ namespace SalesforceCloudCore.Controllers {
             public string issued_at { get; set; }
             public string signature { get; set; }
         }
+
     }
 }

@@ -22,23 +22,16 @@ namespace SalesforceCloudCore.Controllers {
         [HttpPost]
         public async Task<IActionResult> Index ([FromBody] Payload payload) {
             try {
-                string tenantId = payload.config.crm["TenantId"];
-                string applicationId = payload.config.crm["ApplicationId"];
-                string webKey = payload.config.crm["WebKey"];
-                string org = payload.config.crm["DynamicsOrg"];
-                string baseApiUrl = payload.config.crm["DynamicsOrg"] + "api/data/v9.0/";
-                if (payload.agentWork != null) {
-                    Log ("Agent Work", "Outgoing Routing", JsonConvert.SerializeObject (payload.agentWork));
-                    JObject agentWork = new JObject ();
-                    agentWork.Add ("new_workitemid", payload.agentWork.workItem.id);
-                    agentWork.Add ("new_isengaged", false);
-                    agentWork.Add ("new_workitemtype", payload.agentWork.workItem.type);
-                    agentWork.Add ("new_OriginQueue_new_omnichannel_work@odata.bind", "/queues(" + payload.config.crm["QueueId"] + ")");
-                    agentWork.Add ("new_haspopped", false);
-                    AccessToken = await Authenticate (tenantId, applicationId, webKey, org);
-                    CreateWork (baseApiUrl, agentWork);
-                    string userQueueId = await retrieveAgentQueueId (baseApiUrl, payload.agentWork.userId);
-                    string queueItemId = await CreateQueueItem (baseApiUrl, userQueueId, payload.agentWork.workItem.type.ToLower (), payload.agentWork.workItem.id);
+                HttpContent HttpContent = null;
+                SalesforceAuthParams SalesforceAuth = JsonConvert.DeserializeObject<SalesforceAuthParams> (JsonConvert.SerializeObject (payload.config.routingEngine));
+                AuthenticationResponse AuthenticationResponse = await this.Authenticate (SalesforceAuth);
+                if (AuthenticationResponse.access_token == null) {
+                    return StatusCode (401, "Authentication with Salesforce failed!");
+                } else {
+                    if (payload.agentWork != null) {
+                        Log ("Agent Work", "Outgoing Routing", JsonConvert.SerializeObject (payload.agentWork));
+
+                    }
                 }
             } catch (HttpRequestException ex) {
                 return StatusCode (500, ex.Message);
@@ -46,63 +39,51 @@ namespace SalesforceCloudCore.Controllers {
             return Ok ();
         }
 
-        public async Task<string> Authenticate (string tenantId, string applicationId, string webKey, string org) {
-            ClientCredential credential = new ClientCredential (applicationId, webKey);
-            string authorityUri = "" + tenantId;
-            TokenCache tokenCache = new TokenCache ();
-            AuthenticationContext context = new AuthenticationContext (authorityUri);
-            AuthenticationResult result = await context.AcquireTokenAsync (org, credential);
-            return result.AccessToken;
-        }
-        public async void CreateWork (string baseApiUrl, JObject agentWork) {
+        public async Task<AuthenticationResponse> Authenticate (SalesforceAuthParams SalesforceAuth) {
             try {
-                HttpRequestMessage CreateWork =
-                    new HttpRequestMessage (HttpMethod.Post, baseApiUrl + "new_omnichannel_works");
-                CreateWork.Headers.Authorization = new AuthenticationHeaderValue ("Bearer", AccessToken);
-                string content = JsonConvert.SerializeObject (agentWork);
-                var httpContent = new StringContent (content, Encoding.UTF8, "application/json");
+                HttpRequestMessage Authenticate =
+                    new HttpRequestMessage (HttpMethod.Post, "https://login.salesforce.com/services/oauth2/token");
+                var AuthString = "grant_type=password&client_id=" + SalesforceAuth.ClientId + "&client_secret=" + SalesforceAuth.ClientSecret + "&username=" + SalesforceAuth.ClientUsername + "&password=" + SalesforceAuth.ClientAuth;
+                var httpContent = new StringContent (AuthString, Encoding.UTF8, "application/x-www-form-urlencoded");
+                Authenticate.Content = httpContent;
+                HttpResponseMessage AuthenticateResponse =
+                    await httpClient.SendAsync (Authenticate);
+                AuthenticationResponse Auth = JsonConvert.DeserializeObject<AuthenticationResponse> (
+                    await AuthenticateResponse.Content.ReadAsStringAsync ());
+                return Auth;
+            } catch (Exception ex) {
+                throw ex;
+            }
+        }
+        public async Task<Dictionary<string, object>> RetrievePendingServiceRouting (AuthenticationResponse Auth, PendingWork PendingWork) {
+            try {
+                HttpRequestMessage RetrievePendingServiceRouting =
+                    new HttpRequestMessage (HttpMethod.Get, Auth.instance_url + "/services/data/v45.0/sobjects/PendingServiceRouting/" + PendingWork.id);
+                RetrievePendingServiceRouting.Headers.Authorization = new AuthenticationHeaderValue ("Bearer", Auth.access_token);
+                HttpResponseMessage RetrievePendingServiceRoutingResponse =
+                    await httpClient.SendAsync (RetrievePendingServiceRouting);
+                Dictionary<string, object> PendingServiceRouting = JsonConvert.DeserializeObject<Dictionary<string, object>> (
+                    await RetrievePendingServiceRoutingResponse.Content.ReadAsStringAsync ());
+                return PendingServiceRouting;
+            } catch (Exception ex) {
+                throw ex;
+            }
+        }
+        public CreateAgentWork (AuthenticationResponse Auth, AgentWork AgentWork, Dictionary<string, object> PendingServiceRouting) {
+            try {
+                string SObjectType = AgentWork.workItem.type;
+                PendingWork PendingWork = AgentWork.pendingWork;
+                HttpRequestMessage RetrievePresenceName =
+                    new HttpRequestMessage (HttpMethod.Post, Auth.instance_url + "/services/data/v45.0/sobjects/" + SObjectType);
+                RetrievePresenceName.Headers.Authorization = new AuthenticationHeaderValue ("Bearer", Auth.access_token);
+                NewAgentWorkParams NewAgentWorkParams = NewAgentWorkParams (PendingWork.id, )
+                string Content = JsonConvert.SerializeObject (agentWork);
+                var HttpContent = new StringContent (content, Encoding.UTF8, "application/json");
                 CreateWork.Content = httpContent;
-                HttpResponseMessage CreateWorkResponse =
-                    await httpClient.SendAsync (CreateWork);
-            } catch (Exception ex) {
-                throw ex;
-            }
-        }
-        public async Task<string> CreateQueueItem (string baseApiUrl, string userQueueId, string type, string workItemId) {
-            try {
-                HttpRequestMessage CreateQueueItem =
-                    new HttpRequestMessage (HttpMethod.Post, baseApiUrl + "queues(" + userQueueId + ")/Microsoft.Dynamics.CRM.AddToQueue");
-                CreateQueueItem.Headers.Authorization = new AuthenticationHeaderValue ("Bearer", AccessToken);
-                JObject queueItem = new JObject ();
-                JObject Target = new JObject ();
-                JObject QueueItemProperties = new JObject ();
-                Target.Add (type + "id", workItemId);
-                QueueItemProperties.Add ("new_isomnichannelqueueitem", true);
-                Target.Add ("@odata.type", "Microsoft.Dynamics.CRM." + type);
-                queueItem.Add ("Target", Target);
-                queueItem.Add ("QueueItemProperties", QueueItemProperties);
-                string content = JsonConvert.SerializeObject (queueItem);
-                var httpContent = new StringContent (content, Encoding.UTF8, "application/json");
-                CreateQueueItem.Content = httpContent;
-                HttpResponseMessage CreateQueueItemResponse =
-                    await httpClient.SendAsync (CreateQueueItem);
-                JObject RetrievedUser = JsonConvert.DeserializeObject<JObject> (
-                    await CreateQueueItemResponse.Content.ReadAsStringAsync ());
-                return RetrievedUser.GetValue ("QueueItemId").ToString ();
-            } catch (Exception ex) {
-                throw ex;
-            }
-        }
-        public async Task<string> retrieveAgentQueueId (string baseApiUrl, string userId) {
-            try {
-                HttpRequestMessage RetrieveUser =
-                    new HttpRequestMessage (HttpMethod.Get, baseApiUrl + "systemusers(" + userId + ")");
-                RetrieveUser.Headers.Authorization = new AuthenticationHeaderValue ("Bearer", AccessToken);
-                HttpResponseMessage RetrieveUserResponse =
-                    await httpClient.SendAsync (RetrieveUser);
-                JObject RetrievedUser = JsonConvert.DeserializeObject<JObject> (
-                    await RetrieveUserResponse.Content.ReadAsStringAsync ());
-                return RetrievedUser.GetValue ("_queueid_value").ToString ();
+                HttpResponseMessage RetrievePresenceNameResponse =
+                    await httpClient.SendAsync (RetrievePresenceName);
+                SalesforceObjects.ServicePresenceStatus ServicePresenceStatus = JsonConvert.DeserializeObject<SalesforceObjects.ServicePresenceStatus> (
+                    await RetrievePresenceNameResponse.Content.ReadAsStringAsync ());
             } catch (Exception ex) {
                 throw ex;
             }
@@ -115,6 +96,40 @@ namespace SalesforceCloudCore.Controllers {
                 Console.WriteLine ("{0}: {1}", pair.Key, pair.Value);
             }
             Console.Write ("\n");
+        }
+        public class AuthenticationResponse {
+            public string access_token { get; set; }
+            public string instance_url { get; set; }
+            public string id { get; set; }
+            public string token_type { get; set; }
+            public string issued_at { get; set; }
+            public string signature { get; set; }
+        }
+        public class SalesforceAuthParams {
+            [JsonProperty (PropertyName = "ClientId")]
+            public string ClientId { get; set; }
+
+            [JsonProperty (PropertyName = "ClientSecret")]
+            public string ClientSecret { get; set; }
+
+            [JsonProperty (PropertyName = "ClientUsername")]
+            public string ClientUsername { get; set; }
+
+            [JsonProperty (PropertyName = "ClientAuth")]
+            public string ClientAuth { get; set; }
+        }
+        public class NewAgentWorkParams {
+            public string PendingServiceRoutingId { get; set; }
+            public string ServiceChannelId { get; set; }
+            public string UserId { get; set; }
+            public string WorkItemId { get; set; }
+            public NewAgentWorkParams () { }
+            public NewAgentWorkParams (string PendingServiceRoutingId, string ServiceChannelId, string UserId, string WorkItemId) {
+                this.PendingServiceRoutingId = PendingServiceRoutingId;
+                this.ServiceChannelId = ServiceChannelId;
+                this.UserId = UserId;
+                this.WorkItemId = WorkItemId;
+            }
         }
     }
 }

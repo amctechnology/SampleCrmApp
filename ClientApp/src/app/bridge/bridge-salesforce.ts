@@ -45,8 +45,10 @@ class BridgeSalesforce extends Bridge {
       this.eventService.sendEvent('logDebug', 'bridge: App running in lightning');
     } else {
       this.eventService.sendEvent('logDebug', 'bridge: App running in classic');
+      this.eventService.sendEvent('logDebug', 'bridge: App running in classic');
     }
   }
+
   @bind
   protected buildLayoutObjectList(result) {
     if (this.isLightning) {

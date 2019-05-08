@@ -17,6 +17,7 @@ namespace SalesforceCloudCore.Models {
         public WorkItem workItem { get; set; }
         public string userName { get; set; }
         public string userId { get; set; }
+        public PendingWork pendingWork { get; set; }
     }
     public class AgentWorkStatus {
         public bool accept { get; set; } = false;
@@ -33,6 +34,14 @@ namespace SalesforceCloudCore.Models {
         public string modifiedOn { get; set; }
         public string operation { get; set; }
         public WorkItem workItem { get; set; }
+        public PendingWork () { }
+        public PendingWork (string id, string createdOn, string modifiedOn, string operation, WorkItem workItem) {
+            this.id = id;
+            this.createdOn = createdOn;
+            this.modifiedOn = modifiedOn;
+            this.operation = operation;
+            this.workItem = workItem;
+        }
     }
     public class RoutingConfig {
         public string appId { get; set; }
@@ -56,6 +65,11 @@ namespace SalesforceCloudCore.Models {
     public class WorkItem {
         public string id { get; set; }
         public string type { get; set; }
+        public WorkItem () { }
+        public WorkItem (string id, string type) {
+            this.id = id;
+            this.type = type;
+        }
     }
     public class Presence {
         public string status { get; set; }

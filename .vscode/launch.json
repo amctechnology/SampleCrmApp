@@ -34,7 +34,8 @@
         "USE_AUTH": "false",
         "AUTH_PROVIDER_URL": "https://api-dev.contactcanvas.com",
         "AUTH_COOKIE_DOMAIN": "contactcanvas.com",
-        "ClientConfiguration:ApiUrl": "https://api-dev.contactcanvas.com"
+        "ClientConfiguration:ApiUrl": "https://api-dev.contactcanvas.com",
+        "CLOUD_ROUTING_URI": "https://cloudroutingservice-dev.contactcanvas.com/incomingrouting"
       },
       "sourceFileMap": {
         "/Views": "${workspaceFolder}/Views"

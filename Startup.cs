@@ -27,6 +27,9 @@ namespace Salesforce {
 
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices (IServiceCollection services) {
+            AppRoutingConfig appRoutingConfig = new AppRoutingConfig ();
+            appRoutingConfig.cloudRoutingUri = Environment.GetEnvironmentVariable ("CLOUD_ROUTING_URI");
+            services.AddSingleton<AppRoutingConfig> (appRoutingConfig);
             services.AddOptions ();
             services.Configure<ClientConfiguration> (Configuration.GetSection ("ClientConfiguration"));
             services.AddMvc ();
@@ -56,30 +59,23 @@ namespace Salesforce {
             }
 
             // Check auth of user
-            bool useAuth = IsProduction() || Environment.GetEnvironmentVariable("USE_AUTH") == "true";
-            app.Use(async (context, next) =>
-            {
+            bool useAuth = IsProduction () || Environment.GetEnvironmentVariable ("USE_AUTH") == "true";
+            app.Use (async (context, next) => {
 
-                if (useAuth)
-                {
-                    var authTicket = CustomJwtDataFormat.Unprotect(context.Request.Cookies["access_token"]);
+                if (useAuth) {
+                    var authTicket = CustomJwtDataFormat.Unprotect (context.Request.Cookies["access_token"]);
 
-                    if (authTicket != null && (authTicket.Principal.IsInRole("Agent") || authTicket.Principal.IsInRole("Admin") || authTicket.Principal.IsInRole("AMC-Admin")))
-                    {
-                        await next.Invoke();
+                    if (authTicket != null && (authTicket.Principal.IsInRole ("Agent") || authTicket.Principal.IsInRole ("Admin") || authTicket.Principal.IsInRole ("AMC-Admin"))) {
+                        await next.Invoke ();
+                    } else {
+                        context.Response.StatusCode = (int) HttpStatusCode.Forbidden;
                     }
-                    else
-                    {
-                        context.Response.StatusCode = (int)HttpStatusCode.Forbidden;
-                    }
-                }
-                else
-                {
-                    context.User = new ClaimsPrincipal();
-                    var Id = new ClaimsIdentity();
-                    Id.AddClaim(new Claim(ClaimTypes.Role, "Agent"));
-                    context.User.AddIdentity(Id);
-                    await next.Invoke();
+                } else {
+                    context.User = new ClaimsPrincipal ();
+                    var Id = new ClaimsIdentity ();
+                    Id.AddClaim (new Claim (ClaimTypes.Role, "Agent"));
+                    context.User.AddIdentity (Id);
+                    await next.Invoke ();
                 }
             });
 

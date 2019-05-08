@@ -16,11 +16,14 @@ namespace SalesforceCloudCore.Models {
             public string IsPushed { get; set; }
             public string ServiceChannelId { get; set; }
             public string LastDeclinedAgentSession { get; set; }
+            public DateTime CreatedDate { get; set; }
+            public DateTime LastModifiedDate { get; set; }
         }
         public class AgentWork {
             public string Id { get; set; }
             public string Status { get; set; }
             public string WorkItemId { get; set; }
+            public string PendingWorkId { get; set; }
         }
         public class ServicePresenceStatus {
             public string Id { get; set; }
@@ -34,6 +37,5 @@ namespace SalesforceCloudCore.Models {
             public string LastModifiedById { get; set; }
             public DateTime SystemModstamp { get; set; }
         }
-
     }
 }

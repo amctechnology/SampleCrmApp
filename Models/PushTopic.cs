@@ -43,10 +43,18 @@ namespace SalesforceCloudCore.Models {
         [JsonProperty (PropertyName = "davinciPassword")]
         public string davinciPassword { get; set; }
 
-        [JsonProperty (PropertyName = "crm")]
-        public Dictionary<string, string> crm { get; set; }
-
-        [JsonProperty (PropertyName = "routingEngine")]
         public Dictionary<string, string> routingEngine { get; set; }
+
+        [JsonProperty (PropertyName = "ClientId")]
+        public string ClientId { get; set; }
+
+        [JsonProperty (PropertyName = "ClientSecret")]
+        public string ClientSecret { get; set; }
+
+        [JsonProperty (PropertyName = "ClientUsername")]
+        public string ClientUsername { get; set; }
+
+        [JsonProperty (PropertyName = "ClientAuth")]
+        public string ClientAuth { get; set; }
     }
 }
