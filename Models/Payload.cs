@@ -17,7 +17,18 @@ namespace SalesforceCloudCore.Models {
         public WorkItem workItem { get; set; }
         public string userName { get; set; }
         public string userId { get; set; }
-        public PendingWork pendingWork { get; set; }
+        public AgentWork () { }
+        public AgentWork (string id, string createdOn, string modifiedOn, string operation, AgentWorkStatus status, WorkItem workItem, string username, string userId) {
+            this.id = id;
+            this.createdOn = createdOn;
+            this.modifiedOn = modifiedOn;
+            this.operation = operation;
+            this.status = status;
+            this.workItem = workItem;
+            this.userName = username;
+            this.userId = userId;
+
+        }
     }
     public class AgentWorkStatus {
         public bool accept { get; set; } = false;

@@ -20,17 +20,18 @@ namespace SalesforceCloudCore.Controllers {
         }
 
         [HttpPost]
-        public async Task<IActionResult> Index ([FromBody] Payload payload) {
+        public async Task<IActionResult> Index ([FromBody] Payload Payload) {
             try {
                 HttpContent HttpContent = null;
-                SalesforceAuthParams SalesforceAuth = JsonConvert.DeserializeObject<SalesforceAuthParams> (JsonConvert.SerializeObject (payload.config.routingEngine));
+                SalesforceAuthParams SalesforceAuth = JsonConvert.DeserializeObject<SalesforceAuthParams> (JsonConvert.SerializeObject (Payload.config.crm));
                 AuthenticationResponse AuthenticationResponse = await this.Authenticate (SalesforceAuth);
                 if (AuthenticationResponse.access_token == null) {
                     return StatusCode (401, "Authentication with Salesforce failed!");
                 } else {
-                    if (payload.agentWork != null) {
-                        Log ("Agent Work", "Outgoing Routing", JsonConvert.SerializeObject (payload.agentWork));
-
+                    if (Payload.agentWork != null) {
+                        Log ("Agent Work", "Outgoing Routing", JsonConvert.SerializeObject (Payload.agentWork));
+                        Dictionary<string, object> PendingServiceRouting = await this.RetrievePendingServiceRouting (AuthenticationResponse, Payload.agentWork.id);
+                        var response = await this.CreateAgentWork (AuthenticationResponse, Payload.agentWork, PendingServiceRouting);
                     }
                 }
             } catch (HttpRequestException ex) {
@@ -55,10 +56,10 @@ namespace SalesforceCloudCore.Controllers {
                 throw ex;
             }
         }
-        public async Task<Dictionary<string, object>> RetrievePendingServiceRouting (AuthenticationResponse Auth, PendingWork PendingWork) {
+        public async Task<Dictionary<string, object>> RetrievePendingServiceRouting (AuthenticationResponse Auth, string Id) {
             try {
                 HttpRequestMessage RetrievePendingServiceRouting =
-                    new HttpRequestMessage (HttpMethod.Get, Auth.instance_url + "/services/data/v45.0/sobjects/PendingServiceRouting/" + PendingWork.id);
+                    new HttpRequestMessage (HttpMethod.Get, Auth.instance_url + "/services/data/v45.0/sobjects/PendingServiceRouting/" + Id);
                 RetrievePendingServiceRouting.Headers.Authorization = new AuthenticationHeaderValue ("Bearer", Auth.access_token);
                 HttpResponseMessage RetrievePendingServiceRoutingResponse =
                     await httpClient.SendAsync (RetrievePendingServiceRouting);
@@ -69,21 +70,20 @@ namespace SalesforceCloudCore.Controllers {
                 throw ex;
             }
         }
-        public CreateAgentWork (AuthenticationResponse Auth, AgentWork AgentWork, Dictionary<string, object> PendingServiceRouting) {
+        public async Task<Dictionary<string, object>> CreateAgentWork (AuthenticationResponse Auth, AgentWork AgentWork, Dictionary<string, object> PendingServiceRouting) {
             try {
-                string SObjectType = AgentWork.workItem.type;
-                PendingWork PendingWork = AgentWork.pendingWork;
-                HttpRequestMessage RetrievePresenceName =
-                    new HttpRequestMessage (HttpMethod.Post, Auth.instance_url + "/services/data/v45.0/sobjects/" + SObjectType);
-                RetrievePresenceName.Headers.Authorization = new AuthenticationHeaderValue ("Bearer", Auth.access_token);
-                NewAgentWorkParams NewAgentWorkParams = NewAgentWorkParams (PendingWork.id, )
-                string Content = JsonConvert.SerializeObject (agentWork);
-                var HttpContent = new StringContent (content, Encoding.UTF8, "application/json");
-                CreateWork.Content = httpContent;
-                HttpResponseMessage RetrievePresenceNameResponse =
-                    await httpClient.SendAsync (RetrievePresenceName);
-                SalesforceObjects.ServicePresenceStatus ServicePresenceStatus = JsonConvert.DeserializeObject<SalesforceObjects.ServicePresenceStatus> (
-                    await RetrievePresenceNameResponse.Content.ReadAsStringAsync ());
+                HttpRequestMessage CreateAgentWork =
+                    new HttpRequestMessage (HttpMethod.Post, Auth.instance_url + "/services/data/v45.0/sobjects/AgentWork/");
+                CreateAgentWork.Headers.Authorization = new AuthenticationHeaderValue ("Bearer", Auth.access_token);
+                NewAgentWorkParams NewAgentWorkParams = new NewAgentWorkParams (PendingServiceRouting["Id"].ToString (), PendingServiceRouting["ServiceChannelId"].ToString (), AgentWork.userId, PendingServiceRouting["WorkItemId"].ToString ());
+                string Content = JsonConvert.SerializeObject (NewAgentWorkParams);
+                var HttpContent = new StringContent (Content, Encoding.UTF8, "application/json");
+                CreateAgentWork.Content = HttpContent;
+                HttpResponseMessage CreateAgentWorkResponse =
+                    await httpClient.SendAsync (CreateAgentWork);
+                Dictionary<string, object> response = JsonConvert.DeserializeObject<Dictionary<string, object>> (
+                    await CreateAgentWorkResponse.Content.ReadAsStringAsync ());
+                return response;
             } catch (Exception ex) {
                 throw ex;
             }

@@ -21,9 +21,11 @@ namespace SalesforceCloudCore.Models {
         }
         public class AgentWork {
             public string Id { get; set; }
-            public string Status { get; set; }
+            public int Status { get; set; }
             public string WorkItemId { get; set; }
-            public string PendingWorkId { get; set; }
+            public DateTime CreatedDate { get; set; }
+            public DateTime LastModifiedDate { get; set; }
+            public string UserId { get; set; }
         }
         public class ServicePresenceStatus {
             public string Id { get; set; }
