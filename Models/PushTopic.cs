@@ -45,16 +45,16 @@ namespace SalesforceCloudCore.Models {
 
         public Dictionary<string, string> routingEngine { get; set; }
 
-        [JsonProperty (PropertyName = "ClientId")]
+        [JsonProperty (PropertyName = "clientId")]
         public string ClientId { get; set; }
 
-        [JsonProperty (PropertyName = "ClientSecret")]
+        [JsonProperty (PropertyName = "clientSecret")]
         public string ClientSecret { get; set; }
 
-        [JsonProperty (PropertyName = "ClientUsername")]
+        [JsonProperty (PropertyName = "clientUsername")]
         public string ClientUsername { get; set; }
 
-        [JsonProperty (PropertyName = "ClientAuth")]
+        [JsonProperty (PropertyName = "clientAuth")]
         public string ClientAuth { get; set; }
     }
 }
