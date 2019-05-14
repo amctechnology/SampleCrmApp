@@ -2,7 +2,11 @@ import { Component, OnInit } from '@angular/core';
 import * as api from '@amc-technology/davinci-api';
 import { Application } from '@amc-technology/applicationangularframework';
 import { bind } from 'bind-decorator';
-import { IInteraction, registerOnLogout, ChannelTypes } from '@amc-technology/davinci-api';
+import {
+  IInteraction,
+  registerOnLogout,
+  ChannelTypes
+} from '@amc-technology/davinci-api';
 import { Subject } from 'rxjs/Subject';
 import { IActivity } from '../Model/IActivity';
 import { ICreateNewSObjectParams } from '../Model/ICreateNewSObjectParams';
@@ -10,30 +14,38 @@ import { LoggerService } from '../logger.service';
 import { StorageService } from '../storage.service';
 @Component({
   selector: 'app-home',
-  templateUrl: './home-salesforce.component.html',
+  templateUrl: './home-salesforce.component.html'
 })
-
 export class HomeSalesforceComponent extends Application implements OnInit {
   protected interactionDisconnected: Subject<boolean> = new Subject();
   protected autoSave: Subject<void> = new Subject();
   protected phoneNumberFormat: string;
   protected quickCommentList: string[];
-  constructor(private loggerService: LoggerService, protected storageService: StorageService) {
+  constructor(
+    private loggerService: LoggerService,
+    protected storageService: StorageService
+  ) {
     super(loggerService.logger);
-    this.loggerService.logger.logDebug('AMCSalesforceHomeComponent: constructor start');
+    this.loggerService.logger.logDebug(
+      'AMCSalesforceHomeComponent: constructor start'
+    );
     this.storageService.syncWithLocalStorage();
     this.phoneNumberFormat = null;
     this.appName = 'Salesforce';
-    this.loggerService.logger.logDebug('AMCSalesforceHomeComponent: constructor complete');
+    this.loggerService.logger.logDebug(
+      'AMCSalesforceHomeComponent: constructor complete'
+    );
   }
 
   async ngOnInit() {
-    const config = await api.getConfig();
-
+    const config = api.getConfig();
     let salesforceOrg = 'https://na53.salesforce.com';
-    if (config.variables['salesforceOrg'] !== undefined && config.variables['salesforceOrg'] !== null
-    && String(config.variables['salesforceOrg']).length > 0) {
-      salesforceOrg = String(config.variables['salesforceOrg']);
+    if (
+      config['variables']['salesforceOrg'] !== undefined &&
+      config['variables']['salesforceOrg'] !== null &&
+      String(config['variables']['salesforceOrg']).length > 0
+    ) {
+      salesforceOrg = String(config['variables']['salesforceOrg']);
     }
 
     this.bridgeScripts = this.bridgeScripts.concat([
@@ -44,16 +56,25 @@ export class HomeSalesforceComponent extends Application implements OnInit {
     ]);
 
     await super.ngOnInit();
-    this.loggerService.logger.logDebug('AMCSalesforceHomeComponent: ngOnInit start');
+    this.loggerService.logger.logDebug(
+      'AMCSalesforceHomeComponent: ngOnInit start'
+    );
     this.bridgeEventsService.subscribe('clickToDial', event => {
       api.clickToDial(event.number, this.formatCrmResults(event.records));
     });
-    this.bridgeEventsService.subscribe('setActivityDetails', this.setActivityDetails);
+    this.bridgeEventsService.subscribe(
+      'setActivityDetails',
+      this.setActivityDetails
+    );
 
-    this.phoneNumberFormat = String(config.variables['PhoneNumberFormat']).toLowerCase();
-    this.quickCommentList = <string[]>config.variables['QuickComments'];
+    this.phoneNumberFormat = String(
+      config['variables']['PhoneNumberFormat']
+    ).toLowerCase();
+    this.quickCommentList = <string[]>config['variables']['QuickComments'];
     registerOnLogout(this.removeLocalStorageOnLogout);
-    this.loggerService.logger.logDebug('AMCSalesforceHomeComponent: ngOnInit complete');
+    this.loggerService.logger.logDebug(
+      'AMCSalesforceHomeComponent: ngOnInit complete'
+    );
   }
 
   protected removeLocalStorageOnLogout(): Promise<any> {
@@ -76,7 +97,10 @@ export class HomeSalesforceComponent extends Application implements OnInit {
         if (phoneNumberFormat[formatIndex] !== 'x') {
           formattedNumber = formattedNumber + phoneNumberFormat[formatIndex];
           formatIndex = formatIndex + 1;
-          if (numberIndex < number.length && isNaN(Number(number[numberIndex]))) {
+          if (
+            numberIndex < number.length &&
+            isNaN(Number(number[numberIndex]))
+          ) {
             numberIndex = numberIndex + 1;
           }
         } else if (isNaN(Number(number[numberIndex]))) {
@@ -85,9 +109,15 @@ export class HomeSalesforceComponent extends Application implements OnInit {
           if (numberIndex === number.length) {
             return this.reverse(formattedNumber);
           }
-          while (formatIndex < phoneNumberFormat.length && phoneNumberFormat[formatIndex] === 'x') {
+          while (
+            formatIndex < phoneNumberFormat.length &&
+            phoneNumberFormat[formatIndex] === 'x'
+          ) {
             formatIndex = formatIndex + 1;
-            if (numberIndex < number.length && !isNaN(Number(number[numberIndex]))) {
+            if (
+              numberIndex < number.length &&
+              !isNaN(Number(number[numberIndex]))
+            ) {
               formattedNumber = formattedNumber + number[numberIndex];
               numberIndex = numberIndex + 1;
             } else {
@@ -115,9 +145,17 @@ export class HomeSalesforceComponent extends Application implements OnInit {
     for (const id of Object.keys(crmResults)) {
       let recordItem: api.RecordItem = null;
       if (crmResults[id].Id && crmResults[id].RecordType) {
-        recordItem = new api.RecordItem(crmResults[id].Id, crmResults[id].RecordType, crmResults[id].RecordType);
+        recordItem = new api.RecordItem(
+          crmResults[id].Id,
+          crmResults[id].RecordType,
+          crmResults[id].RecordType
+        );
       } else if (crmResults[id].object && crmResults[id].displayName) {
-        recordItem = new api.RecordItem(id, crmResults[id].object, crmResults[id].displayName);
+        recordItem = new api.RecordItem(
+          id,
+          crmResults[id].object,
+          crmResults[id].displayName
+        );
       }
       if (recordItem !== null) {
         if (crmResults[id].Name) {
@@ -131,7 +169,12 @@ export class HomeSalesforceComponent extends Application implements OnInit {
         }
         for (const fieldName of Object.keys(crmResults[id])) {
           if (ignoreFields.indexOf(fieldName) < 0) {
-            recordItem.setField(fieldName, fieldName, fieldName, crmResults[id][fieldName]);
+            recordItem.setField(
+              fieldName,
+              fieldName,
+              fieldName,
+              crmResults[id][fieldName]
+            );
           }
         }
         result.addSearchRecord(recordItem);
@@ -141,22 +184,30 @@ export class HomeSalesforceComponent extends Application implements OnInit {
   }
 
   protected async getSearchLayout() {
-    const salesforceLayouts = await this.bridgeEventsService.sendEvent('getSearchLayout');
+    const salesforceLayouts = await this.bridgeEventsService.sendEvent(
+      'getSearchLayout'
+    );
     const result = new api.SearchLayouts();
     const telephonyLayout = new api.SearchLayout(false, []);
     if (salesforceLayouts.Internal) {
-      telephonyLayout.setInternal(this.parseSearchLayoutEntities(salesforceLayouts.Internal));
+      telephonyLayout.setInternal(
+        this.parseSearchLayoutEntities(salesforceLayouts.Internal)
+      );
     }
     if (salesforceLayouts.Inbound) {
       const openInNewWindow =
         salesforceLayouts.Inbound.screenPopSettings &&
         salesforceLayouts.Inbound.screenPopSettings.screenPopOpenWithin &&
-        salesforceLayouts.Inbound.screenPopSettings.screenPopOpenWithin !== 'ExistingWindow';
-      switch (salesforceLayouts.Inbound.screenPopSettings.NoMatch.screenPopType) {
+        salesforceLayouts.Inbound.screenPopSettings.screenPopOpenWithin !==
+          'ExistingWindow';
+      switch (
+        salesforceLayouts.Inbound.screenPopSettings.NoMatch.screenPopType
+      ) {
         case 'PopToEntity':
           telephonyLayout.setNoMatch({
             type: api.NoMatchPopTypes.PopToNewEntity,
-            data: salesforceLayouts.Inbound.screenPopSettings.NoMatch.screenPopData
+            data:
+              salesforceLayouts.Inbound.screenPopSettings.NoMatch.screenPopData
           });
           break;
         case 'DoNotPop':
@@ -167,10 +218,13 @@ export class HomeSalesforceComponent extends Application implements OnInit {
         case 'PopToVisualforce':
           telephonyLayout.setNoMatch({
             type: api.NoMatchPopTypes.PopToUrl,
-            data: salesforceLayouts.Inbound.screenPopSettings.NoMatch.screenPopData
+            data:
+              salesforceLayouts.Inbound.screenPopSettings.NoMatch.screenPopData
           });
       }
-      switch (salesforceLayouts.Inbound.screenPopSettings.SingleMatch.screenPopType) {
+      switch (
+        salesforceLayouts.Inbound.screenPopSettings.SingleMatch.screenPopType
+      ) {
         case 'PopToEntity':
           telephonyLayout.setSingleMatch({
             type: api.SingleMatchPopTypes.PopToDetials
@@ -184,10 +238,15 @@ export class HomeSalesforceComponent extends Application implements OnInit {
         case 'PopToVisualforce':
           telephonyLayout.setSingleMatch({
             type: api.SingleMatchPopTypes.PopToUrl,
-            data: salesforceLayouts.Inbound.screenPopSettings.SingleMatch.screenPopData
+            data:
+              salesforceLayouts.Inbound.screenPopSettings.SingleMatch
+                .screenPopData
           });
       }
-      switch (salesforceLayouts.Inbound.screenPopSettings.MultipleMatches.screenPopType) {
+      switch (
+        salesforceLayouts.Inbound.screenPopSettings.MultipleMatches
+          .screenPopType
+      ) {
         case 'PopToEntity':
           telephonyLayout.setMultiMatch({
             type: api.MultiMatchPopTypes.PopToSearch
@@ -201,21 +260,29 @@ export class HomeSalesforceComponent extends Application implements OnInit {
         case 'PopToVisualforce':
           telephonyLayout.setMultiMatch({
             type: api.MultiMatchPopTypes.PopToUrl,
-            data: salesforceLayouts.Inbound.screenPopSettings.MultipleMatches.screenPopData
+            data:
+              salesforceLayouts.Inbound.screenPopSettings.MultipleMatches
+                .screenPopData
           });
       }
-      telephonyLayout.setInbound(this.parseSearchLayoutEntities(salesforceLayouts.Inbound));
+      telephonyLayout.setInbound(
+        this.parseSearchLayoutEntities(salesforceLayouts.Inbound)
+      );
       telephonyLayout.setDefault(telephonyLayout.getInbound());
       telephonyLayout.setOpenInNewWindow(openInNewWindow);
     }
     if (salesforceLayouts.Outbound) {
-      telephonyLayout.setOutbound(this.parseSearchLayoutEntities(salesforceLayouts.Outbound));
+      telephonyLayout.setOutbound(
+        this.parseSearchLayoutEntities(salesforceLayouts.Outbound)
+      );
     }
     result.setLayout([api.ChannelTypes.Telephony], telephonyLayout);
     return result;
   }
 
-  private parseSearchLayoutEntities(salesforceLayout: any): api.ISearchLayoutForEntity[] {
+  private parseSearchLayoutEntities(
+    salesforceLayout: any
+  ): api.ISearchLayoutForEntity[] {
     const layoutsForEntities: api.ISearchLayoutForEntity[] = [];
     for (const entityName of Object.keys(salesforceLayout.objects)) {
       const layoutForEntity: api.ISearchLayoutForEntity = {
@@ -228,11 +295,13 @@ export class HomeSalesforceComponent extends Application implements OnInit {
         NameFields: []
       };
 
-      for (const field of Object.values<{ apiName, displayName }>(salesforceLayout.objects[entityName])) {
+      for (const field of Object.values<{ apiName; displayName }>(
+        salesforceLayout.objects[entityName]
+      )) {
         layoutForEntity.DisplayFields.push({
           DevName: field.apiName,
           DisplayName: field.displayName,
-          Value: null,
+          Value: null
         });
       }
 
@@ -247,21 +316,36 @@ export class HomeSalesforceComponent extends Application implements OnInit {
   }
 
   protected async saveActivity(activity): Promise<string> {
-    this.loggerService.logger.logDebug('AMCSalesforceHomeComponent: Save activity: ' + JSON.stringify(activity)
-      , api.ErrorCode.ACTIVITY);
+    this.loggerService.logger.logDebug(
+      'AMCSalesforceHomeComponent: Save activity: ' + JSON.stringify(activity),
+      api.ErrorCode.ACTIVITY
+    );
     if (this.storageService.activityListContains(activity.InteractionId)) {
-      activity.ActivityId = this.storageService.getActivity(activity.InteractionId).ActivityId;
+      activity.ActivityId = this.storageService.getActivity(
+        activity.InteractionId
+      ).ActivityId;
     }
     if (activity.Status === 'Completed') {
       this.storageService.clearWhoList();
       this.storageService.clearWhatList();
       this.storageService.removeActivity(activity.InteractionId);
     }
-    this.loggerService.logger.logDebug(`AMCSalesforceHomeComponent: Sending activity: ${JSON.stringify(activity)} to bridge to be saved`
-      , api.ErrorCode.ACTIVITY);
-    activity = await this.bridgeEventsService.sendEvent('saveActivity', activity);
-    this.loggerService.logger.logDebug(`AMCSalesforceHomeComponent: Updated activity received from bridge: ${JSON.stringify(activity)}`
-      , api.ErrorCode.ACTIVITY);
+    this.loggerService.logger.logDebug(
+      `AMCSalesforceHomeComponent: Sending activity: ${JSON.stringify(
+        activity
+      )} to bridge to be saved`,
+      api.ErrorCode.ACTIVITY
+    );
+    activity = await this.bridgeEventsService.sendEvent(
+      'saveActivity',
+      activity
+    );
+    this.loggerService.logger.logDebug(
+      `AMCSalesforceHomeComponent: Updated activity received from bridge: ${JSON.stringify(
+        activity
+      )}`,
+      api.ErrorCode.ACTIVITY
+    );
     this.storageService.updateActivity(activity);
     return Promise.resolve(activity.ActivityId);
   }
@@ -279,32 +363,56 @@ export class HomeSalesforceComponent extends Application implements OnInit {
     return year + '-' + month + '-' + day;
   }
 
-  protected async onInteraction(interaction: api.IInteraction): Promise<api.SearchRecords> {
-    this.loggerService.logger.logDebug(`AMCSalesforceHomeComponent: Interaction recieved: ${JSON.stringify(interaction)}`
-      , api.ErrorCode.INTERACTION_EVENT);
+  protected async onInteraction(
+    interaction: api.IInteraction
+  ): Promise<api.SearchRecords> {
+    this.loggerService.logger.logDebug(
+      `AMCSalesforceHomeComponent: Interaction recieved: ${JSON.stringify(
+        interaction
+      )}`,
+      api.ErrorCode.INTERACTION_EVENT
+    );
     try {
       const interactionId = interaction.interactionId;
       const scenarioIdInt = interaction.scenarioId;
       let isNewScenarioId = false;
-      if (interaction.channelType === ChannelTypes.Telephony || interaction.channelType === ChannelTypes.SMS) {
-        interaction.details.fields.Phone.Value = this.formatPhoneNumber(interaction.details.fields.Phone.Value, this.phoneNumberFormat);
+      if (
+        interaction.channelType === ChannelTypes.Telephony ||
+        interaction.channelType === ChannelTypes.SMS
+      ) {
+        interaction.details.fields.Phone.Value = this.formatPhoneNumber(
+          interaction.details.fields.Phone.Value,
+          this.phoneNumberFormat
+        );
       }
-      if (!this.scenarioInteractionMappings.hasOwnProperty(scenarioIdInt)
-        && !this.storageService.getCurrentInteraction()
-        && interaction.state !== api.InteractionStates.Disconnected) {
+      if (
+        !this.scenarioInteractionMappings.hasOwnProperty(scenarioIdInt) &&
+        !this.storageService.getCurrentInteraction() &&
+        interaction.state !== api.InteractionStates.Disconnected
+      ) {
         this.scenarioInteractionMappings[scenarioIdInt] = {};
         isNewScenarioId = true;
         this.scenarioInteractionMappings[scenarioIdInt][interactionId] = true;
       }
-      if (this.shouldPreformScreenpop(interaction, isNewScenarioId)
-        && !this.storageService.getCurrentInteraction()
-        && interaction.state !== api.InteractionStates.Disconnected) {
-        this.loggerService.logger.logDebug(`AMCSalesforceHomeComponent: screenpop for new interaction: ${JSON.stringify(interaction)}`
-          , api.ErrorCode.SCREEN_POP);
+      if (
+        this.shouldPreformScreenpop(interaction, isNewScenarioId) &&
+        !this.storageService.getCurrentInteraction() &&
+        interaction.state !== api.InteractionStates.Disconnected
+      ) {
+        this.loggerService.logger.logDebug(
+          `AMCSalesforceHomeComponent: screenpop for new interaction: ${JSON.stringify(
+            interaction
+          )}`,
+          api.ErrorCode.SCREEN_POP
+        );
         const searchRecord = await this.preformScreenpop(interaction);
         this.storageService.setsearchRecordList(searchRecord.toJSON());
-        this.loggerService.logger.logDebug(`AMCSalesforceHomeComponent: Search results: ${JSON.stringify(searchRecord.toJSON())}`
-          , api.ErrorCode.SEARCH_RECORD);
+        this.loggerService.logger.logDebug(
+          `AMCSalesforceHomeComponent: Search results: ${JSON.stringify(
+            searchRecord.toJSON()
+          )}`,
+          api.ErrorCode.SEARCH_RECORD
+        );
         if (this.storageService.getsearchRecordList().length > 1) {
           this.storageService.setSearchReturnedSingleResult(false);
           this.storageService.setSearchResultWasReturned(true);
@@ -315,22 +423,42 @@ export class HomeSalesforceComponent extends Application implements OnInit {
         this.storageService.setCurrentInteraction(interaction);
         this.storageService.addActivity(this.createActivity(interaction));
 
-        this.storageService.setSubject(interactionId, this.buildSubjectText(interaction));
-        this.loggerService.logger.logDebug(`AMCSalesforceHomeComponent: Autosave activity:
-        ${JSON.stringify(this.storageService.getActivity(this.storageService.getCurrentInteraction().interactionId))}`
-          , api.ErrorCode.ACTIVITY);
+        this.storageService.setSubject(
+          interactionId,
+          this.buildSubjectText(interaction)
+        );
+        this.loggerService.logger.logDebug(
+          `AMCSalesforceHomeComponent: Autosave activity:
+        ${JSON.stringify(
+          this.storageService.getActivity(
+            this.storageService.getCurrentInteraction().interactionId
+          )
+        )}`,
+          api.ErrorCode.ACTIVITY
+        );
         this.autoSave.next();
         return searchRecord;
       } else if (interaction.state === api.InteractionStates.Disconnected) {
-        this.loggerService.logger.logDebug(`AMCSalesforceHomeComponent: Disconnect interaction received: ${JSON.stringify(interaction)}`
-          , api.ErrorCode.DISCONEECTED_INTERACTION);
+        this.loggerService.logger.logDebug(
+          `AMCSalesforceHomeComponent: Disconnect interaction received: ${JSON.stringify(
+            interaction
+          )}`,
+          api.ErrorCode.DISCONEECTED_INTERACTION
+        );
         if (this.scenarioInteractionMappings[scenarioIdInt]) {
           delete this.scenarioInteractionMappings[scenarioIdInt][interactionId];
-          if (Object.keys(this.scenarioInteractionMappings[scenarioIdInt]).length === 0) {
+          if (
+            Object.keys(this.scenarioInteractionMappings[scenarioIdInt])
+              .length === 0
+          ) {
             delete this.scenarioInteractionMappings[scenarioIdInt];
           }
         }
-        if (this.storageService.getCurrentInteraction() && this.storageService.getCurrentInteraction().interactionId === interactionId) {
+        if (
+          this.storageService.getCurrentInteraction() &&
+          this.storageService.getCurrentInteraction().interactionId ===
+            interactionId
+        ) {
           this.interactionDisconnected.next(true);
           this.storageService.onInteractionDisconnect();
         }
@@ -400,17 +528,28 @@ export class HomeSalesforceComponent extends Application implements OnInit {
       InteractionId: interaction.interactionId,
       contactSource: this.getContactSource(interaction)
     };
-    this.loggerService.logger.logDebug(`AMCSalesforceHomeComponent: Create new activity: ${JSON.stringify(activity)}`
-      , api.ErrorCode.ACTIVITY);
+    this.loggerService.logger.logDebug(
+      `AMCSalesforceHomeComponent: Create new activity: ${JSON.stringify(
+        activity
+      )}`,
+      api.ErrorCode.ACTIVITY
+    );
     return activity;
   }
 
   @bind
   protected setActivityDetails(eventObject) {
-    this.loggerService.logger.logDebug(`AMCSalesforceHomeComponent: Activity details received from bridge: ${JSON.stringify(eventObject)}`
-      , api.ErrorCode.ACTIVITY);
+    this.loggerService.logger.logDebug(
+      `AMCSalesforceHomeComponent: Activity details received from bridge: ${JSON.stringify(
+        eventObject
+      )}`,
+      api.ErrorCode.ACTIVITY
+    );
     if (this.storageService.getCurrentInteraction()) {
-      if (eventObject.objectType === 'Contact' || eventObject.objectType === 'Lead') {
+      if (
+        eventObject.objectType === 'Contact' ||
+        eventObject.objectType === 'Lead'
+      ) {
         if (!this.storageService.whoListContains(eventObject)) {
           this.storageService.setWhoList(eventObject);
           this.autoSave.next();
@@ -422,24 +561,35 @@ export class HomeSalesforceComponent extends Application implements OnInit {
         }
       }
     }
-
   }
 
   @bind
   protected createNewEntity(entityType) {
-    this.loggerService.logger.logDebug(`AMCSalesforceHomeComponent: Screenpop new Salesforce object of type:
-    ${JSON.stringify(entityType)}`, api.ErrorCode.SCREEN_POP);
+    this.loggerService.logger.logDebug(
+      `AMCSalesforceHomeComponent: Screenpop new Salesforce object of type:
+    ${JSON.stringify(entityType)}`,
+      api.ErrorCode.SCREEN_POP
+    );
     let params: ICreateNewSObjectParams;
     if (this.storageService.getCurrentInteraction()) {
-      if (this.storageService.activityListContains(this.storageService.getCurrentInteraction().interactionId)) {
-        const activity = this.storageService.getActivity(this.storageService.getCurrentInteraction().interactionId);
+      if (
+        this.storageService.activityListContains(
+          this.storageService.getCurrentInteraction().interactionId
+        )
+      ) {
+        const activity = this.storageService.getActivity(
+          this.storageService.getCurrentInteraction().interactionId
+        );
         params = this.buildParams(entityType, activity);
       }
     } else {
       params = this.buildParams(entityType, null);
     }
-    this.loggerService.logger.logDebug(`AMCSalesforceHomeComponent: Send screenpop request to bridge with params:
-    ${JSON.stringify(params)}`, api.ErrorCode.SCREEN_POP);
+    this.loggerService.logger.logDebug(
+      `AMCSalesforceHomeComponent: Send screenpop request to bridge with params:
+    ${JSON.stringify(params)}`,
+      api.ErrorCode.SCREEN_POP
+    );
     this.bridgeEventsService.sendEvent('createNewEntity', params);
   }
 
@@ -467,8 +617,9 @@ export class HomeSalesforceComponent extends Application implements OnInit {
         params.opportunityFields.Description = activity.Description;
         params.opportunityFields.StageName = 'Prospecting';
       } else if (entityType === 'Lead') {
-        params.leadFields[this.storageService.activity.contactSource.sourceType] =
-          this.storageService.activity.contactSource.source;
+        params.leadFields[
+          this.storageService.activity.contactSource.sourceType
+        ] = this.storageService.activity.contactSource.source;
         params.leadFields.Description = activity.Description;
       }
     }
@@ -476,10 +627,9 @@ export class HomeSalesforceComponent extends Application implements OnInit {
   }
 
   protected agentSelectedCallerInformation(id) {
-    this.loggerService.logger.logDebug('AMCSalesforceHomeComponent: Screenpop selected caller information');
+    this.loggerService.logger.logDebug(
+      'AMCSalesforceHomeComponent: Screenpop selected caller information'
+    );
     this.bridgeEventsService.sendEvent('agentSelectedCallerInformation', id);
   }
 }
-
-
-
