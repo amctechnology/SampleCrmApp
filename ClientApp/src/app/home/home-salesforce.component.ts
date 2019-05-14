@@ -38,7 +38,7 @@ export class HomeSalesforceComponent extends Application implements OnInit {
   }
 
   async ngOnInit() {
-    const config = api.getConfig();
+    const config = await api.getConfig();
     let salesforceOrg = 'https://na53.salesforce.com';
     if (
       config['variables']['salesforceOrg'] !== undefined &&
