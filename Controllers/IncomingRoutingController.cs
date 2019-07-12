@@ -184,7 +184,7 @@ namespace SalesforceCloudCore.Controllers {
             foreach (var SObject in SObjects) {
                 try {
                     PrefixList.Add (SObject.KeyPrefix, SObject.Name);
-                } catch (Exception ex) { }
+                } catch (Exception) { }
             }
             return PrefixList;
         }
