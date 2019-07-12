@@ -14,7 +14,6 @@ using SalesforceCloudCore.Models;
 namespace SalesforceCloudCore.Controllers {
     public class OutgoingRoutingController : Controller {
         private static HttpClient httpClient;
-        private static string AccessToken;
         public OutgoingRoutingController () {
             httpClient = new HttpClient ();
         }
@@ -22,7 +21,6 @@ namespace SalesforceCloudCore.Controllers {
         [HttpPost]
         public async Task<IActionResult> Index ([FromBody] Payload Payload) {
             try {
-                HttpContent HttpContent = null;
                 SalesforceAuthParams SalesforceAuth = JsonConvert.DeserializeObject<SalesforceAuthParams> (JsonConvert.SerializeObject (Payload.config.crm));
                 AuthenticationResponse AuthenticationResponse = await this.Authenticate (SalesforceAuth);
                 if (AuthenticationResponse.access_token == null) {
