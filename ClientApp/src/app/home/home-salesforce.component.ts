@@ -557,13 +557,14 @@ export class HomeSalesforceComponent extends Application implements OnInit {
       ) {
         if (!this.storageService.whoListContains(eventObject)) {
           this.storageService.setWhoList(eventObject);
+          this.autoSave.next(1);
         }
       } else if (eventObject.objectId !== undefined) {
         if (!this.storageService.whatListContains(eventObject)) {
           this.storageService.setWhatList(eventObject);
+          this.autoSave.next(1);
         }
       }
-      this.autoSave.next(1);
     }
   }
 
