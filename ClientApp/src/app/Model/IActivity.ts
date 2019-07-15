@@ -15,4 +15,5 @@ export interface IActivity {
     sourceType: string;
     source: string;
   };
+  saveToSalesforce: boolean;
 }
