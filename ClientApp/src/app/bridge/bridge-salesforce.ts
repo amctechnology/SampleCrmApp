@@ -413,6 +413,9 @@ class BridgeSalesforce extends Bridge {
         if (activity.ActivityId) {
           activityObject['value']['Id'] = activity.ActivityId;
         }
+        for (const key of Object.keys(activity.CadFields)) {
+          activityObject['value'][key] = activity.CadFields[key];
+        }
         sforce.opencti.saveLog(activityObject);
       });
     }
@@ -424,6 +427,9 @@ class BridgeSalesforce extends Bridge {
         `&ActivityDate=${activity.ActivityDate}`;
       if (activity.ActivityId) {
         activityString = activityString + '&Id=' + activity.ActivityId;
+      }
+      for (const key of Object.keys(activity.CadFields)) {
+        activityString = activityString + '&' + key + '=' + activity.CadFields[key];
       }
       sforce.interaction.saveLog('Task', activityString, result => {
         activity.ActivityId = result.result;
