@@ -7,6 +7,7 @@ import {
   registerOnLogout,
   ChannelTypes
 } from '@amc-technology/davinci-api';
+import { BehaviorSubject } from 'rxjs/BehaviorSubject';
 import { Subject } from 'rxjs/Subject';
 import { IActivity } from '../Model/IActivity';
 import { ICreateNewSObjectParams } from '../Model/ICreateNewSObjectParams';
@@ -19,7 +20,7 @@ import { stringify } from '@angular/core/src/util';
 })
 export class HomeSalesforceComponent extends Application implements OnInit {
   protected interactionDisconnected: Subject<boolean> = new Subject();
-  protected autoSave: Subject<void> = new Subject();
+  protected autoSave: BehaviorSubject<number> = new BehaviorSubject(0);
   protected phoneNumberFormat: string;
   protected quickCommentList: string[];
   protected cadActivityMap: any;
@@ -75,6 +76,7 @@ export class HomeSalesforceComponent extends Application implements OnInit {
     ).toLowerCase();
     this.quickCommentList = <string[]>config['variables']['QuickComments'];
     this.cadActivityMap = config['variables']['CADActivityMap'];
+    this.storageService.maxRecentItems = <Number>config['variables']['MaxRecentItems'];
     registerOnLogout(this.removeLocalStorageOnLogout);
     this.loggerService.logger.logDebug(
       'AMCSalesforceHomeComponent: ngOnInit complete'
@@ -91,6 +93,7 @@ export class HomeSalesforceComponent extends Application implements OnInit {
     let numberIndex = 0;
     let formatIndex = 0;
     let formattedNumber = '';
+    number = number.replace(/\D/g, '');
     number = this.reverse(number);
     phoneNumberFormat = this.reverse(phoneNumberFormat);
     if (number && phoneNumberFormat) {
@@ -340,10 +343,12 @@ export class HomeSalesforceComponent extends Application implements OnInit {
       )} to bridge to be saved`,
       api.ErrorCode.ACTIVITY
     );
-    activity = await this.bridgeEventsService.sendEvent(
-      'saveActivity',
-      activity
-    );
+    if (activity.saveToSalesforce) {
+      activity = await this.bridgeEventsService.sendEvent(
+        'saveActivity',
+        activity
+      );
+    }
     this.loggerService.logger.logDebug(
       `AMCSalesforceHomeComponent: Updated activity received from bridge: ${JSON.stringify(
         activity
@@ -448,7 +453,7 @@ export class HomeSalesforceComponent extends Application implements OnInit {
         )}`,
           api.ErrorCode.ACTIVITY
         );
-        this.autoSave.next();
+        this.autoSave.next(0);
         return searchRecord;
       } else if (interaction.state === api.InteractionStates.Disconnected) {
         this.loggerService.logger.logDebug(
@@ -540,6 +545,7 @@ export class HomeSalesforceComponent extends Application implements OnInit {
       InteractionId: interaction.interactionId,
       contactSource: this.getContactSource(interaction),
       CadFields: {},
+      saveToSalesforce: false,
     };
     for (const key in this.cadActivityMap) {
       if (interaction.details.fields[key]) {
@@ -573,12 +579,12 @@ export class HomeSalesforceComponent extends Application implements OnInit {
       ) {
         if (!this.storageService.whoListContains(eventObject)) {
           this.storageService.setWhoList(eventObject);
-          this.autoSave.next();
+          this.autoSave.next(1);
         }
       } else if (eventObject.objectId !== undefined) {
         if (!this.storageService.whatListContains(eventObject)) {
           this.storageService.setWhatList(eventObject);
-          this.autoSave.next();
+          this.autoSave.next(1);
         }
       }
     }

@@ -15,6 +15,7 @@ export class StorageService {
   public searchReturnedSingleResult: boolean;
   public searchResultWasReturned: boolean;
   public currentTicketId: string;
+  public maxRecentItems: Number;
   constructor() {
     this.activityList = [];
     this.recentActivityList = [];
@@ -25,6 +26,7 @@ export class StorageService {
     this.whatList = [];
     this.whoList = [];
     this.currentTicketId = '';
+    this.maxRecentItems = 0;
   }
   public setCurrentTicketId(id) {
     this.currentTicketId = id;
@@ -247,7 +249,10 @@ export class StorageService {
     return false;
   }
   public addRecentActivity(activity: IActivity) {
-    this.recentActivityList.push(activity);
+    if (this.recentActivityList.length === this.maxRecentItems) {
+      this.recentActivityList.pop();
+    }
+    this.recentActivityList.unshift(activity);
     this.storeToLocalStorage();
   }
   public updateRecentActivity(activity: IActivity) {

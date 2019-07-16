@@ -18,4 +18,5 @@ export interface IActivity {
   CadFields: {
     [key: string]: string
   };
+  saveToSalesforce: boolean;
 }
