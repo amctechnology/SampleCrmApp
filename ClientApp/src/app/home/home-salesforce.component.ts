@@ -13,6 +13,7 @@ import { IActivity } from '../Model/IActivity';
 import { ICreateNewSObjectParams } from '../Model/ICreateNewSObjectParams';
 import { LoggerService } from '../logger.service';
 import { StorageService } from '../storage.service';
+import { stringify } from '@angular/core/src/util';
 @Component({
   selector: 'app-home',
   templateUrl: './home-salesforce.component.html'
@@ -22,6 +23,7 @@ export class HomeSalesforceComponent extends Application implements OnInit {
   protected autoSave: BehaviorSubject<number> = new BehaviorSubject(0);
   protected phoneNumberFormat: string;
   protected quickCommentList: string[];
+  protected cadActivityMap: Object;
   constructor(
     private loggerService: LoggerService,
     protected storageService: StorageService
@@ -72,6 +74,8 @@ export class HomeSalesforceComponent extends Application implements OnInit {
       config['variables']['PhoneNumberFormat']
     ).toLowerCase();
     this.quickCommentList = <string[]>config['variables']['QuickComments'];
+    this.cadActivityMap = config['variables']['CADActivityMap'];
+    this.storageService.maxRecentItems = <Number>config['variables']['MaxRecentItems'];
     registerOnLogout(this.removeLocalStorageOnLogout);
     this.loggerService.logger.logDebug(
       'AMCSalesforceHomeComponent: ngOnInit complete'
@@ -350,7 +354,11 @@ export class HomeSalesforceComponent extends Application implements OnInit {
       )}`,
       api.ErrorCode.ACTIVITY
     );
-    this.storageService.updateActivity(activity);
+    if (this.storageService.activityListContains(activity.InteractionId)) {
+      this.storageService.updateActivity(activity);
+    } else {
+      this.storageService.updateRecentActivity(activity);
+    }
     return Promise.resolve(activity.ActivityId);
   }
 
@@ -379,6 +387,10 @@ export class HomeSalesforceComponent extends Application implements OnInit {
     try {
       const interactionId = interaction.interactionId;
       const scenarioIdInt = interaction.scenarioId;
+      this.storageService.updateCadFields(interaction, this.cadActivityMap);
+      if (this.storageService.recentActivityListContains(interactionId)) {
+        this.saveActivity(this.storageService.getRecentActivity(interactionId));
+      }
       let isNewScenarioId = false;
       if (
         interaction.channelType === ChannelTypes.Telephony ||
@@ -531,8 +543,17 @@ export class HomeSalesforceComponent extends Application implements OnInit {
       ActivityId: '',
       InteractionId: interaction.interactionId,
       contactSource: this.getContactSource(interaction),
-      saveToSalesforce: false
+      CadFields: {},
+      saveToSalesforce: false,
     };
+    for (const key in this.cadActivityMap) {
+      if (interaction.details.fields[key]) {
+        if (!activity.CadFields) {
+          activity.CadFields = {};
+        }
+        activity.CadFields[this.cadActivityMap[key]] = interaction.details.fields[key].Value;
+      }
+    }
     this.loggerService.logger.logDebug(
       `AMCSalesforceHomeComponent: Create new activity: ${JSON.stringify(
         activity

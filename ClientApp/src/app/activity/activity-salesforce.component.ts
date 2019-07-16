@@ -28,7 +28,7 @@ export class ActivitySalesforceComponent implements OnInit {
   ngOnInit() {
     this.interactionDisconnected.subscribe(() => {
       this.loggerService.logger.logDebug('create: Interaction disconnected event received', api.ErrorCode.DISCONEECTED_INTERACTION);
-      this.activitySave(true);
+      this.activitySave(true, true);
     });
     this.autoSave.subscribe(event => {
       this.loggerService.logger.logDebug('create: Auto save event received');
