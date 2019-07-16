@@ -241,9 +241,7 @@ export class StorageService {
     }
   }
   public recentActivityListContains(interactionId: string): boolean {
-    return (this.recentActivityList.find(item => {
-      return item.InteractionId === interactionId;
-   })) ? true : false;
+    return (this.recentActivityList.find(item => item.InteractionId === interactionId)) ? true : false;
   }
   public addRecentActivity(activity: IActivity) {
     if (this.recentActivityList.length === this.maxRecentItems) {
@@ -261,9 +259,7 @@ export class StorageService {
     }
   }
   public getRecentActivity(interactionId: string): IActivity {
-    return (this.recentActivityList.find(item => {
-      return item.InteractionId === interactionId;
-   }));
+    return (this.recentActivityList.find(item => item.InteractionId === interactionId));
   }
   public updateCadFields(interaction: IInteraction, cadActivityMap: any) {
     const isInteractionCurrent = this.activityListContains(interaction.interactionId);
