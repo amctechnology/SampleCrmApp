@@ -241,12 +241,9 @@ export class StorageService {
     }
   }
   public recentActivityListContains(interactionId: string): boolean {
-    for (let i = 0; i < this.recentActivityList.length; i++) {
-      if (this.recentActivityList[i].InteractionId === interactionId) {
-        return true;
-      }
-    }
-    return false;
+    return (this.recentActivityList.find(item => {
+      return item.InteractionId === interactionId;
+   })) ? true : false;
   }
   public addRecentActivity(activity: IActivity) {
     if (this.recentActivityList.length === this.maxRecentItems) {
@@ -264,25 +261,25 @@ export class StorageService {
     }
   }
   public getRecentActivity(interactionId: string): IActivity {
-    for (let i = 0; i < this.recentActivityList.length; i++) {
-      if (this.recentActivityList[i].InteractionId === interactionId) {
-        return this.recentActivityList[i];
-      }
-    }
+    return (this.recentActivityList.find(item => {
+      return item.InteractionId === interactionId;
+   }));
   }
   public updateCadFields(interaction: IInteraction, cadActivityMap: any) {
-    if ((this.activityListContains(interaction.interactionId)) || (this.recentActivityListContains(interaction.interactionId))) {
+    const isInteractionCurrent = this.activityListContains(interaction.interactionId);
+    const isInteractionRecent = this.recentActivityListContains(interaction.interactionId);
+    if (isInteractionCurrent || isInteractionRecent) {
         if (interaction.details) {
           for (const key in cadActivityMap) {
             if (interaction.details.fields[key]) {
-              const objActivity = (this.activityListContains(interaction.interactionId)) ?
+              const objActivity = (isInteractionCurrent) ?
               this.getActivity(interaction.interactionId) :
               this.getRecentActivity(interaction.interactionId);
               if (!objActivity.CadFields) {
                 objActivity.CadFields = {};
               }
               objActivity.CadFields[cadActivityMap[key]] = interaction.details.fields[key].Value;
-              if (this.activityListContains(interaction.interactionId)) {
+              if (isInteractionCurrent) {
                 this.updateActivity(objActivity);
               } else {
                 this.updateRecentActivity(objActivity);

@@ -23,7 +23,7 @@ export class HomeSalesforceComponent extends Application implements OnInit {
   protected autoSave: BehaviorSubject<number> = new BehaviorSubject(0);
   protected phoneNumberFormat: string;
   protected quickCommentList: string[];
-  protected cadActivityMap: any;
+  protected cadActivityMap: Object;
   constructor(
     private loggerService: LoggerService,
     protected storageService: StorageService
@@ -35,7 +35,6 @@ export class HomeSalesforceComponent extends Application implements OnInit {
     this.storageService.syncWithLocalStorage();
     this.phoneNumberFormat = null;
     this.appName = 'Salesforce';
-    this.cadActivityMap = null;
     this.loggerService.logger.logDebug(
       'AMCSalesforceHomeComponent: constructor complete'
     );
