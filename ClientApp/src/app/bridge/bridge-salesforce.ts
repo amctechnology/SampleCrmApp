@@ -231,7 +231,7 @@ class BridgeSalesforce extends Bridge {
         const finalValue = `value=${cad.value}`;
         const finalquery = `${finalfields}&${finalObject}&${finalKey}&${finalValue}`;
         const cadSearchRequest = {
-          apexClass: 'AMCCloudOpenCTI.ObjectRetrieval',
+          apexClass: 'AMCOpenCTINS.ObjectRetrieval',
           methodName: 'getObject',
           methodParams: finalquery,
           callback: function (response) {
