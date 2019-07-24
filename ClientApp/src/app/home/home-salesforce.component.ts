@@ -74,7 +74,11 @@ export class HomeSalesforceComponent extends Application implements OnInit {
       config['variables']['PhoneNumberFormat']
     ).toLowerCase();
     this.quickCommentList = <string[]>config['variables']['QuickComments'];
-    this.cadActivityMap = config['variables']['CADActivityMap'];
+    if (config['variables']['CADActivityMap']) {
+      this.cadActivityMap = config['variables']['CADActivityMap'];
+    } else {
+      this.cadActivityMap = {};
+    }
     this.storageService.maxRecentItems = <Number>config['variables']['MaxRecentItems'];
     registerOnLogout(this.removeLocalStorageOnLogout);
     this.loggerService.logger.logDebug(
