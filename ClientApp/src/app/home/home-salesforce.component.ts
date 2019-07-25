@@ -5,7 +5,8 @@ import { bind } from 'bind-decorator';
 import {
   IInteraction,
   registerOnLogout,
-  ChannelTypes
+  ChannelTypes,
+  IRecordItem
 } from '@amc-technology/davinci-api';
 import { BehaviorSubject } from 'rxjs/BehaviorSubject';
 import { Subject } from 'rxjs/Subject';
@@ -26,6 +27,10 @@ export class HomeSalesforceComponent extends Application implements OnInit {
   protected cadActivityMap: Object;
   screenpopOnAlert: Boolean;
   wasClickToDial: boolean;
+  lastOnFocusWasAnEntity: boolean;
+  ScreenpopOnClickToDialListView: boolean;
+  lastClickToDialRecord: any;
+  lastClickToDialSearchRecord: api.SearchRecords;
 
   constructor(
     private loggerService: LoggerService,
@@ -37,7 +42,9 @@ export class HomeSalesforceComponent extends Application implements OnInit {
     );
     this.storageService.syncWithLocalStorage();
     this.screenpopOnAlert = true;
+    this.ScreenpopOnClickToDialListView = false;
     this.phoneNumberFormat = null;
+    this.lastClickToDialRecord = null;
     this.wasClickToDial = false;
     this.appName = 'Salesforce';
     this.loggerService.logger.logDebug(
@@ -69,6 +76,9 @@ export class HomeSalesforceComponent extends Application implements OnInit {
     );
     this.bridgeEventsService.subscribe('clickToDial', event => {
       this.wasClickToDial = true;
+      this.lastOnFocusWasAnEntity = event.lastOnFocusWasAnEntity;
+      this.lastClickToDialRecord = event.clickedEntity;
+      this.lastClickToDialSearchRecord = event.clickedSearchRecord;
       api.clickToDial(event.number, this.formatCrmResults(event.records));
     });
     this.bridgeEventsService.subscribe(
@@ -89,6 +99,7 @@ export class HomeSalesforceComponent extends Application implements OnInit {
     } else {
       this.cadActivityMap = {};
     }
+    this.ScreenpopOnClickToDialListView = <boolean>config['variables']['ScreenpopOnClickToDialListView'];
     this.storageService.maxRecentItems = <Number>config['variables']['MaxRecentItems'];
     registerOnLogout(this.removeLocalStorageOnLogout);
     this.loggerService.logger.logDebug(
@@ -451,6 +462,11 @@ export class HomeSalesforceComponent extends Application implements OnInit {
             interaction.state === api.InteractionStates.Connected) ||
           this.wasClickToDial
         ) {
+        if (this.ScreenpopOnClickToDialListView && !this.lastOnFocusWasAnEntity && this.wasClickToDial) {
+          interaction.details.id = this.lastClickToDialRecord['objectId'];
+          interaction.details.type = this.lastClickToDialRecord['object'];
+        }
+
         this.loggerService.logger.logDebug(
           `AMCSalesforceHomeComponent: screenpop for new interaction: ${JSON.stringify(
             interaction
@@ -458,6 +474,9 @@ export class HomeSalesforceComponent extends Application implements OnInit {
           api.ErrorCode.SCREEN_POP
         );
         const searchRecord = await this.preformScreenpop(interaction);
+        if (this.ScreenpopOnClickToDialListView && !this.lastOnFocusWasAnEntity && this.wasClickToDial) {
+// push to searchRecord.records
+        }
         this.storageService.setsearchRecordList(searchRecord.toJSON());
         this.loggerService.logger.logDebug(
           `AMCSalesforceHomeComponent: Search results: ${JSON.stringify(
@@ -491,6 +510,7 @@ export class HomeSalesforceComponent extends Application implements OnInit {
         this.autoSave.next(0);
         this.wasClickToDial = false;
         return searchRecord;
+
           }
       } else if (interaction.state === api.InteractionStates.Disconnected) {
         this.loggerService.logger.logDebug(

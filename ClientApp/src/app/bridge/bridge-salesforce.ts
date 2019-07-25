@@ -12,6 +12,7 @@ class BridgeSalesforce extends Bridge {
   activity: IActivity = null;
   layoutObjectList: string[];
   searchLayout: any;
+  lastOnFocusWasAnEntity: any;
 
   constructor() {
     super();
@@ -25,6 +26,7 @@ class BridgeSalesforce extends Bridge {
     this.eventService.subscribe('saveActivity', this.saveActivity);
     this.eventService.subscribe('createNewEntity', this.createNewEntity);
     this.eventService.subscribe('agentSelectedCallerInformation', this.tryScreenpop);
+    this.lastOnFocusWasAnEntity = false;
   }
 
   async afterScriptsLoad(): Promise<any> {
@@ -123,6 +125,16 @@ class BridgeSalesforce extends Bridge {
         entity.objectName = temp.objectName;
         entity.url = temp.url;
       }
+      if (
+        (!entity.objectType || entity.objectType === '') &&
+        (!entity.displayName || entity.displayName === '') &&
+        (!entity.objectId || entity.objectId === '') &&
+        (!entity.objectName || entity.objectName === '')
+      ) {
+        this.lastOnFocusWasAnEntity = false;
+      } else {
+        this.lastOnFocusWasAnEntity = true;
+      }
       if (this.layoutObjectList.includes(entity.objectType) && entity.objectId !== '') {
         this.eventService.sendEvent('setActivityDetails', entity);
         this.eventService.sendEvent('logDebug', 'bridge: onFocus event sent to home');
@@ -146,9 +158,15 @@ class BridgeSalesforce extends Bridge {
     }
 
     const records = await this.trySearch(entity.number, InteractionDirectionTypes.Outbound, '', false);
+    records[entity.objectId]['fields'] = {};
+    records[entity.objectId].fields['Name'] = {};
+    records[entity.objectId].fields.Name['Value'] = records[entity.objectId].Name;
     this.eventService.sendEvent('clickToDial', {
       number: entity.number,
-      records: records
+      records: records,
+      lastOnFocusWasAnEntity: this.lastOnFocusWasAnEntity,
+      clickedEntity: entity,
+      clickedSearchRecord: records[entity.objectId]
     });
   }
 
