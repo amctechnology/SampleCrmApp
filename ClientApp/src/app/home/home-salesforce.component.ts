@@ -24,6 +24,9 @@ export class HomeSalesforceComponent extends Application implements OnInit {
   protected phoneNumberFormat: string;
   protected quickCommentList: string[];
   protected cadActivityMap: Object;
+  screenpopOnAlert: Boolean;
+  wasClickToDial: boolean;
+
   constructor(
     private loggerService: LoggerService,
     protected storageService: StorageService
@@ -33,7 +36,9 @@ export class HomeSalesforceComponent extends Application implements OnInit {
       'AMCSalesforceHomeComponent: constructor start'
     );
     this.storageService.syncWithLocalStorage();
+    this.screenpopOnAlert = true;
     this.phoneNumberFormat = null;
+    this.wasClickToDial = false;
     this.appName = 'Salesforce';
     this.loggerService.logger.logDebug(
       'AMCSalesforceHomeComponent: constructor complete'
@@ -63,6 +68,7 @@ export class HomeSalesforceComponent extends Application implements OnInit {
       'AMCSalesforceHomeComponent: ngOnInit start'
     );
     this.bridgeEventsService.subscribe('clickToDial', event => {
+      this.wasClickToDial = true;
       api.clickToDial(event.number, this.formatCrmResults(event.records));
     });
     this.bridgeEventsService.subscribe(
@@ -73,6 +79,10 @@ export class HomeSalesforceComponent extends Application implements OnInit {
     this.phoneNumberFormat = String(
       config['variables']['PhoneNumberFormat']
     ).toLowerCase();
+
+    if (config['variables']['ScreenpopOnAlert'] !== null && config['variables']['ScreenpopOnAlert'] !== undefined) {
+      this.screenpopOnAlert = Boolean(config['variables']['ScreenpopOnAlert']);
+    }
     this.quickCommentList = <string[]>config['variables']['QuickComments'];
     if (config['variables']['CADActivityMap']) {
       this.cadActivityMap = config['variables']['CADActivityMap'];
@@ -410,15 +420,37 @@ export class HomeSalesforceComponent extends Application implements OnInit {
         !this.storageService.getCurrentInteraction() &&
         interaction.state !== api.InteractionStates.Disconnected
       ) {
-        this.scenarioInteractionMappings[scenarioIdInt] = {};
-        isNewScenarioId = true;
-        this.scenarioInteractionMappings[scenarioIdInt][interactionId] = true;
+        if (
+          (this.screenpopOnAlert === true &&
+            interaction.state === api.InteractionStates.Alerting) ||
+          (this.screenpopOnAlert === false &&
+            interaction.state === api.InteractionStates.Connected)
+        ) {
+          this.scenarioInteractionMappings[scenarioIdInt] = {};
+          isNewScenarioId = true;
+          this.scenarioInteractionMappings[scenarioIdInt][
+            interactionId
+          ] = true;
+        } else if (this.wasClickToDial) {
+          this.scenarioInteractionMappings[scenarioIdInt] = {};
+          isNewScenarioId = true;
+          this.scenarioInteractionMappings[scenarioIdInt][
+            interactionId
+          ] = true;
+        }
       }
       if (
         this.shouldPreformScreenpop(interaction, isNewScenarioId) &&
         !this.storageService.getCurrentInteraction() &&
         interaction.state !== api.InteractionStates.Disconnected
       ) {
+        if (
+          (this.screenpopOnAlert === true &&
+            interaction.state === api.InteractionStates.Alerting) ||
+          (this.screenpopOnAlert === false &&
+            interaction.state === api.InteractionStates.Connected) ||
+          this.wasClickToDial
+        ) {
         this.loggerService.logger.logDebug(
           `AMCSalesforceHomeComponent: screenpop for new interaction: ${JSON.stringify(
             interaction
@@ -457,7 +489,9 @@ export class HomeSalesforceComponent extends Application implements OnInit {
           api.ErrorCode.ACTIVITY
         );
         this.autoSave.next(0);
+        this.wasClickToDial = false;
         return searchRecord;
+          }
       } else if (interaction.state === api.InteractionStates.Disconnected) {
         this.loggerService.logger.logDebug(
           `AMCSalesforceHomeComponent: Disconnect interaction received: ${JSON.stringify(
@@ -480,14 +514,17 @@ export class HomeSalesforceComponent extends Application implements OnInit {
             interactionId
         ) {
           this.interactionDisconnected.next(true);
+          this.wasClickToDial = false;
           this.storageService.onInteractionDisconnect();
         }
       }
     } catch (e) {
       const msg = `Error in onInteraction! Exception details: ${e.message}`;
       this.logger.logError(msg);
+      this.wasClickToDial = false;
       throw msg;
     }
+    this.wasClickToDial = false;
     return;
   }
 
