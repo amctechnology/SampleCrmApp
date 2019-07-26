@@ -5,8 +5,7 @@ import { bind } from 'bind-decorator';
 import {
   IInteraction,
   registerOnLogout,
-  ChannelTypes,
-  IRecordItem
+  ChannelTypes
 } from '@amc-technology/davinci-api';
 import { BehaviorSubject } from 'rxjs/BehaviorSubject';
 import { Subject } from 'rxjs/Subject';
@@ -30,7 +29,7 @@ export class HomeSalesforceComponent extends Application implements OnInit {
   lastOnFocusWasAnEntity: boolean;
   ScreenpopOnClickToDialListView: boolean;
   lastClickToDialRecord: any;
-  lastClickToDialSearchRecord: api.SearchRecords;
+  lastClickToDialSearchRecord: any;
 
   constructor(
     private loggerService: LoggerService,
@@ -79,6 +78,7 @@ export class HomeSalesforceComponent extends Application implements OnInit {
       this.lastOnFocusWasAnEntity = event.lastOnFocusWasAnEntity;
       this.lastClickToDialRecord = event.clickedEntity;
       this.lastClickToDialSearchRecord = event.clickedSearchRecord;
+      this.lastClickToDialSearchRecord['id'] = event.clickedEntity.objectId;
       api.clickToDial(event.number, this.formatCrmResults(event.records));
     });
     this.bridgeEventsService.subscribe(
@@ -475,9 +475,10 @@ export class HomeSalesforceComponent extends Application implements OnInit {
         );
         const searchRecord = await this.preformScreenpop(interaction);
         if (this.ScreenpopOnClickToDialListView && !this.lastOnFocusWasAnEntity && this.wasClickToDial) {
-// push to searchRecord.records
+          this.storageService.setsearchRecordList([this.lastClickToDialSearchRecord]);
+        } else {
+          this.storageService.setsearchRecordList(searchRecord.toJSON());
         }
-        this.storageService.setsearchRecordList(searchRecord.toJSON());
         this.loggerService.logger.logDebug(
           `AMCSalesforceHomeComponent: Search results: ${JSON.stringify(
             searchRecord.toJSON()
