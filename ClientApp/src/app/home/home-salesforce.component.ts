@@ -28,7 +28,6 @@ export class HomeSalesforceComponent extends Application implements OnInit {
   wasClickToDial: boolean;
   lastOnFocusWasAnEntity: boolean;
   ScreenpopOnClickToDialListView: boolean;
-  lastClickToDialRecord: any;
   lastClickToDialSearchRecord: any;
 
   constructor(
@@ -43,7 +42,6 @@ export class HomeSalesforceComponent extends Application implements OnInit {
     this.screenpopOnAlert = true;
     this.ScreenpopOnClickToDialListView = false;
     this.phoneNumberFormat = null;
-    this.lastClickToDialRecord = null;
     this.wasClickToDial = false;
     this.appName = 'Salesforce';
     this.loggerService.logger.logDebug(
@@ -76,7 +74,6 @@ export class HomeSalesforceComponent extends Application implements OnInit {
     this.bridgeEventsService.subscribe('clickToDial', event => {
       this.wasClickToDial = true;
       this.lastOnFocusWasAnEntity = event.lastOnFocusWasAnEntity;
-      this.lastClickToDialRecord = event.clickedEntity;
       this.lastClickToDialSearchRecord = event.clickedSearchRecord;
       this.lastClickToDialSearchRecord['id'] = event.clickedEntity.objectId;
       api.clickToDial(event.number, this.formatCrmResults(event.records));
@@ -463,8 +460,8 @@ export class HomeSalesforceComponent extends Application implements OnInit {
           this.wasClickToDial
         ) {
         if (this.ScreenpopOnClickToDialListView && !this.lastOnFocusWasAnEntity && this.wasClickToDial) {
-          interaction.details.id = this.lastClickToDialRecord['objectId'];
-          interaction.details.type = this.lastClickToDialRecord['object'];
+          interaction.details.id = this.lastClickToDialSearchRecord['id'];
+          interaction.details.type = this.lastClickToDialSearchRecord['object'];
         }
 
         this.loggerService.logger.logDebug(
