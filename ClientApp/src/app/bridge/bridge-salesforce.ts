@@ -12,7 +12,7 @@ class BridgeSalesforce extends Bridge {
   activity: IActivity = null;
   layoutObjectList: string[];
   searchLayout: any;
-  lastOnFocusWasAnEntity: any;
+  lastOnFocusWasAnEntity: boolean;
 
   constructor() {
     super();
@@ -362,10 +362,11 @@ class BridgeSalesforce extends Bridge {
   protected setSoftphoneHeight(heightInPixels: number) {
     return new Promise<void>((resolve, reject) => {
       // Salesforce allows a MAX of 700 pixels height
-      const AdjustedheightInPixels = ((heightInPixels > 700) ? 700 : heightInPixels);
+      const AdjustedheightInPixelsLightning = ((heightInPixels > 650) ? 650 : heightInPixels);
+      const AdjustedheightInPixelsClassic = ((heightInPixels > 685) ? 685 : heightInPixels);
       if (this.isLightning) {
         sforce.opencti.setSoftphonePanelHeight({
-          heightPX: AdjustedheightInPixels,
+          heightPX: AdjustedheightInPixelsLightning + 50,
           callback: response => {
             if (response.errors) {
               reject(response.errors);
@@ -375,7 +376,7 @@ class BridgeSalesforce extends Bridge {
           }
         });
       } else {
-        sforce.interaction.cti.setSoftphoneHeight(AdjustedheightInPixels, response => {
+        sforce.interaction.cti.setSoftphoneHeight(AdjustedheightInPixelsClassic + 15, response => {
           if (response.error) {
             reject(response.error);
           } else {
