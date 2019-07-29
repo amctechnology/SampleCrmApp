@@ -26,6 +26,9 @@ export class HomeSalesforceComponent extends Application implements OnInit {
   protected cadActivityMap: Object;
   screenpopOnAlert: Boolean;
   wasClickToDial: boolean;
+  lastOnFocusWasAnEntity: boolean;
+  ScreenpopOnClickToDialListView: boolean;
+  lastClickToDialSearchRecord: any;
 
   constructor(
     private loggerService: LoggerService,
@@ -37,6 +40,7 @@ export class HomeSalesforceComponent extends Application implements OnInit {
     );
     this.storageService.syncWithLocalStorage();
     this.screenpopOnAlert = true;
+    this.ScreenpopOnClickToDialListView = false;
     this.phoneNumberFormat = null;
     this.wasClickToDial = false;
     this.appName = 'Salesforce';
@@ -69,6 +73,9 @@ export class HomeSalesforceComponent extends Application implements OnInit {
     );
     this.bridgeEventsService.subscribe('clickToDial', event => {
       this.wasClickToDial = true;
+      this.lastOnFocusWasAnEntity = event.lastOnFocusWasAnEntity;
+      this.lastClickToDialSearchRecord = event.clickedSearchRecord;
+      this.lastClickToDialSearchRecord['id'] = event.clickedEntity.objectId;
       api.clickToDial(event.number, this.formatCrmResults(event.records));
     });
     this.bridgeEventsService.subscribe(
@@ -89,6 +96,7 @@ export class HomeSalesforceComponent extends Application implements OnInit {
     } else {
       this.cadActivityMap = {};
     }
+    this.ScreenpopOnClickToDialListView = <boolean>config['variables']['ScreenpopOnClickToDialListView'];
     this.storageService.maxRecentItems = <Number>config['variables']['MaxRecentItems'];
     registerOnLogout(this.removeLocalStorageOnLogout);
     this.loggerService.logger.logDebug(
@@ -451,6 +459,11 @@ export class HomeSalesforceComponent extends Application implements OnInit {
             interaction.state === api.InteractionStates.Connected) ||
           this.wasClickToDial
         ) {
+        if (this.ScreenpopOnClickToDialListView && !this.lastOnFocusWasAnEntity && this.wasClickToDial) {
+          interaction.details.id = this.lastClickToDialSearchRecord['id'];
+          interaction.details.type = this.lastClickToDialSearchRecord['object'];
+        }
+
         this.loggerService.logger.logDebug(
           `AMCSalesforceHomeComponent: screenpop for new interaction: ${JSON.stringify(
             interaction
@@ -458,7 +471,11 @@ export class HomeSalesforceComponent extends Application implements OnInit {
           api.ErrorCode.SCREEN_POP
         );
         const searchRecord = await this.preformScreenpop(interaction);
-        this.storageService.setsearchRecordList(searchRecord.toJSON());
+        if (this.ScreenpopOnClickToDialListView && !this.lastOnFocusWasAnEntity && this.wasClickToDial) {
+          this.storageService.setsearchRecordList([this.lastClickToDialSearchRecord]);
+        } else {
+          this.storageService.setsearchRecordList(searchRecord.toJSON());
+        }
         this.loggerService.logger.logDebug(
           `AMCSalesforceHomeComponent: Search results: ${JSON.stringify(
             searchRecord.toJSON()
@@ -491,6 +508,7 @@ export class HomeSalesforceComponent extends Application implements OnInit {
         this.autoSave.next(0);
         this.wasClickToDial = false;
         return searchRecord;
+
           }
       } else if (interaction.state === api.InteractionStates.Disconnected) {
         this.loggerService.logger.logDebug(

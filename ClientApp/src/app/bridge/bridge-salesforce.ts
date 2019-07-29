@@ -12,6 +12,7 @@ class BridgeSalesforce extends Bridge {
   activity: IActivity = null;
   layoutObjectList: string[];
   searchLayout: any;
+  lastOnFocusWasAnEntity: boolean;
 
   constructor() {
     super();
@@ -25,6 +26,7 @@ class BridgeSalesforce extends Bridge {
     this.eventService.subscribe('saveActivity', this.saveActivity);
     this.eventService.subscribe('createNewEntity', this.createNewEntity);
     this.eventService.subscribe('agentSelectedCallerInformation', this.tryScreenpop);
+    this.lastOnFocusWasAnEntity = false;
   }
 
   async afterScriptsLoad(): Promise<any> {
@@ -123,6 +125,16 @@ class BridgeSalesforce extends Bridge {
         entity.objectName = temp.objectName;
         entity.url = temp.url;
       }
+      if (
+        (!entity.objectType || entity.objectType === '') &&
+        (!entity.displayName || entity.displayName === '') &&
+        (!entity.objectId || entity.objectId === '') &&
+        (!entity.objectName || entity.objectName === '')
+      ) {
+        this.lastOnFocusWasAnEntity = false;
+      } else {
+        this.lastOnFocusWasAnEntity = true;
+      }
       if (this.layoutObjectList.includes(entity.objectType) && entity.objectId !== '') {
         this.eventService.sendEvent('setActivityDetails', entity);
         this.eventService.sendEvent('logDebug', 'bridge: onFocus event sent to home');
@@ -146,9 +158,15 @@ class BridgeSalesforce extends Bridge {
     }
 
     const records = await this.trySearch(entity.number, InteractionDirectionTypes.Outbound, '', false);
+    records[entity.objectId]['fields'] = {};
+    records[entity.objectId].fields['Name'] = {};
+    records[entity.objectId].fields.Name['Value'] = records[entity.objectId].Name;
     this.eventService.sendEvent('clickToDial', {
       number: entity.number,
-      records: records
+      records: records,
+      lastOnFocusWasAnEntity: this.lastOnFocusWasAnEntity,
+      clickedEntity: entity,
+      clickedSearchRecord: records[entity.objectId]
     });
   }
 
@@ -344,10 +362,11 @@ class BridgeSalesforce extends Bridge {
   protected setSoftphoneHeight(heightInPixels: number) {
     return new Promise<void>((resolve, reject) => {
       // Salesforce allows a MAX of 700 pixels height
-      const AdjustedheightInPixels = ((heightInPixels > 700) ? 700 : heightInPixels);
+      const AdjustedheightInPixelsLightning = ((heightInPixels > 650) ? 650 : heightInPixels);
+      const AdjustedheightInPixelsClassic = ((heightInPixels > 685) ? 685 : heightInPixels);
       if (this.isLightning) {
         sforce.opencti.setSoftphonePanelHeight({
-          heightPX: AdjustedheightInPixels,
+          heightPX: AdjustedheightInPixelsLightning + 50,
           callback: response => {
             if (response.errors) {
               reject(response.errors);
@@ -357,7 +376,7 @@ class BridgeSalesforce extends Bridge {
           }
         });
       } else {
-        sforce.interaction.cti.setSoftphoneHeight(AdjustedheightInPixels, response => {
+        sforce.interaction.cti.setSoftphoneHeight(AdjustedheightInPixelsClassic + 15, response => {
           if (response.error) {
             reject(response.error);
           } else {
