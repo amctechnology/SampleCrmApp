@@ -459,9 +459,13 @@ export class HomeSalesforceComponent extends Application implements OnInit {
             interaction.state === api.InteractionStates.Connected) ||
           this.wasClickToDial
         ) {
-        if (this.ScreenpopOnClickToDialListView && !this.lastOnFocusWasAnEntity && this.wasClickToDial) {
+        if (/* this.ScreenpopOnClickToDialListView && */ !this.lastOnFocusWasAnEntity && this.wasClickToDial) {
+          if (this.ScreenpopOnClickToDialListView) {
+            interaction.details.type = 'ClickToDialScreenpop';
+          } else {
+            interaction.details.type = 'ClickToDialNoScreenpop';
+          }
           interaction.details.id = this.lastClickToDialSearchRecord['id'];
-          interaction.details.type = this.lastClickToDialSearchRecord['object'];
         }
 
         this.loggerService.logger.logDebug(

@@ -175,6 +175,17 @@ class BridgeSalesforce extends Bridge {
     this.eventService.sendEvent('logVerbose', `bridge: screenpopHandler START: ${event}`);
     try {
       let screenpopRecords = null;
+      if (event.type) {
+        if (event.type === 'ClickToDialScreenpop') {
+          screenpopRecords = await this.tryScreenpop(event.id);
+          return screenpopRecords;
+        } else if (event.type === 'ClickToDialNoScreenpop') {
+          for (const phoneNumber of event.phoneNumbers) {
+            screenpopRecords = await this.trySearch(phoneNumber, InteractionDirectionTypes.Inbound, event.cadString, false);
+            if (screenpopRecords != null) { return screenpopRecords; }
+          }
+        }
+      }
       if (event.id && event.type) {
         screenpopRecords = await this.tryScreenpop(event.id);
       }
