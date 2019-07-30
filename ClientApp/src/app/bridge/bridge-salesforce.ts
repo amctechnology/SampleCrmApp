@@ -182,7 +182,23 @@ class BridgeSalesforce extends Bridge {
         } else if (event.type === 'ClickToDialNoScreenpop') {
           for (const phoneNumber of event.phoneNumbers) {
             screenpopRecords = await this.trySearch(phoneNumber, InteractionDirectionTypes.Inbound, event.cadString, false);
-            if (screenpopRecords != null) { return screenpopRecords; }
+            if (screenpopRecords != null) {
+              const allowed = [event.id];
+              const filtered = Object.keys(screenpopRecords).filter(key => allowed.includes(key))
+                              .reduce((obj, key) => {
+                              obj[key] = screenpopRecords[key];
+                              return obj;
+                              }, {});
+              const entityForSetActivityDetails = {
+                'displayName': filtered[event.id].displayName,
+                'objectId': event.id,
+                'objectName': filtered[event.id].Name,
+                'objectType': filtered[event.id].displayName,
+                'AddToList': null
+              };
+              this.eventService.sendEvent('setActivityDetails', entityForSetActivityDetails);
+              return filtered;
+            }
           }
         }
       }

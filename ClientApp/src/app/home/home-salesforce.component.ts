@@ -634,7 +634,7 @@ export class HomeSalesforceComponent extends Application implements OnInit {
       )}`,
       api.ErrorCode.ACTIVITY
     );
-    if (this.storageService.getCurrentInteraction()) {
+    if (this.storageService.getCurrentInteraction() || eventObject.hasOwnProperty('AddToList')) {
       if (
         eventObject.objectType === 'Contact' ||
         eventObject.objectType === 'Lead'
