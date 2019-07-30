@@ -459,7 +459,7 @@ export class HomeSalesforceComponent extends Application implements OnInit {
             interaction.state === api.InteractionStates.Connected) ||
           this.wasClickToDial
         ) {
-        if (/* this.ScreenpopOnClickToDialListView && */ !this.lastOnFocusWasAnEntity && this.wasClickToDial) {
+        if (!this.lastOnFocusWasAnEntity && this.wasClickToDial) {
           if (this.ScreenpopOnClickToDialListView) {
             interaction.details.type = 'ClickToDialScreenpop';
           } else {
@@ -475,7 +475,7 @@ export class HomeSalesforceComponent extends Application implements OnInit {
           api.ErrorCode.SCREEN_POP
         );
         const searchRecord = await this.preformScreenpop(interaction);
-        if (this.ScreenpopOnClickToDialListView && !this.lastOnFocusWasAnEntity && this.wasClickToDial) {
+        if (!this.lastOnFocusWasAnEntity && this.wasClickToDial) {
           this.storageService.setsearchRecordList([this.lastClickToDialSearchRecord]);
         } else {
           this.storageService.setsearchRecordList(searchRecord.toJSON());
