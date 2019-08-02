@@ -409,9 +409,14 @@ export class HomeSalesforceComponent extends Application implements OnInit {
     try {
       const interactionId = interaction.interactionId;
       const scenarioIdInt = interaction.scenarioId;
+      let storageServiceInteractionID = null;
+      if (this.storageService.currentInteraction) {
+        storageServiceInteractionID = this.storageService.currentInteraction.interactionId;
+      }
       this.storageService.updateCadFields(interaction, this.cadActivityMap);
-      if (this.storageService.recentActivityListContains(interactionId)) {
-        this.saveActivity(this.storageService.getRecentActivity(interactionId));
+      if (this.storageService.recentActivityListContains(interactionId) &&
+        this.storageService.currentInteraction && storageServiceInteractionID !== interactionId) {
+          this.saveActivity(this.storageService.getRecentActivity(interactionId));
       }
       let isNewScenarioId = false;
       if (
@@ -428,23 +433,18 @@ export class HomeSalesforceComponent extends Application implements OnInit {
         !this.storageService.getCurrentInteraction() &&
         interaction.state !== api.InteractionStates.Disconnected
       ) {
-        if (
-          (this.screenpopOnAlert === true &&
-            interaction.state === api.InteractionStates.Alerting) ||
-          (this.screenpopOnAlert === false &&
-            interaction.state === api.InteractionStates.Connected)
-        ) {
+        if (!this.wasClickToDial) {
+          if ((this.screenpopOnAlert === true && interaction.state === api.InteractionStates.Alerting) ||
+            (this.screenpopOnAlert === false && interaction.state === api.InteractionStates.Connected) ||
+            (interaction.direction === api.InteractionDirectionTypes.Outbound)) {
+            this.scenarioInteractionMappings[scenarioIdInt] = {};
+            isNewScenarioId = true;
+            this.scenarioInteractionMappings[scenarioIdInt][interactionId] = true;
+          }
+        } else {
           this.scenarioInteractionMappings[scenarioIdInt] = {};
           isNewScenarioId = true;
-          this.scenarioInteractionMappings[scenarioIdInt][
-            interactionId
-          ] = true;
-        } else if (this.wasClickToDial) {
-          this.scenarioInteractionMappings[scenarioIdInt] = {};
-          isNewScenarioId = true;
-          this.scenarioInteractionMappings[scenarioIdInt][
-            interactionId
-          ] = true;
+          this.scenarioInteractionMappings[scenarioIdInt][interactionId] = true;
         }
       }
       if (
@@ -452,16 +452,16 @@ export class HomeSalesforceComponent extends Application implements OnInit {
         !this.storageService.getCurrentInteraction() &&
         interaction.state !== api.InteractionStates.Disconnected
       ) {
-        if (
-          (this.screenpopOnAlert === true &&
-            interaction.state === api.InteractionStates.Alerting) ||
-          (this.screenpopOnAlert === false &&
-            interaction.state === api.InteractionStates.Connected) ||
-          this.wasClickToDial
-        ) {
-        if (this.ScreenpopOnClickToDialListView && !this.lastOnFocusWasAnEntity && this.wasClickToDial) {
+        if ((this.screenpopOnAlert === true && interaction.state === api.InteractionStates.Alerting) ||
+          (this.screenpopOnAlert === false && interaction.state === api.InteractionStates.Connected) || this.wasClickToDial
+          ||  (interaction.direction === api.InteractionDirectionTypes.Outbound)) {
+        if (!this.lastOnFocusWasAnEntity && this.wasClickToDial) {
+          if (this.ScreenpopOnClickToDialListView) {
+            interaction.details.type = 'ClickToDialScreenpop';
+          } else {
+            interaction.details.type = 'ClickToDialNoScreenpop';
+          }
           interaction.details.id = this.lastClickToDialSearchRecord['id'];
-          interaction.details.type = this.lastClickToDialSearchRecord['object'];
         }
 
         this.loggerService.logger.logDebug(
@@ -471,7 +471,7 @@ export class HomeSalesforceComponent extends Application implements OnInit {
           api.ErrorCode.SCREEN_POP
         );
         const searchRecord = await this.preformScreenpop(interaction);
-        if (this.ScreenpopOnClickToDialListView && !this.lastOnFocusWasAnEntity && this.wasClickToDial) {
+        if (!this.lastOnFocusWasAnEntity && this.wasClickToDial) {
           this.storageService.setsearchRecordList([this.lastClickToDialSearchRecord]);
         } else {
           this.storageService.setsearchRecordList(searchRecord.toJSON());
@@ -630,7 +630,7 @@ export class HomeSalesforceComponent extends Application implements OnInit {
       )}`,
       api.ErrorCode.ACTIVITY
     );
-    if (this.storageService.getCurrentInteraction()) {
+    if (this.storageService.getCurrentInteraction() || eventObject.hasOwnProperty('AddToList')) {
       if (
         eventObject.objectType === 'Contact' ||
         eventObject.objectType === 'Lead'
