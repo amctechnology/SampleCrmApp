@@ -414,8 +414,7 @@ export class HomeSalesforceComponent extends Application implements OnInit {
         storageServiceInteractionID = this.storageService.currentInteraction.interactionId;
       }
       this.storageService.updateCadFields(interaction, this.cadActivityMap);
-      if (this.storageService.recentActivityListContains(interactionId) &&
-        this.storageService.currentInteraction && storageServiceInteractionID !== interactionId) {
+      if (this.storageService.recentActivityListContains(interactionId) && storageServiceInteractionID !== interactionId) {
           this.saveActivity(this.storageService.getRecentActivity(interactionId));
       }
       let isNewScenarioId = false;
