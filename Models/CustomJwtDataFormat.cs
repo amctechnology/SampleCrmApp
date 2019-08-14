@@ -13,11 +13,6 @@ using Newtonsoft.Json;
 
 namespace Salesforce.Models {
     class CustomJwtDataFormat : ISecureDataFormat<AuthenticationTicket> {
-        private struct JsonClaim {
-            public string type;
-            public string value;
-        }
-
         private static readonly string AuthProvider = Environment.GetEnvironmentVariable("AUTH_PROVIDER_URL");
         private static readonly bool isDevelopmentEnvironment = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") == "Development";
         private HttpClient client;
@@ -69,7 +64,7 @@ namespace Salesforce.Models {
                 try {
                     Principal = TokenHandler.ValidateToken(Token, ValidationParameters, out SecurityToken);                    
                 }
-                catch (Microsoft.IdentityModel.Tokens.SecurityTokenInvalidSignatureException e) {
+                catch (Microsoft.IdentityModel.Tokens.SecurityTokenInvalidSignatureException) {
                     // TODO: log error
                     UpdatePublicKey();
 
@@ -82,7 +77,7 @@ namespace Salesforce.Models {
                     return new AuthenticationTicket(Principal, new AuthenticationProperties(), "Cookie");
                 }
             }
-            catch (Exception e)
+            catch (Exception)
             {
                 //Log here
             }

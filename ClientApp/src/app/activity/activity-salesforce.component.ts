@@ -5,6 +5,7 @@ import { IActivity } from '../Model/IActivity';
 import { IActivityDetails } from '../Model/IActivityDetails';
 import { LoggerService } from '../logger.service';
 import { StorageService } from '../storage.service';
+import { BehaviorSubject } from 'rxjs/BehaviorSubject';
 @Component({
   selector: 'app-activity',
   templateUrl: './activity-salesforce.component.html',
@@ -12,7 +13,7 @@ import { StorageService } from '../storage.service';
 })
 export class ActivitySalesforceComponent implements OnInit {
   @Input() interactionDisconnected: Subject<boolean>;
-  @Input() autoSave: Subject<void>;
+  @Input() autoSave: BehaviorSubject<number>;
   @Input() quickCommentList: string[];
   @Output() ActivitySave: EventEmitter<IActivity> = new EventEmitter<IActivity>();
   @Output() childComponentLogger: EventEmitter<string> = new EventEmitter<string>();
@@ -27,14 +28,19 @@ export class ActivitySalesforceComponent implements OnInit {
   ngOnInit() {
     this.interactionDisconnected.subscribe(() => {
       this.loggerService.logger.logDebug('create: Interaction disconnected event received', api.ErrorCode.DISCONEECTED_INTERACTION);
-      this.activitySave(true);
+      this.activitySave(true, true);
     });
-    this.autoSave.subscribe(() => {
+    this.autoSave.subscribe(event => {
       this.loggerService.logger.logDebug('create: Auto save event received');
-      this.activitySave(false);
+      if (event === 0) {
+        this.activitySave(false, true);
+      } else {
+        this.activitySave(false);
+      }
+
     });
   }
-  protected activitySave(clearActivityFields) {
+  protected activitySave(clearActivityFields, saveToSalesforce = false) {
     if (this.storageService.currentInteraction) {
       this.storageService.activity.CallDurationInSeconds = this.getSecondsElapsed(this.storageService.activity.TimeStamp).toString();
       if (this.storageService.activity.WhatObject.objectType === '') {
@@ -48,6 +54,7 @@ export class ActivitySalesforceComponent implements OnInit {
         }
       }
       this.storageService.activity.CallType = this.getInteractionDirection(this.storageService.getCurrentInteraction().direction);
+      this.storageService.activity.saveToSalesforce = saveToSalesforce;
       if (clearActivityFields) {
         this.storageService.activity.Status = 'Completed';
         this.ActivitySave.emit(this.storageService.activity);

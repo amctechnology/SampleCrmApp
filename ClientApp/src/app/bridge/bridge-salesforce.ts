@@ -12,6 +12,7 @@ class BridgeSalesforce extends Bridge {
   activity: IActivity = null;
   layoutObjectList: string[];
   searchLayout: any;
+  lastOnFocusWasAnEntity: boolean;
 
   constructor() {
     super();
@@ -25,6 +26,7 @@ class BridgeSalesforce extends Bridge {
     this.eventService.subscribe('saveActivity', this.saveActivity);
     this.eventService.subscribe('createNewEntity', this.createNewEntity);
     this.eventService.subscribe('agentSelectedCallerInformation', this.tryScreenpop);
+    this.lastOnFocusWasAnEntity = false;
   }
 
   async afterScriptsLoad(): Promise<any> {
@@ -45,8 +47,10 @@ class BridgeSalesforce extends Bridge {
       this.eventService.sendEvent('logDebug', 'bridge: App running in lightning');
     } else {
       this.eventService.sendEvent('logDebug', 'bridge: App running in classic');
+      this.eventService.sendEvent('logDebug', 'bridge: App running in classic');
     }
   }
+
   @bind
   protected buildLayoutObjectList(result) {
     if (this.isLightning) {
@@ -121,6 +125,16 @@ class BridgeSalesforce extends Bridge {
         entity.objectName = temp.objectName;
         entity.url = temp.url;
       }
+      if (
+        (!entity.objectType || entity.objectType === '') &&
+        (!entity.displayName || entity.displayName === '') &&
+        (!entity.objectId || entity.objectId === '') &&
+        (!entity.objectName || entity.objectName === '')
+      ) {
+        this.lastOnFocusWasAnEntity = false;
+      } else {
+        this.lastOnFocusWasAnEntity = true;
+      }
       if (this.layoutObjectList.includes(entity.objectType) && entity.objectId !== '') {
         this.eventService.sendEvent('setActivityDetails', entity);
         this.eventService.sendEvent('logDebug', 'bridge: onFocus event sent to home');
@@ -144,9 +158,15 @@ class BridgeSalesforce extends Bridge {
     }
 
     const records = await this.trySearch(entity.number, InteractionDirectionTypes.Outbound, '', false);
+    records[entity.objectId]['fields'] = {};
+    records[entity.objectId].fields['Name'] = {};
+    records[entity.objectId].fields.Name['Value'] = records[entity.objectId].Name;
     this.eventService.sendEvent('clickToDial', {
       number: entity.number,
-      records: records
+      records: records,
+      lastOnFocusWasAnEntity: this.lastOnFocusWasAnEntity,
+      clickedEntity: entity,
+      clickedSearchRecord: records[entity.objectId]
     });
   }
 
@@ -155,6 +175,33 @@ class BridgeSalesforce extends Bridge {
     this.eventService.sendEvent('logVerbose', `bridge: screenpopHandler START: ${event}`);
     try {
       let screenpopRecords = null;
+      if (event.type) {
+        if (event.type === 'ClickToDialScreenpop') {
+          screenpopRecords = await this.tryScreenpop(event.id);
+          return screenpopRecords;
+        } else if (event.type === 'ClickToDialNoScreenpop') {
+          for (const phoneNumber of event.phoneNumbers) {
+            screenpopRecords = await this.trySearch(phoneNumber, InteractionDirectionTypes.Inbound, event.cadString, false);
+            if (screenpopRecords != null) {
+              const allowed = [event.id];
+              const filtered = Object.keys(screenpopRecords).filter(key => allowed.includes(key))
+                              .reduce((obj, key) => {
+                              obj[key] = screenpopRecords[key];
+                              return obj;
+                              }, {});
+              const entityForSetActivityDetails = {
+                'displayName': filtered[event.id].displayName,
+                'objectId': event.id,
+                'objectName': filtered[event.id].Name,
+                'objectType': filtered[event.id].displayName,
+                'AddToList': null
+              };
+              this.eventService.sendEvent('setActivityDetails', entityForSetActivityDetails);
+              return filtered;
+            }
+          }
+        }
+      }
       if (event.id && event.type) {
         screenpopRecords = await this.tryScreenpop(event.id);
       }
@@ -229,7 +276,7 @@ class BridgeSalesforce extends Bridge {
         const finalValue = `value=${cad.value}`;
         const finalquery = `${finalfields}&${finalObject}&${finalKey}&${finalValue}`;
         const cadSearchRequest = {
-          apexClass: 'AMCCloudOpenCTI.ObjectRetrieval',
+          apexClass: 'AMCOpenCTINS.ObjectRetrieval',
           methodName: 'getObject',
           methodParams: finalquery,
           callback: function (response) {
@@ -342,10 +389,11 @@ class BridgeSalesforce extends Bridge {
   protected setSoftphoneHeight(heightInPixels: number) {
     return new Promise<void>((resolve, reject) => {
       // Salesforce allows a MAX of 700 pixels height
-      const AdjustedheightInPixels = ((heightInPixels > 700) ? 700 : heightInPixels);
+      const AdjustedheightInPixelsLightning = ((heightInPixels > 650) ? 650 : heightInPixels);
+      const AdjustedheightInPixelsClassic = ((heightInPixels > 685) ? 685 : heightInPixels);
       if (this.isLightning) {
         sforce.opencti.setSoftphonePanelHeight({
-          heightPX: AdjustedheightInPixels,
+          heightPX: AdjustedheightInPixelsLightning + 50,
           callback: response => {
             if (response.errors) {
               reject(response.errors);
@@ -355,7 +403,7 @@ class BridgeSalesforce extends Bridge {
           }
         });
       } else {
-        sforce.interaction.cti.setSoftphoneHeight(AdjustedheightInPixels, response => {
+        sforce.interaction.cti.setSoftphoneHeight(AdjustedheightInPixelsClassic + 15, response => {
           if (response.error) {
             reject(response.error);
           } else {
@@ -411,6 +459,9 @@ class BridgeSalesforce extends Bridge {
         if (activity.ActivityId) {
           activityObject['value']['Id'] = activity.ActivityId;
         }
+        for (const key of Object.keys(activity.CadFields)) {
+          activityObject['value'][key] = activity.CadFields[key];
+        }
         sforce.opencti.saveLog(activityObject);
       });
     }
@@ -422,6 +473,9 @@ class BridgeSalesforce extends Bridge {
         `&ActivityDate=${activity.ActivityDate}`;
       if (activity.ActivityId) {
         activityString = activityString + '&Id=' + activity.ActivityId;
+      }
+      for (const key of Object.keys(activity.CadFields)) {
+        activityString = activityString + '&' + key + '=' + activity.CadFields[key];
       }
       sforce.interaction.saveLog('Task', activityString, result => {
         activity.ActivityId = result.result;

@@ -9,13 +9,16 @@ export class StorageService {
   public whatList: IActivityDetails[];
   public currentInteraction: api.IInteraction;
   public activityList: IActivity[];
+  public recentActivityList: IActivity[];
   public activity: IActivity;
   public searchRecordList: api.IRecordItem[];
   public searchReturnedSingleResult: boolean;
   public searchResultWasReturned: boolean;
   public currentTicketId: string;
+  public maxRecentItems: Number;
   constructor() {
     this.activityList = [];
+    this.recentActivityList = [];
     this.currentInteraction = null;
     this.searchRecordList = [];
     this.searchResultWasReturned = null;
@@ -23,6 +26,7 @@ export class StorageService {
     this.whatList = [];
     this.whoList = [];
     this.currentTicketId = '';
+    this.maxRecentItems = 0;
   }
   public setCurrentTicketId(id) {
     this.currentTicketId = id;
@@ -63,6 +67,7 @@ export class StorageService {
   public removeActivity(interactionId: string) {
     for (let i = 0; i < this.activityList.length; i++) {
       if (this.activityList[i].InteractionId === interactionId) {
+        this.addRecentActivity(this.activityList[i]);
         this.activityList.splice(i, 1);
         this.activity = null;
       }
@@ -216,7 +221,8 @@ export class StorageService {
       searchReturnedSingleResult: this.searchReturnedSingleResult,
       whatList: this.whatList,
       whoList: this.whoList,
-      currentTicketId: this.currentTicketId
+      currentTicketId: this.currentTicketId,
+      recentActivityList: this.recentActivityList
     }));
   }
   public syncWithLocalStorage() {
@@ -231,6 +237,52 @@ export class StorageService {
       this.whatList = browserStorage.whatList;
       this.whoList = browserStorage.whoList;
       this.currentTicketId = browserStorage.currentTicketId;
+      this.recentActivityList = browserStorage.recentActivityList;
+    }
+  }
+  public recentActivityListContains(interactionId: string): boolean {
+    return (this.recentActivityList.find(item => item.InteractionId === interactionId)) ? true : false;
+  }
+  public addRecentActivity(activity: IActivity) {
+    if (this.recentActivityList.length === this.maxRecentItems) {
+      this.recentActivityList.pop();
+    }
+    this.recentActivityList.unshift(activity);
+    this.storeToLocalStorage();
+  }
+  public updateRecentActivity(activity: IActivity) {
+    for (let i = 0; i < this.recentActivityList.length; i++) {
+      if (this.recentActivityList[i].InteractionId === activity.InteractionId) {
+        this.recentActivityList[i] = activity;
+        this.storeToLocalStorage();
+      }
+    }
+  }
+  public getRecentActivity(interactionId: string): IActivity {
+    return (this.recentActivityList.find(item => item.InteractionId === interactionId));
+  }
+  public updateCadFields(interaction: IInteraction, cadActivityMap: any) {
+    const isInteractionCurrent = this.activityListContains(interaction.interactionId);
+    const isInteractionRecent = this.recentActivityListContains(interaction.interactionId);
+    if (isInteractionCurrent || isInteractionRecent) {
+        if (interaction.details) {
+          for (const key in cadActivityMap) {
+            if (interaction.details.fields[key]) {
+              const objActivity = (isInteractionCurrent) ?
+              this.getActivity(interaction.interactionId) :
+              this.getRecentActivity(interaction.interactionId);
+              if (!objActivity.CadFields) {
+                objActivity.CadFields = {};
+              }
+              objActivity.CadFields[cadActivityMap[key]] = interaction.details.fields[key].Value;
+              if (isInteractionCurrent) {
+                this.updateActivity(objActivity);
+              } else {
+                this.updateRecentActivity(objActivity);
+              }
+            }
+          }
+      }
     }
   }
 }
