@@ -76,6 +76,9 @@ export class HomeSalesforceComponent extends Application implements OnInit {
       this.lastOnFocusWasAnEntity = event.lastOnFocusWasAnEntity;
       this.lastClickToDialSearchRecord = event.clickedSearchRecord;
       this.lastClickToDialSearchRecord['id'] = event.clickedEntity.objectId;
+      if (!event.records.SCREEN_POP_DATA) {
+        delete event.records['SCREEN_POP_DATA'];
+      }
       api.clickToDial(event.number, this.formatCrmResults(event.records));
     });
     this.bridgeEventsService.subscribe(

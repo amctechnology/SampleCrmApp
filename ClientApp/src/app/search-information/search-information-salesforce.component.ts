@@ -38,8 +38,12 @@ export class SearchInformationSalesforceComponent {
       }
     }
     let name = searchRecord.fields[nameKey].Value;
-    name = searchRecord.displayName + ': ' + name;
-
+    if (searchRecord.displayName) {
+      name = searchRecord.displayName + ': ' + name;
+    } else {
+      // Lightning
+      name = searchRecord.RecordType + ': ' + name;
+    }
     return name;
   }
   protected getRecord(id) {

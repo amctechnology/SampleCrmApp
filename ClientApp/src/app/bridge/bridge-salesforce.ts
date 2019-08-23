@@ -175,29 +175,53 @@ class BridgeSalesforce extends Bridge {
     this.eventService.sendEvent('logVerbose', `bridge: screenpopHandler START: ${event}`);
     try {
       let screenpopRecords = null;
+      const versionIsLightning = this.isLightning;
       if (event.type) {
         if (event.type === 'ClickToDialScreenpop') {
           screenpopRecords = await this.tryScreenpop(event.id);
           return screenpopRecords;
         } else if (event.type === 'ClickToDialNoScreenpop') {
-          for (const phoneNumber of event.phoneNumbers) {
-            screenpopRecords = await this.trySearch(phoneNumber, InteractionDirectionTypes.Inbound, event.cadString, false);
-            if (screenpopRecords != null) {
-              const allowed = [event.id];
-              const filtered = Object.keys(screenpopRecords).filter(key => allowed.includes(key))
-                              .reduce((obj, key) => {
-                              obj[key] = screenpopRecords[key];
-                              return obj;
-                              }, {});
-              const entityForSetActivityDetails = {
-                'displayName': filtered[event.id].displayName,
-                'objectId': event.id,
-                'objectName': filtered[event.id].Name,
-                'objectType': filtered[event.id].displayName,
-                'AddToList': null
-              };
-              this.eventService.sendEvent('setActivityDetails', entityForSetActivityDetails);
-              return filtered;
+          if (!versionIsLightning) {
+            for (const phoneNumber of event.phoneNumbers) {
+              screenpopRecords = await this.trySearch(phoneNumber, InteractionDirectionTypes.Inbound, event.cadString, false);
+              if (screenpopRecords != null) {
+                const allowed = [event.id];
+                const filtered = Object.keys(screenpopRecords).filter(key => allowed.includes(key))
+                                .reduce((obj, key) => {
+                                obj[key] = screenpopRecords[key];
+                                return obj;
+                                }, {});
+                const entityForSetActivityDetails = {
+                  'displayName': filtered[event.id].displayName,
+                  'objectId': event.id,
+                  'objectName': filtered[event.id].Name,
+                  'objectType': filtered[event.id].displayName,
+                  'AddToList': null
+                };
+                this.eventService.sendEvent('setActivityDetails', entityForSetActivityDetails);
+                return filtered;
+              }
+            }
+          } else {
+            for (const phoneNumber of event.phoneNumbers) {
+              screenpopRecords = await this.trySearch(phoneNumber, InteractionDirectionTypes.Inbound, event.cadString, false);
+              if (screenpopRecords != null) {
+                const allowed = [event.id];
+                const filtered = Object.keys(screenpopRecords).filter(key => allowed.includes(key))
+                                .reduce((obj, key) => {
+                                obj[key] = screenpopRecords[key];
+                                return obj;
+                                }, {});
+                const entityForSetActivityDetails = {
+                  'displayName': filtered[event.id].RecordType,
+                  'objectId': event.id,
+                  'objectName': filtered[event.id].Name,
+                  'objectType': filtered[event.id].RecordType,
+                  'AddToList': null
+                };
+                this.eventService.sendEvent('setActivityDetails', entityForSetActivityDetails);
+                return filtered;
+              }
             }
           }
         }
