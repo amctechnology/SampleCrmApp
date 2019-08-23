@@ -181,7 +181,6 @@ class BridgeSalesforce extends Bridge {
           screenpopRecords = await this.tryScreenpop(event.id);
           return screenpopRecords;
         } else if (event.type === 'ClickToDialNoScreenpop') {
-          if (!versionIsLightning) {
             for (const phoneNumber of event.phoneNumbers) {
               screenpopRecords = await this.trySearch(phoneNumber, InteractionDirectionTypes.Inbound, event.cadString, false);
               if (screenpopRecords != null) {
@@ -192,38 +191,16 @@ class BridgeSalesforce extends Bridge {
                                 return obj;
                                 }, {});
                 const entityForSetActivityDetails = {
-                  'displayName': filtered[event.id].displayName,
+                  'displayName': (versionIsLightning ? filtered[event.id].RecordType : filtered[event.id].displayName ),
                   'objectId': event.id,
                   'objectName': filtered[event.id].Name,
-                  'objectType': filtered[event.id].displayName,
+                  'objectType': (versionIsLightning ? filtered[event.id].RecordType : filtered[event.id].displayName ),
                   'AddToList': null
                 };
                 this.eventService.sendEvent('setActivityDetails', entityForSetActivityDetails);
                 return filtered;
               }
             }
-          } else {
-            for (const phoneNumber of event.phoneNumbers) {
-              screenpopRecords = await this.trySearch(phoneNumber, InteractionDirectionTypes.Inbound, event.cadString, false);
-              if (screenpopRecords != null) {
-                const allowed = [event.id];
-                const filtered = Object.keys(screenpopRecords).filter(key => allowed.includes(key))
-                                .reduce((obj, key) => {
-                                obj[key] = screenpopRecords[key];
-                                return obj;
-                                }, {});
-                const entityForSetActivityDetails = {
-                  'displayName': filtered[event.id].RecordType,
-                  'objectId': event.id,
-                  'objectName': filtered[event.id].Name,
-                  'objectType': filtered[event.id].RecordType,
-                  'AddToList': null
-                };
-                this.eventService.sendEvent('setActivityDetails', entityForSetActivityDetails);
-                return filtered;
-              }
-            }
-          }
         }
       }
       if (event.id && event.type) {
