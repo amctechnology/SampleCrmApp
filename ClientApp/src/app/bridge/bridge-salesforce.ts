@@ -177,30 +177,28 @@ class BridgeSalesforce extends Bridge {
       let screenpopRecords = null;
       const versionIsLightning = this.isLightning;
       if (event.type) {
-        if (event.type === 'ClickToDialScreenpop') {
-          screenpopRecords = await this.tryScreenpop(event.id);
-          return screenpopRecords;
-        } else if (event.type === 'ClickToDialNoScreenpop') {
-            for (const phoneNumber of event.phoneNumbers) {
-              screenpopRecords = await this.trySearch(phoneNumber, InteractionDirectionTypes.Inbound, event.cadString, false);
-              if (screenpopRecords != null) {
-                const allowed = [event.id];
-                const filtered = Object.keys(screenpopRecords).filter(key => allowed.includes(key))
-                                .reduce((obj, key) => {
-                                obj[key] = screenpopRecords[key];
-                                return obj;
-                                }, {});
-                const entityForSetActivityDetails = {
-                  'displayName': (versionIsLightning ? filtered[event.id].RecordType : filtered[event.id].displayName ),
-                  'objectId': event.id,
-                  'objectName': filtered[event.id].Name,
-                  'objectType': (versionIsLightning ? filtered[event.id].RecordType : filtered[event.id].displayName ),
-                  'AddToList': null
-                };
-                this.eventService.sendEvent('setActivityDetails', entityForSetActivityDetails);
-                return filtered;
-              }
+        for (const phoneNumber of event.phoneNumbers) {
+          screenpopRecords = await this.trySearch(phoneNumber, InteractionDirectionTypes.Inbound, event.cadString, false);
+          if (screenpopRecords != null) {
+            const allowed = [event.id];
+            const filtered = Object.keys(screenpopRecords).filter(key => allowed.includes(key))
+                            .reduce((obj, key) => {
+                            obj[key] = screenpopRecords[key];
+                            return obj;
+                            }, {});
+            const entityForSetActivityDetails = {
+              'displayName': (versionIsLightning ? filtered[event.id].RecordType : filtered[event.id].displayName ),
+              'objectId': event.id,
+              'objectName': filtered[event.id].Name,
+              'objectType': (versionIsLightning ? filtered[event.id].RecordType : filtered[event.id].displayName ),
+              'AddToList': null
+            };
+            this.eventService.sendEvent('setActivityDetails', entityForSetActivityDetails);
+            if (event.type === 'ClickToDialScreenpop') {
+              screenpopRecords = await this.tryScreenpop(event.id);
             }
+            return filtered;
+          }
         }
       }
       if (event.id && event.type) {
