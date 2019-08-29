@@ -157,16 +157,10 @@ class BridgeSalesforce extends Bridge {
       entity = JSON.parse(event.result);
     }
 
-    const records = await this.trySearch(entity.number, InteractionDirectionTypes.Outbound, '', false);
-    records[entity.objectId]['fields'] = {};
-    records[entity.objectId].fields['Name'] = {};
-    records[entity.objectId].fields.Name['Value'] = records[entity.objectId].Name;
     this.eventService.sendEvent('clickToDial', {
-      number: entity.number,
-      records: records,
       lastOnFocusWasAnEntity: this.lastOnFocusWasAnEntity,
-      clickedEntity: entity,
-      clickedSearchRecord: records[entity.objectId]
+      isLightning: this.isLightning,
+      entity: event
     });
   }
 
@@ -176,29 +170,39 @@ class BridgeSalesforce extends Bridge {
     try {
       let screenpopRecords = null;
       const versionIsLightning = this.isLightning;
-      if (event.type) {
-        for (const phoneNumber of event.phoneNumbers) {
-          screenpopRecords = await this.trySearch(phoneNumber, InteractionDirectionTypes.Inbound, event.cadString, false);
-          if (screenpopRecords != null) {
-            const allowed = [event.id];
-            const filtered = Object.keys(screenpopRecords).filter(key => allowed.includes(key))
-                            .reduce((obj, key) => {
-                            obj[key] = screenpopRecords[key];
-                            return obj;
-                            }, {});
-            const entityForSetActivityDetails = {
-              'displayName': (versionIsLightning ? filtered[event.id].RecordType : filtered[event.id].displayName ),
-              'objectId': event.id,
-              'objectName': filtered[event.id].Name,
-              'objectType': (versionIsLightning ? filtered[event.id].RecordType : filtered[event.id].displayName ),
-              'AddToList': null
+      if (event.type === 'ClickToDialNoScreenpop' || event.type === 'ClickToDialScreenpop') {
+        if (event.id) {
+          let formattedRecord = {};
+          if (versionIsLightning) {
+            formattedRecord =  {
+              [event.id.recordId] :
+                {'Id' : event.id.recordId,
+                'Name' : event.id.recordName,
+                'RecordType' : event.id.objectType}
             };
-            this.eventService.sendEvent('setActivityDetails', entityForSetActivityDetails);
-            if (event.type === 'ClickToDialScreenpop') {
-              screenpopRecords = await this.tryScreenpop(event.id);
-            }
-            return filtered;
+          } else {
+            const classicEntity = JSON.parse(event.id.result);
+            formattedRecord =  {
+              [classicEntity.objectId] :
+                {'Id' : classicEntity.objectId,
+                'Name' : classicEntity.objectName,
+                'RecordType' : classicEntity.object}
+            };
           }
+
+          const entityId = Object.keys(formattedRecord);
+          const entityForSetActivityDetails = {
+              'displayName': formattedRecord[entityId[0]].RecordType,
+              'objectId': entityId[0],
+              'objectName': formattedRecord[entityId[0]].Name,
+              'objectType': formattedRecord[entityId[0]].RecordType,
+              'AddToList': null
+          };
+          this.eventService.sendEvent('setActivityDetails', entityForSetActivityDetails);
+          if (event.type === 'ClickToDialScreenpop') {
+            screenpopRecords = await this.tryScreenpop(entityId[0]);
+          }
+          return formattedRecord;
         }
       }
       if (event.id && event.type) {

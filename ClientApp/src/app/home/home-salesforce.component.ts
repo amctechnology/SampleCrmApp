@@ -29,6 +29,7 @@ export class HomeSalesforceComponent extends Application implements OnInit {
   lastOnFocusWasAnEntity: boolean;
   ScreenpopOnClickToDialListView: boolean;
   lastClickToDialSearchRecord: any;
+  clickToDialEntity: any;
 
   constructor(
     private loggerService: LoggerService,
@@ -74,12 +75,26 @@ export class HomeSalesforceComponent extends Application implements OnInit {
     this.bridgeEventsService.subscribe('clickToDial', event => {
       this.wasClickToDial = true;
       this.lastOnFocusWasAnEntity = event.lastOnFocusWasAnEntity;
-      this.lastClickToDialSearchRecord = event.clickedSearchRecord;
-      this.lastClickToDialSearchRecord['id'] = event.clickedEntity.objectId;
-      if (!event.records.SCREEN_POP_DATA) {
-        delete event.records['SCREEN_POP_DATA'];
+      this.clickToDialEntity = event.entity;
+      let objectForFormatCrmResults = {};
+      if (event.isLightning) {
+        objectForFormatCrmResults = {
+          [event.entity.recordId] :
+            {'Id' : event.entity.recordId,
+            'Name' : event.entity.recordName,
+            'RecordType' : event.entity.objectType}
+        };
+        api.clickToDial(event.entity.number, this.formatCrmResults(objectForFormatCrmResults));
+      } else {
+        const classicEntity = JSON.parse(event.entity.result);
+        objectForFormatCrmResults = {
+          [classicEntity.objectId] :
+          {'Id' : classicEntity.objectId,
+           'Name' : classicEntity.objectName,
+           'RecordType' : classicEntity.object}
+        };
+        api.clickToDial(classicEntity.number, this.formatCrmResults(objectForFormatCrmResults));
       }
-      api.clickToDial(event.number, this.formatCrmResults(event.records));
     });
     this.bridgeEventsService.subscribe(
       'setActivityDetails',
@@ -463,7 +478,7 @@ export class HomeSalesforceComponent extends Application implements OnInit {
           } else {
             interaction.details.type = 'ClickToDialNoScreenpop';
           }
-          interaction.details.id = this.lastClickToDialSearchRecord['id'];
+          interaction.details.id = this.clickToDialEntity;
         }
 
         this.loggerService.logger.logDebug(
@@ -473,11 +488,7 @@ export class HomeSalesforceComponent extends Application implements OnInit {
           api.ErrorCode.SCREEN_POP
         );
         const searchRecord = await this.preformScreenpop(interaction);
-        if (!this.lastOnFocusWasAnEntity && this.wasClickToDial) {
-          this.storageService.setsearchRecordList([this.lastClickToDialSearchRecord]);
-        } else {
-          this.storageService.setsearchRecordList(searchRecord.toJSON());
-        }
+        this.storageService.setsearchRecordList(searchRecord.toJSON());
         this.loggerService.logger.logDebug(
           `AMCSalesforceHomeComponent: Search results: ${JSON.stringify(
             searchRecord.toJSON()
