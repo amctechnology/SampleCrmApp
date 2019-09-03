@@ -38,8 +38,7 @@ export class SearchInformationSalesforceComponent {
       }
     }
     let name = searchRecord.fields[nameKey].Value;
-    name = searchRecord.displayName + ': ' + name;
-
+    name = (searchRecord.displayName ? (searchRecord.displayName + ': ' + name) : (searchRecord.RecordType + ': ' + name) );
     return name;
   }
   protected getRecord(id) {
