@@ -1,7 +1,7 @@
 <div *ngIf="isSearchInformationMaximized" class="callDisplay">
   <div class="editor callHeader">
     <label class="headerLabel">
-      <b>Caller Information</b>
+      <b>Caller Information</b> <label *ngIf="!storageService.searchReturnedSingleResult" class="multiMatchLabel">Multiple Matches Available</label>
     </label>
     <img class="ViewResizeImage" src="assets/images/section_collapse.png" (click)="isSearchInformationMaximized = false"
       title="Collapse">
@@ -9,6 +9,7 @@
   <div class="callBody">
     <div *ngIf="!storageService.searchReturnedSingleResult">
       <select class="multipleSearchResultSelect" data-resetperactivity="false" (change)='onAgentSelectedCallerInformation($event)'>
+        <option selected disabled hidden style='display: none' value=''>Click for Multi-Match Options</option>
         <option *ngFor="let searchRecord of storageService.searchRecordList" id="{{searchRecord.id}}" value="{{searchRecord.id}}">{{parseSearchRecordForName(searchRecord)}}</option>
       </select>
     </div>
@@ -22,7 +23,7 @@
 <div *ngIf="!isSearchInformationMaximized" class="callDisplay">
   <div class="editor callHeader">
     <label class="headerLabel">
-      <b>Caller Information</b>
+      <b>Caller Information</b> <label *ngIf="!storageService.searchReturnedSingleResult" class="multiMatchLabel">Multiple Matches Available</label>
     </label>
     <img class="ViewResizeImage" src="assets/images/section_expand.png" (click)="isSearchInformationMaximized = true"
       title="Expand">

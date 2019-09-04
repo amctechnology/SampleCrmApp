@@ -9,6 +9,14 @@
   display: flex;
 }
 
+.multiMatchLabel {
+  background-color: #1e72ba;
+  color: white;
+  font-size: 9px;
+  padding-left: 2px;
+  padding-right: 2px;
+}
+
 .editor {
   font-size: 0.9em;
   width: 70%;
