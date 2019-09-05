@@ -16,6 +16,14 @@ export class SearchInformationSalesforceComponent {
     this.isSearchInformationMaximized = true;
     this.loggerService.logger.logDebug('searchInformationComponent: Constructor complete');
   }
+
+  protected expandCallerInformationSection() {
+    this.isSearchInformationMaximized = true;
+  }
+
+  protected collapseCallerInformationSection() {
+    this.isSearchInformationMaximized = false;
+  }
   protected onAgentSelectedCallerInformation(event) {
     if (this.storageService.searchReturnedSingleResult) {
       this.loggerService.logger.logDebug(`searchInformationComponent: Agent selected caller info: ${event.currentTarget.id}`);
@@ -25,6 +33,7 @@ export class SearchInformationSalesforceComponent {
         this.loggerService.logger.logDebug(`searchInformationComponent: Agent selected caller info: ${event.currentTarget.value}`);
         this.agentSelectedCallerInformation.emit(event.currentTarget.value);
         this.lastCallerId = event.currentTarget.value;
+        this.storageService.storeToLocalStorage();
       }
     }
   }

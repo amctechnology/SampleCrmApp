@@ -16,6 +16,7 @@ export class StorageService {
   public searchResultWasReturned: boolean;
   public currentTicketId: string;
   public maxRecentItems: Number;
+  public selectedSearchRecord: string;
   constructor() {
     this.activityList = [];
     this.recentActivityList = [];
@@ -211,7 +212,7 @@ export class StorageService {
     this.clearWhatList();
     this.clearWhoList();
   }
-  protected storeToLocalStorage() {
+  public storeToLocalStorage() {
     localStorage.setItem('scenario', JSON.stringify({
       activityList: this.activityList,
       activity: this.activity,
@@ -222,7 +223,8 @@ export class StorageService {
       whatList: this.whatList,
       whoList: this.whoList,
       currentTicketId: this.currentTicketId,
-      recentActivityList: this.recentActivityList
+      recentActivityList: this.recentActivityList,
+      selectedSearchRecord: this.selectedSearchRecord
     }));
   }
   public syncWithLocalStorage() {
@@ -238,6 +240,7 @@ export class StorageService {
       this.whoList = browserStorage.whoList;
       this.currentTicketId = browserStorage.currentTicketId;
       this.recentActivityList = browserStorage.recentActivityList;
+      this.selectedSearchRecord = browserStorage.selectedSearchRecord;
     }
   }
   public recentActivityListContains(interactionId: string): boolean {
