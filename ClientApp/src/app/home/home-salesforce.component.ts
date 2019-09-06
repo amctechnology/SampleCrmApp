@@ -496,6 +496,7 @@ export class HomeSalesforceComponent extends Application implements OnInit {
           api.ErrorCode.SEARCH_RECORD
         );
         if (this.storageService.getsearchRecordList().length > 1) {
+          this.storageService.selectedSearchRecord = 'DefaultMultiMatch';
           this.storageService.setSearchReturnedSingleResult(false);
           this.storageService.setSearchResultWasReturned(true);
         } else if (this.storageService.getsearchRecordList().length === 1) {

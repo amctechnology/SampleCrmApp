@@ -9,6 +9,11 @@
   display: flex;
 }
 
+.multiMatchImg {
+  height: 18px;
+  margin-left: 5px;
+}
+
 .editor {
   font-size: 0.9em;
   width: 70%;
