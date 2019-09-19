@@ -27,9 +27,9 @@ export class CreateSalesforceComponent implements OnInit {
   }
 
   protected getDisplay(entity) {
-    return entity.split('\\')[0];
+    return entity.substring(0, entity.indexof('\\'));
   }
   protected getImage(entity) {
-    return entity.split('\\')[1];
+    return entity.substring(entity.indexof('\\') + 1);
   }
 }
