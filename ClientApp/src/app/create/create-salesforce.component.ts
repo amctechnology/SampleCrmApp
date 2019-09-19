@@ -1,4 +1,4 @@
-import { Component, OnInit, EventEmitter, Output } from '@angular/core';
+import { Component, OnInit, EventEmitter, Output, Input } from '@angular/core';
 import { LoggerService } from '../logger.service';
 @Component({
   selector: 'app-create',
@@ -8,15 +8,28 @@ import { LoggerService } from '../logger.service';
 export class CreateSalesforceComponent implements OnInit {
   @Output() CreateNewEntity: EventEmitter<string> = new EventEmitter<string>();
   isCreateMaximized: boolean;
+  @Input() Entities: any;
   constructor(private loggerService: LoggerService) {
     this.loggerService.logger.logDebug('create: Constructor start');
     this.isCreateMaximized = true;
     this.loggerService.logger.logDebug('create: Constructor complete');
   }
-  ngOnInit() {
-  }
+  ngOnInit() {}
   protected createNewEntity(type) {
-    this.loggerService.logger.logDebug(`create: request screenpop for new Salesforce object type: ${type}`);
+    this.loggerService.logger.logDebug(
+      `create: request screenpop for new Salesforce object type: ${type}`
+    );
     this.CreateNewEntity.emit(type);
+  }
+
+  protected getEntities() {
+    return Object.keys(this.Entities);
+  }
+
+  protected getDisplay(entity) {
+    return entity.split('\\')[0];
+  }
+  protected getImage(entity) {
+    return entity.split('\\')[1];
   }
 }

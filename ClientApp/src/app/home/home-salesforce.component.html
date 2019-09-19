@@ -12,6 +12,7 @@
   ></app-activity>
   <app-create
     *ngIf="DisplayQuickCreate"
+    [Entities]="quickCreateEntities"
     (CreateNewEntity)="createNewEntity($event)"
   ></app-create>
 </div>

@@ -23,6 +23,7 @@ export class HomeSalesforceComponent extends Application implements OnInit {
   protected autoSave: BehaviorSubject<number> = new BehaviorSubject(0);
   protected phoneNumberFormat: string;
   protected quickCommentList: string[];
+  protected quickCreateEntities: any;
   protected cadActivityMap: Object;
   screenpopOnAlert: Boolean;
   wasClickToDial: boolean;
@@ -125,7 +126,10 @@ export class HomeSalesforceComponent extends Application implements OnInit {
     this.DisplayQuickCreate = Boolean(
       config['QuickCreate']['variables']['DisplayQuickCreate']
     );
+    this.quickCreateEntities =
+      config['QuickCreate']['variables']['QuickCreateKeyList'];
 
+    console.log('fdgfdgdfgfg', this.quickCreateEntities);
     if (config['variables']['CADActivityMap']) {
       this.cadActivityMap = config['variables']['CADActivityMap'];
     } else {
