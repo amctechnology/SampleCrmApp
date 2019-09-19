@@ -129,7 +129,7 @@ export class HomeSalesforceComponent extends Application implements OnInit {
     this.quickCreateEntities =
       config['QuickCreate']['variables']['QuickCreateKeyList'];
 
-    console.log('fdgfdgdfgfg', this.quickCreateEntities);
+
     if (config['variables']['CADActivityMap']) {
       this.cadActivityMap = config['variables']['CADActivityMap'];
     } else {
