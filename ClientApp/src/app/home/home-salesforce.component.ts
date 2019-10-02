@@ -23,6 +23,7 @@ export class HomeSalesforceComponent extends Application implements OnInit {
   protected autoSave: BehaviorSubject<number> = new BehaviorSubject(0);
   protected phoneNumberFormat: string;
   protected quickCommentList: string[];
+  protected QuickCreateEntities: any;
   protected cadActivityMap: Object;
   screenpopOnAlert: Boolean;
   wasClickToDial: boolean;
@@ -30,6 +31,7 @@ export class HomeSalesforceComponent extends Application implements OnInit {
   ScreenpopOnClickToDialListView: boolean;
   lastClickToDialSearchRecord: any;
   clickToDialEntity: any;
+  DisplayQuickCreate: boolean;
 
   constructor(
     private loggerService: LoggerService,
@@ -43,6 +45,7 @@ export class HomeSalesforceComponent extends Application implements OnInit {
     this.screenpopOnAlert = true;
     this.ScreenpopOnClickToDialListView = false;
     this.phoneNumberFormat = null;
+    this.DisplayQuickCreate = true;
     this.wasClickToDial = false;
     this.appName = 'Salesforce';
     this.loggerService.logger.logDebug(
@@ -79,21 +82,29 @@ export class HomeSalesforceComponent extends Application implements OnInit {
       let objectForFormatCrmResults = {};
       if (event.isLightning) {
         objectForFormatCrmResults = {
-          [event.entity.recordId] :
-            {'Id' : event.entity.recordId,
-            'Name' : event.entity.recordName,
-            'RecordType' : event.entity.objectType}
+          [event.entity.recordId]: {
+            Id: event.entity.recordId,
+            Name: event.entity.recordName,
+            RecordType: event.entity.objectType
+          }
         };
-        api.clickToDial(event.entity.number, this.formatCrmResults(objectForFormatCrmResults));
+        api.clickToDial(
+          event.entity.number,
+          this.formatCrmResults(objectForFormatCrmResults)
+        );
       } else {
         const classicEntity = JSON.parse(event.entity.result);
         objectForFormatCrmResults = {
-          [classicEntity.objectId] :
-          {'Id' : classicEntity.objectId,
-           'Name' : classicEntity.objectName,
-           'RecordType' : classicEntity.object}
+          [classicEntity.objectId]: {
+            Id: classicEntity.objectId,
+            Name: classicEntity.objectName,
+            RecordType: classicEntity.object
+          }
         };
-        api.clickToDial(classicEntity.number, this.formatCrmResults(objectForFormatCrmResults));
+        api.clickToDial(
+          classicEntity.number,
+          this.formatCrmResults(objectForFormatCrmResults)
+        );
       }
     });
     this.bridgeEventsService.subscribe(
@@ -105,17 +116,28 @@ export class HomeSalesforceComponent extends Application implements OnInit {
       config['variables']['PhoneNumberFormat']
     ).toLowerCase();
 
-    if (config['variables']['ScreenpopOnAlert'] !== null && config['variables']['ScreenpopOnAlert'] !== undefined) {
+    if (
+      config['variables']['ScreenpopOnAlert'] !== null &&
+      config['variables']['ScreenpopOnAlert'] !== undefined
+    ) {
       this.screenpopOnAlert = Boolean(config['variables']['ScreenpopOnAlert']);
     }
     this.quickCommentList = <string[]>config['variables']['QuickComments'];
+    this.QuickCreateEntities =
+      config['QuickCreate']['variables']['QuickCreateKeyList'];
+    this.DisplayQuickCreate = (Object.keys(this.QuickCreateEntities).length > 0);
+
     if (config['variables']['CADActivityMap']) {
       this.cadActivityMap = config['variables']['CADActivityMap'];
     } else {
       this.cadActivityMap = {};
     }
-    this.ScreenpopOnClickToDialListView = <boolean>config['variables']['ScreenpopOnClickToDialListView'];
-    this.storageService.maxRecentItems = <Number>config['variables']['MaxRecentItems'];
+    this.ScreenpopOnClickToDialListView = <boolean>(
+      config['variables']['ScreenpopOnClickToDialListView']
+    );
+    this.storageService.maxRecentItems = <Number>(
+      config['variables']['MaxRecentItems']
+    );
     registerOnLogout(this.removeLocalStorageOnLogout);
     this.loggerService.logger.logDebug(
       'AMCSalesforceHomeComponent: ngOnInit complete'
@@ -429,11 +451,15 @@ export class HomeSalesforceComponent extends Application implements OnInit {
       const scenarioIdInt = interaction.scenarioId;
       let storageServiceInteractionID = null;
       if (this.storageService.currentInteraction) {
-        storageServiceInteractionID = this.storageService.currentInteraction.interactionId;
+        storageServiceInteractionID = this.storageService.currentInteraction
+          .interactionId;
       }
       this.storageService.updateCadFields(interaction, this.cadActivityMap);
-      if (this.storageService.recentActivityListContains(interactionId) && storageServiceInteractionID !== interactionId) {
-          this.saveActivity(this.storageService.getRecentActivity(interactionId));
+      if (
+        this.storageService.recentActivityListContains(interactionId) &&
+        storageServiceInteractionID !== interactionId
+      ) {
+        this.saveActivity(this.storageService.getRecentActivity(interactionId));
       }
       let isNewScenarioId = false;
       if (
@@ -451,12 +477,18 @@ export class HomeSalesforceComponent extends Application implements OnInit {
         interaction.state !== api.InteractionStates.Disconnected
       ) {
         if (!this.wasClickToDial) {
-          if ((this.screenpopOnAlert === true && interaction.state === api.InteractionStates.Alerting) ||
-            (this.screenpopOnAlert === false && interaction.state === api.InteractionStates.Connected) ||
-            (interaction.direction === api.InteractionDirectionTypes.Outbound)) {
+          if (
+            (this.screenpopOnAlert === true &&
+              interaction.state === api.InteractionStates.Alerting) ||
+            (this.screenpopOnAlert === false &&
+              interaction.state === api.InteractionStates.Connected) ||
+            interaction.direction === api.InteractionDirectionTypes.Outbound
+          ) {
             this.scenarioInteractionMappings[scenarioIdInt] = {};
             isNewScenarioId = true;
-            this.scenarioInteractionMappings[scenarioIdInt][interactionId] = true;
+            this.scenarioInteractionMappings[scenarioIdInt][
+              interactionId
+            ] = true;
           }
         } else {
           this.scenarioInteractionMappings[scenarioIdInt] = {};
@@ -469,61 +501,65 @@ export class HomeSalesforceComponent extends Application implements OnInit {
         !this.storageService.getCurrentInteraction() &&
         interaction.state !== api.InteractionStates.Disconnected
       ) {
-        if ((this.screenpopOnAlert === true && interaction.state === api.InteractionStates.Alerting) ||
-          (this.screenpopOnAlert === false && interaction.state === api.InteractionStates.Connected) || this.wasClickToDial
-          ||  (interaction.direction === api.InteractionDirectionTypes.Outbound)) {
-        if (!this.lastOnFocusWasAnEntity && this.wasClickToDial) {
-          if (this.ScreenpopOnClickToDialListView) {
-            interaction.details.type = 'ClickToDialScreenpop';
-          } else {
-            interaction.details.type = 'ClickToDialNoScreenpop';
+        if (
+          (this.screenpopOnAlert === true &&
+            interaction.state === api.InteractionStates.Alerting) ||
+          (this.screenpopOnAlert === false &&
+            interaction.state === api.InteractionStates.Connected) ||
+          this.wasClickToDial ||
+          interaction.direction === api.InteractionDirectionTypes.Outbound
+        ) {
+          if (!this.lastOnFocusWasAnEntity && this.wasClickToDial) {
+            if (this.ScreenpopOnClickToDialListView) {
+              interaction.details.type = 'ClickToDialScreenpop';
+            } else {
+              interaction.details.type = 'ClickToDialNoScreenpop';
+            }
+            interaction.details.id = this.clickToDialEntity;
           }
-          interaction.details.id = this.clickToDialEntity;
-        }
 
-        this.loggerService.logger.logDebug(
-          `AMCSalesforceHomeComponent: screenpop for new interaction: ${JSON.stringify(
-            interaction
-          )}`,
-          api.ErrorCode.SCREEN_POP
-        );
-        const searchRecord = await this.preformScreenpop(interaction);
-        this.storageService.setsearchRecordList(searchRecord.toJSON());
-        this.loggerService.logger.logDebug(
-          `AMCSalesforceHomeComponent: Search results: ${JSON.stringify(
-            searchRecord.toJSON()
-          )}`,
-          api.ErrorCode.SEARCH_RECORD
-        );
-        if (this.storageService.getsearchRecordList().length > 1) {
-          this.storageService.selectedSearchRecord = 'DefaultMultiMatch';
-          this.storageService.setSearchReturnedSingleResult(false);
-          this.storageService.setSearchResultWasReturned(true);
-        } else if (this.storageService.getsearchRecordList().length === 1) {
-          this.storageService.setSearchReturnedSingleResult(true);
-          this.storageService.setSearchResultWasReturned(true);
-        }
-        this.storageService.setCurrentInteraction(interaction);
-        this.storageService.addActivity(this.createActivity(interaction));
+          this.loggerService.logger.logDebug(
+            `AMCSalesforceHomeComponent: screenpop for new interaction: ${JSON.stringify(
+              interaction
+            )}`,
+            api.ErrorCode.SCREEN_POP
+          );
+          const searchRecord = await this.preformScreenpop(interaction);
+          this.storageService.setsearchRecordList(searchRecord.toJSON());
+          this.loggerService.logger.logDebug(
+            `AMCSalesforceHomeComponent: Search results: ${JSON.stringify(
+              searchRecord.toJSON()
+            )}`,
+            api.ErrorCode.SEARCH_RECORD
+          );
+          if (this.storageService.getsearchRecordList().length > 1) {
+            this.storageService.selectedSearchRecord = 'DefaultMultiMatch';
+            this.storageService.setSearchReturnedSingleResult(false);
+            this.storageService.setSearchResultWasReturned(true);
+          } else if (this.storageService.getsearchRecordList().length === 1) {
+            this.storageService.setSearchReturnedSingleResult(true);
+            this.storageService.setSearchResultWasReturned(true);
+          }
+          this.storageService.setCurrentInteraction(interaction);
+          this.storageService.addActivity(this.createActivity(interaction));
 
-        this.storageService.setSubject(
-          interactionId,
-          this.buildSubjectText(interaction)
-        );
-        this.loggerService.logger.logDebug(
-          `AMCSalesforceHomeComponent: Autosave activity:
+          this.storageService.setSubject(
+            interactionId,
+            this.buildSubjectText(interaction)
+          );
+          this.loggerService.logger.logDebug(
+            `AMCSalesforceHomeComponent: Autosave activity:
         ${JSON.stringify(
           this.storageService.getActivity(
             this.storageService.getCurrentInteraction().interactionId
           )
         )}`,
-          api.ErrorCode.ACTIVITY
-        );
-        this.autoSave.next(0);
-        this.wasClickToDial = false;
-        return searchRecord;
-
-          }
+            api.ErrorCode.ACTIVITY
+          );
+          this.autoSave.next(0);
+          this.wasClickToDial = false;
+          return searchRecord;
+        }
       } else if (interaction.state === api.InteractionStates.Disconnected) {
         this.loggerService.logger.logDebug(
           `AMCSalesforceHomeComponent: Disconnect interaction received: ${JSON.stringify(
@@ -617,14 +653,15 @@ export class HomeSalesforceComponent extends Application implements OnInit {
       InteractionId: interaction.interactionId,
       contactSource: this.getContactSource(interaction),
       CadFields: {},
-      saveToSalesforce: false,
+      saveToSalesforce: false
     };
     for (const key in this.cadActivityMap) {
       if (interaction.details.fields[key]) {
         if (!activity.CadFields) {
           activity.CadFields = {};
         }
-        activity.CadFields[this.cadActivityMap[key]] = interaction.details.fields[key].Value;
+        activity.CadFields[this.cadActivityMap[key]] =
+          interaction.details.fields[key].Value;
       }
     }
     this.loggerService.logger.logDebug(
@@ -644,7 +681,10 @@ export class HomeSalesforceComponent extends Application implements OnInit {
       )}`,
       api.ErrorCode.ACTIVITY
     );
-    if (this.storageService.getCurrentInteraction() || eventObject.hasOwnProperty('AddToList')) {
+    if (
+      this.storageService.getCurrentInteraction() ||
+      eventObject.hasOwnProperty('AddToList')
+    ) {
       if (
         eventObject.objectType === 'Contact' ||
         eventObject.objectType === 'Lead'
