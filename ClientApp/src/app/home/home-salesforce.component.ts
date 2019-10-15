@@ -7,20 +7,15 @@ import {
   registerOnLogout,
   ChannelTypes
 } from '@amc-technology/davinci-api';
-import { BehaviorSubject } from 'rxjs/BehaviorSubject';
-import { Subject } from 'rxjs/Subject';
 import { IActivity } from '../Model/IActivity';
 import { ICreateNewSObjectParams } from '../Model/ICreateNewSObjectParams';
 import { LoggerService } from '../logger.service';
 import { StorageService } from '../storage.service';
-import { stringify } from '@angular/core/src/util';
 @Component({
   selector: 'app-home',
   templateUrl: './home-salesforce.component.html'
 })
 export class HomeSalesforceComponent extends Application implements OnInit {
-  protected interactionDisconnected: Subject<boolean> = new Subject();
-  protected autoSave: BehaviorSubject<number> = new BehaviorSubject(0);
   protected phoneNumberFormat: string;
   protected quickCommentList: string[];
   protected QuickCreateEntities: any;
@@ -32,6 +27,8 @@ export class HomeSalesforceComponent extends Application implements OnInit {
   lastClickToDialSearchRecord: any;
   clickToDialEntity: any;
   DisplayQuickCreate: boolean;
+  public quickCommentOptionRequiredCadArray: any;
+
 
   constructor(
     private loggerService: LoggerService,
@@ -48,6 +45,7 @@ export class HomeSalesforceComponent extends Application implements OnInit {
     this.DisplayQuickCreate = true;
     this.wasClickToDial = false;
     this.appName = 'Salesforce';
+    this.quickCommentOptionRequiredCadArray = {};
     this.loggerService.logger.logDebug(
       'AMCSalesforceHomeComponent: constructor complete'
     );
@@ -123,6 +121,14 @@ export class HomeSalesforceComponent extends Application implements OnInit {
       this.screenpopOnAlert = Boolean(config['variables']['ScreenpopOnAlert']);
     }
     this.quickCommentList = <string[]>config['variables']['QuickComments'];
+    for (let i = 0; i < this.quickCommentList.length; i++) {
+      this.quickCommentList[i] = this.quickCommentList[i].replace(/\\n/g, String.fromCharCode(13, 10));
+      this.quickCommentList[i] = this.quickCommentList[i].replace(/\\t/g, String.fromCharCode(9));
+    }
+    const CADQuickCommentRegex = /\{\{.*?\}\}/g;
+    for (let i = 0; i < this.quickCommentList.length; i++) {
+      this.quickCommentOptionRequiredCadArray[i] = this.quickCommentList[i].match(CADQuickCommentRegex);
+    }
     this.QuickCreateEntities =
       config['QuickCreate']['variables']['QuickCreateKeyList'];
     this.DisplayQuickCreate = (Object.keys(this.QuickCreateEntities).length > 0);
@@ -150,13 +156,13 @@ export class HomeSalesforceComponent extends Application implements OnInit {
     });
   }
 
-  protected formatPhoneNumber(number: string, phoneNumberFormat: string) {
+  protected formatPhoneNumber(number: string) {
     let numberIndex = 0;
     let formatIndex = 0;
     let formattedNumber = '';
     number = number.replace(/\D/g, '');
     number = this.reverse(number);
-    phoneNumberFormat = this.reverse(phoneNumberFormat);
+    const phoneNumberFormat = this.reverse(this.phoneNumberFormat);
     if (number && phoneNumberFormat) {
       while (formatIndex < phoneNumberFormat.length) {
         if (numberIndex === number.length + 1) {
@@ -383,44 +389,21 @@ export class HomeSalesforceComponent extends Application implements OnInit {
     return this.bridgeEventsService.sendEvent('isToolbarVisible');
   }
 
-  protected async saveActivity(activity): Promise<string> {
-    this.loggerService.logger.logDebug(
-      'AMCSalesforceHomeComponent: Save activity: ' + JSON.stringify(activity),
+  protected async saveActivity(scenarioId, isComplete = false): Promise<string> {
+    let activity = this.storageService.getActivity(scenarioId);
+    this.loggerService.logger.logDebug('Salesforce Home: Save activity: ' + JSON.stringify(activity), api.ErrorCode.ACTIVITY);
+    if (activity.IsActive && isComplete) {
+      activity.IsActive = false;
+    }
+    activity.Status = (isComplete) ? 'Completed' : 'Not Completed';
+    this.loggerService.logger.logDebug(`SalesforceHome: Sending activity: ${JSON.stringify(activity)} to bridge to be saved`,
       api.ErrorCode.ACTIVITY
     );
-    if (this.storageService.activityListContains(activity.InteractionId)) {
-      activity.ActivityId = this.storageService.getActivity(
-        activity.InteractionId
-      ).ActivityId;
-    }
-    if (activity.Status === 'Completed') {
-      this.storageService.clearWhoList();
-      this.storageService.clearWhatList();
-      this.storageService.removeActivity(activity.InteractionId);
-    }
-    this.loggerService.logger.logDebug(
-      `AMCSalesforceHomeComponent: Sending activity: ${JSON.stringify(
-        activity
-      )} to bridge to be saved`,
+    activity = await this.bridgeEventsService.sendEvent('saveActivity', activity);
+    this.loggerService.logger.logDebug(`AMCSalesforceHomeComponent: Updated activity received from bridge: ${JSON.stringify(activity)}`,
       api.ErrorCode.ACTIVITY
     );
-    if (activity.saveToSalesforce) {
-      activity = await this.bridgeEventsService.sendEvent(
-        'saveActivity',
-        activity
-      );
-    }
-    this.loggerService.logger.logDebug(
-      `AMCSalesforceHomeComponent: Updated activity received from bridge: ${JSON.stringify(
-        activity
-      )}`,
-      api.ErrorCode.ACTIVITY
-    );
-    if (this.storageService.activityListContains(activity.InteractionId)) {
-      this.storageService.updateActivity(activity);
-    } else {
-      this.storageService.updateRecentActivity(activity);
-    }
+    this.storageService.updateActivity(activity);
     return Promise.resolve(activity.ActivityId);
   }
 
@@ -447,143 +430,45 @@ export class HomeSalesforceComponent extends Application implements OnInit {
       api.ErrorCode.INTERACTION_EVENT
     );
     try {
-      const interactionId = interaction.interactionId;
-      const scenarioIdInt = interaction.scenarioId;
-      let storageServiceInteractionID = null;
-      if (this.storageService.currentInteraction) {
-        storageServiceInteractionID = this.storageService.currentInteraction
-          .interactionId;
-      }
-      this.storageService.updateCadFields(interaction, this.cadActivityMap);
-      if (
-        this.storageService.recentActivityListContains(interactionId) &&
-        storageServiceInteractionID !== interactionId
-      ) {
-        this.saveActivity(this.storageService.getRecentActivity(interactionId));
-      }
+      const scenarioId = interaction.scenarioId;
       let isNewScenarioId = false;
-      if (
-        interaction.channelType === ChannelTypes.Telephony ||
-        interaction.channelType === ChannelTypes.SMS
-      ) {
-        interaction.details.fields.Phone.Value = this.formatPhoneNumber(
-          interaction.details.fields.Phone.Value,
-          this.phoneNumberFormat
-        );
+      this.storageService.updateCadFields(interaction, this.cadActivityMap);
+      if (this.storageService.recentActivityListContains(scenarioId) && this.storageService.currentScenarioId !== scenarioId) {
+        this.saveActivity(scenarioId, true);
+        return;
       }
-      if (
-        !this.scenarioInteractionMappings.hasOwnProperty(scenarioIdInt) &&
-        !this.storageService.getCurrentInteraction() &&
-        interaction.state !== api.InteractionStates.Disconnected
-      ) {
-        if (!this.wasClickToDial) {
-          if (
-            (this.screenpopOnAlert === true &&
-              interaction.state === api.InteractionStates.Alerting) ||
-            (this.screenpopOnAlert === false &&
-              interaction.state === api.InteractionStates.Connected) ||
-            interaction.direction === api.InteractionDirectionTypes.Outbound
-          ) {
-            this.scenarioInteractionMappings[scenarioIdInt] = {};
-            isNewScenarioId = true;
-            this.scenarioInteractionMappings[scenarioIdInt][
-              interactionId
-            ] = true;
-          }
-        } else {
-          this.scenarioInteractionMappings[scenarioIdInt] = {};
-          isNewScenarioId = true;
-          this.scenarioInteractionMappings[scenarioIdInt][interactionId] = true;
-        }
+
+      if (interaction.details.fields.Phone && interaction.details.fields.Phone.Value) {
+        interaction.details.fields.Phone.Value = this.formatPhoneNumber(interaction.details.fields.Phone.Value);
       }
-      if (
-        this.shouldPreformScreenpop(interaction, isNewScenarioId) &&
-        !this.storageService.getCurrentInteraction() &&
-        interaction.state !== api.InteractionStates.Disconnected
-      ) {
-        if (
-          (this.screenpopOnAlert === true &&
-            interaction.state === api.InteractionStates.Alerting) ||
-          (this.screenpopOnAlert === false &&
-            interaction.state === api.InteractionStates.Connected) ||
-          this.wasClickToDial ||
-          interaction.direction === api.InteractionDirectionTypes.Outbound
-        ) {
-          if (!this.lastOnFocusWasAnEntity && this.wasClickToDial) {
-            if (this.ScreenpopOnClickToDialListView) {
-              interaction.details.type = 'ClickToDialScreenpop';
-            } else {
-              interaction.details.type = 'ClickToDialNoScreenpop';
-            }
-            interaction.details.id = this.clickToDialEntity;
-          }
 
-          this.loggerService.logger.logDebug(
-            `AMCSalesforceHomeComponent: screenpop for new interaction: ${JSON.stringify(
-              interaction
-            )}`,
-            api.ErrorCode.SCREEN_POP
-          );
-          const searchRecord = await this.preformScreenpop(interaction);
-          this.storageService.setsearchRecordList(searchRecord.toJSON());
-          this.loggerService.logger.logDebug(
-            `AMCSalesforceHomeComponent: Search results: ${JSON.stringify(
-              searchRecord.toJSON()
-            )}`,
-            api.ErrorCode.SEARCH_RECORD
-          );
-          if (this.storageService.getsearchRecordList().length > 1) {
-            this.storageService.selectedSearchRecord = 'DefaultMultiMatch';
-            this.storageService.setSearchReturnedSingleResult(false);
-            this.storageService.setSearchResultWasReturned(true);
-          } else if (this.storageService.getsearchRecordList().length === 1) {
-            this.storageService.setSearchReturnedSingleResult(true);
-            this.storageService.setSearchResultWasReturned(true);
-          }
-          this.storageService.setCurrentInteraction(interaction);
-          this.storageService.addActivity(this.createActivity(interaction));
+      isNewScenarioId = await this.processIfNewScenario(interaction);
 
-          this.storageService.setSubject(
-            interactionId,
-            this.buildSubjectText(interaction)
-          );
-          this.loggerService.logger.logDebug(
-            `AMCSalesforceHomeComponent: Autosave activity:
-        ${JSON.stringify(
-          this.storageService.getActivity(
-            this.storageService.getCurrentInteraction().interactionId
-          )
-        )}`,
-            api.ErrorCode.ACTIVITY
-          );
-          this.autoSave.next(0);
-          this.wasClickToDial = false;
-          return searchRecord;
-        }
-      } else if (interaction.state === api.InteractionStates.Disconnected) {
-        this.loggerService.logger.logDebug(
-          `AMCSalesforceHomeComponent: Disconnect interaction received: ${JSON.stringify(
-            interaction
-          )}`,
+      if (interaction['userFocus'] || (this.storageService.activeScenarioIdList.length === 1 &&
+        this.storageService.activeScenarioIdList.indexOf(scenarioId) >= 0)) {
+        this.storageService.setCurrentScenarioId(scenarioId);
+      }
+
+      if (interaction.state === api.InteractionStates.Disconnected) {
+        this.loggerService.logger.logDebug(`Salesforce Home: Disconnect interaction received:${JSON.stringify(interaction)}`,
           api.ErrorCode.DISCONEECTED_INTERACTION
         );
-        if (this.scenarioInteractionMappings[scenarioIdInt]) {
-          delete this.scenarioInteractionMappings[scenarioIdInt][interactionId];
-          if (
-            Object.keys(this.scenarioInteractionMappings[scenarioIdInt])
-              .length === 0
-          ) {
-            delete this.scenarioInteractionMappings[scenarioIdInt];
+        this.wasClickToDial = false;
+        this.deleteExistingScenario(interaction);
+      } else if (!(interaction.state === api.InteractionStates.Alerting && this.screenpopOnAlert === false)) {
+        if (!this.lastOnFocusWasAnEntity && this.wasClickToDial) {
+          if (this.ScreenpopOnClickToDialListView) {
+            interaction.details.type = 'ClickToDialScreenpop';
+          } else {
+            interaction.details.type = 'ClickToDialNoScreenpop';
           }
+          interaction.details.id = this.clickToDialEntity;
         }
-        if (
-          this.storageService.getCurrentInteraction() &&
-          this.storageService.getCurrentInteraction().interactionId ===
-            interactionId
-        ) {
-          this.interactionDisconnected.next(true);
-          this.wasClickToDial = false;
-          this.storageService.onInteractionDisconnect();
+        if (!this.storageService.searchRecordList[scenarioId]) {
+            const searchRecord = await this.searchAndScreenpop(interaction, isNewScenarioId);
+            this.storageService.setsearchRecordList(searchRecord.toJSON(), scenarioId);
+            this.wasClickToDial = false;
+            return searchRecord;
         }
       }
     } catch (e) {
@@ -594,6 +479,44 @@ export class HomeSalesforceComponent extends Application implements OnInit {
     }
     this.wasClickToDial = false;
     return;
+  }
+
+  private async searchAndScreenpop(interaction: api.IInteraction, isNewScenarioId: boolean) {
+    if (this.shouldPreformScreenpop(interaction, isNewScenarioId)) {
+      return await this.preformScreenpop(interaction);
+    } else {
+      this.logger.logDebug('searchAndScreenpop START:' +  JSON.stringify(interaction));
+      const event = this.generateEventForScreenpop(interaction);
+      event['search'] = true;
+      const screenpopResult = await this.bridgeEventsService.sendEvent('search', event);
+      this.logger.logDebug('searchAndScreenpop searchResults=' + screenpopResult);
+      const records = this.formatCrmResults(screenpopResult);
+      this.logger.logDebug('searchAndScreenpop records=' + screenpopResult);
+      this.logger.logDebug('searchAndScreenpop END');
+      return records;
+    }
+  }
+
+  protected deleteExistingScenario(interaction: api.IInteraction): void {
+    if (this.scenarioInteractionMappings[interaction.scenarioId]) {
+      delete this.scenarioInteractionMappings[interaction.scenarioId][interaction.interactionId];
+      if (Object.keys(this.scenarioInteractionMappings[interaction.scenarioId]).length === 0) {
+        this.saveActivity(interaction.scenarioId, true);
+        this.storageService.onInteractionDisconnect(interaction.scenarioId);
+        delete this.scenarioInteractionMappings[interaction.scenarioId];
+      }
+    }
+  }
+
+  protected async processIfNewScenario(interaction: api.IInteraction): Promise<boolean> {
+    if (!this.scenarioInteractionMappings.hasOwnProperty(interaction.scenarioId)) {
+      this.scenarioInteractionMappings[interaction.scenarioId] = {};
+      this.scenarioInteractionMappings[interaction.scenarioId][interaction.interactionId] = true;
+      this.storageService.addActivity(this.createActivity(interaction));
+      await this.saveActivity(interaction.scenarioId);
+      return true;
+    }
+    return false;
   }
 
   protected buildSubjectText(interaction: IInteraction) {
@@ -650,10 +573,10 @@ export class HomeSalesforceComponent extends Application implements OnInit {
       ActivityDate: this.formatDate(date),
       TimeStamp: date,
       ActivityId: '',
-      InteractionId: interaction.interactionId,
+      ScenarioId: interaction.scenarioId,
       contactSource: this.getContactSource(interaction),
       CadFields: {},
-      saveToSalesforce: false
+      IsActive: true
     };
     for (const key in this.cadActivityMap) {
       if (interaction.details.fields[key]) {
@@ -675,29 +598,14 @@ export class HomeSalesforceComponent extends Application implements OnInit {
 
   @bind
   protected setActivityDetails(eventObject) {
-    this.loggerService.logger.logDebug(
-      `AMCSalesforceHomeComponent: Activity details received from bridge: ${JSON.stringify(
-        eventObject
-      )}`,
-      api.ErrorCode.ACTIVITY
-    );
-    if (
-      this.storageService.getCurrentInteraction() ||
-      eventObject.hasOwnProperty('AddToList')
-    ) {
-      if (
-        eventObject.objectType === 'Contact' ||
-        eventObject.objectType === 'Lead'
-      ) {
-        if (!this.storageService.whoListContains(eventObject)) {
-          this.storageService.setWhoList(eventObject);
-          this.autoSave.next(1);
-        }
-      } else if (eventObject.objectId !== undefined) {
-        if (!this.storageService.whatListContains(eventObject)) {
-          this.storageService.setWhatList(eventObject);
-          this.autoSave.next(1);
-        }
+    this.loggerService.logger.logDebug(`AMCSalesforceHomeComponent: Activity details received from bridge: ${JSON.stringify(
+      eventObject)}`, api.ErrorCode.ACTIVITY);
+    if (this.storageService.getCurrentScenarioId() || eventObject.hasOwnProperty('AddToList')) {
+      if (this.storageService.currentScenarioId) {
+        this.storageService.updateWhoWhatLists(eventObject, this.storageService.currentScenarioId);
+      }
+      if (this.storageService.workingRecentScenarioId) {
+        this.storageService.updateWhoWhatLists(eventObject, this.storageService.workingRecentScenarioId);
       }
     }
   }
@@ -710,15 +618,9 @@ export class HomeSalesforceComponent extends Application implements OnInit {
       api.ErrorCode.SCREEN_POP
     );
     let params: ICreateNewSObjectParams;
-    if (this.storageService.getCurrentInteraction()) {
-      if (
-        this.storageService.activityListContains(
-          this.storageService.getCurrentInteraction().interactionId
-        )
-      ) {
-        const activity = this.storageService.getActivity(
-          this.storageService.getCurrentInteraction().interactionId
-        );
+    if (this.storageService.currentScenarioId) {
+      if (this.storageService.activityList[this.storageService.currentScenarioId]) {
+        const activity = this.storageService.getActivity(this.storageService.currentScenarioId);
         params = this.buildParams(entityType, activity);
       }
     } else {
@@ -739,7 +641,7 @@ export class HomeSalesforceComponent extends Application implements OnInit {
       opportunityFields: {},
       leadFields: {}
     };
-    if (this.storageService.getCurrentInteraction()) {
+    if (this.storageService.currentScenarioId) {
       if (entityType === 'Case') {
         if (activity.WhatObject.objectType === 'Account') {
           params.caseFields.AccountId = activity.WhatObject.objectId;
@@ -757,8 +659,8 @@ export class HomeSalesforceComponent extends Application implements OnInit {
         params.opportunityFields.StageName = 'Prospecting';
       } else if (entityType === 'Lead') {
         params.leadFields[
-          this.storageService.activity.contactSource.sourceType
-        ] = this.storageService.activity.contactSource.source;
+          this.storageService.activityList[this.storageService.currentScenarioId].contactSource.sourceType
+        ] = this.storageService.activityList[this.storageService.currentScenarioId].contactSource.source;
         params.leadFields.Description = activity.Description;
       }
     }
