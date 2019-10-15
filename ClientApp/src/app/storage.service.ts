@@ -5,284 +5,348 @@ import { IActivityDetails } from './Model/IActivityDetails';
 import { Injectable } from '@angular/core';
 @Injectable()
 export class StorageService {
-  public whoList: IActivityDetails[];
-  public whatList: IActivityDetails[];
-  public currentInteraction: api.IInteraction;
-  public activityList: IActivity[];
-  public recentActivityList: IActivity[];
-  public activity: IActivity;
-  public searchRecordList: api.IRecordItem[];
-  public searchReturnedSingleResult: boolean;
-  public searchResultWasReturned: boolean;
+  public whoList: {
+    [scenarioId: string]: IActivityDetails[]
+  };
+  public whatList: {
+    [scenarioId: string]: IActivityDetails[]
+  };
+  public currentScenarioId: string;
+  public workingRecentScenarioId: string;
+  public activityList: {
+    [scenarioId: string]: IActivity
+  };
   public currentTicketId: string;
+  public recentScenarioIdList: string[];
+  public activeScenarioIdList: string[];
+  public expiredScenarioIdList: string[];
+  public searchRecordList: {
+    [scenarioId: string]: api.IRecordItem[]
+  };
+  public selectedWhatValueList: {
+    [key: string]: string;
+  };
+  public selectedWhoValueList: {
+    [key: string]: string;
+  };
+  public selectedSearchRecordList: {
+    [key: string]: string;
+  };
+  public nameChangesList: string[];
+  public relatedToChangesList: string[];
+  public maxExpiredItems: Number;
   public maxRecentItems: Number;
-  public selectedSearchRecord: string;
+
   constructor() {
-    this.activityList = [];
-    this.recentActivityList = [];
-    this.currentInteraction = null;
-    this.searchRecordList = [];
-    this.searchResultWasReturned = null;
-    this.searchReturnedSingleResult = null;
-    this.whatList = [];
-    this.whoList = [];
-    this.currentTicketId = '';
+    this.whoList = {};
+    this.whatList = {};
+    this.currentScenarioId = null;
+    this.workingRecentScenarioId = null;
+    this.activityList = {};
+    this.recentScenarioIdList = [];
+    this.activeScenarioIdList = [];
+    this.expiredScenarioIdList = [];
+    this.searchRecordList = {};
+    this.selectedWhatValueList = {};
+    this.selectedWhoValueList = {};
+    this.selectedSearchRecordList = {};
+    this.nameChangesList = [];
+    this.relatedToChangesList = [];
     this.maxRecentItems = 0;
+    this.maxExpiredItems = 2;
+    this.currentTicketId = '';
   }
+
+  public getCurrentScenarioId(): string {
+    return this.currentScenarioId;
+  }
+
+  public setCurrentScenarioId(currentScenarioId: string) {
+    this.currentScenarioId = currentScenarioId;
+    this.storeToLocalStorage();
+  }
+
   public setCurrentTicketId(id) {
     this.currentTicketId = id;
     this.storeToLocalStorage();
   }
+
   public getCurrentTicketId() {
     return this.currentTicketId;
   }
-  public getActivity(interactionId: string): IActivity {
-    for (let i = 0; i < this.activityList.length; i++) {
-      if (this.activityList[i].InteractionId === interactionId) {
-        return this.activityList[i];
+
+  public getActivity(scenarioId: string = null): IActivity {
+    if (!scenarioId) {
+      scenarioId = this.currentScenarioId;
+    }
+    if (this.activityList[scenarioId]) {
+      return this.activityList[scenarioId];
+    }
+    return null;
+  }
+
+  public recentActivityListContains(scenarioId: string): boolean {
+    return (this.activityList[scenarioId] && !this.activityList[scenarioId].IsActive) ? true : false;
+  }
+
+  private addRecentActivity(activity: IActivity) {
+    const deleteExpiredActivity = ((this.expiredScenarioIdList.length === this.maxExpiredItems) && this.maxRecentItems === 0);
+    if ((Object.keys(this.recentScenarioIdList).length === this.maxRecentItems) || this.maxRecentItems === 0) {
+      const scenarioId = (this.maxRecentItems === 0) ?
+      (deleteExpiredActivity ? this.expiredScenarioIdList.pop() : activity.ScenarioId) : this.recentScenarioIdList.pop();
+      this.clearWhatList(scenarioId);
+      this.clearWhoList(scenarioId);
+      delete this.selectedWhatValueList[scenarioId];
+      delete this.selectedWhoValueList[scenarioId];
+      if (this.maxRecentItems !== 0 || deleteExpiredActivity) {
+        delete this.activityList[scenarioId];
       }
     }
+    if (this.maxRecentItems !== 0) {
+      this.recentScenarioIdList.unshift(activity.ScenarioId);
+    } else {
+      this.expiredScenarioIdList.unshift(activity.ScenarioId);
+    }
+    this.storeToLocalStorage();
   }
+
   public addActivity(activity: IActivity) {
-    this.activityList.push(activity);
-    this.activity = activity;
+    this.activityList[activity.ScenarioId] = activity;
+    this.activeScenarioIdList.push(activity.ScenarioId);
     this.storeToLocalStorage();
   }
+
   public updateActivity(activity: IActivity) {
-    for (let i = 0; i < this.activityList.length; i++) {
-      if (this.activityList[i].InteractionId === activity.InteractionId) {
-        this.activityList[i] = activity;
-        this.activity = activity;
-        this.storeToLocalStorage();
-      }
+    if (this.activityList[activity.ScenarioId]) {
+      this.activityList[activity.ScenarioId] = activity;
     }
+    this.storeToLocalStorage();
   }
-  public activityListContains(interactionId: string): boolean {
-    for (let i = 0; i < this.activityList.length; i++) {
-      if (this.activityList[i].InteractionId === interactionId) {
-        return true;
+
+  private removeActivity(scenarioId: string) {
+    if (this.activityList[scenarioId]) {
+      this.addRecentActivity(this.activityList[scenarioId]);
+      this.activeScenarioIdList = this.activeScenarioIdList.filter(id => id !== scenarioId);
+    }
+    this.storeToLocalStorage();
+  }
+
+  private activityListContains(scenarioId: string): boolean {
+    return (this.activityList[scenarioId]) ? true : false;
+  }
+
+  public getSubject(): string {
+    return this.getActivity().Subject;
+  }
+
+  public setSubject(subject: string, scenarioId: string) {
+    if (this.activityList[scenarioId]) {
+      this.activityList[scenarioId].Subject = subject;
+    }
+    this.storeToLocalStorage();
+  }
+
+  public getDescription(): string {
+    return this.getActivity().Description;
+  }
+
+  public setDescription(description: string, scenarioId: string) {
+    if (this.activityList[scenarioId]) {
+      this.activityList[scenarioId].Description = description;
+    }
+    this.storeToLocalStorage();
+  }
+
+  private setActivityWhoObject(whoObject: IActivityDetails, scenarioId: string) {
+    if (this.activityList[scenarioId]) {
+      this.activityList[scenarioId].WhoObject = whoObject;
+    }
+    this.storeToLocalStorage();
+  }
+
+  private setActivityWhatObject(whatObject: IActivityDetails, scenarioId: string) {
+    if (this.activityList[scenarioId]) {
+      this.activityList[scenarioId].WhatObject = whatObject;
+    }
+    this.storeToLocalStorage();
+  }
+
+  public UpdateWhoObjectSelectionChange(whoObjectId: string, scenarioId: string) {
+    const currentWhoObject = this.getWhoObject(whoObjectId, scenarioId);
+    if (this.currentScenarioId === scenarioId) {
+      this.nameChangesList.push(scenarioId);
+    }
+    this.setActivityWhoObject(currentWhoObject, scenarioId);
+  }
+
+  public UpdateWhatObjectSelectionChange(whatObjectId: string, scenarioId: string) {
+      const currentWhatObject = this.getWhatObject(whatObjectId, scenarioId);
+      if (this.currentScenarioId === scenarioId) {
+        this.relatedToChangesList.push(scenarioId);
+      }
+      this.setActivityWhatObject(currentWhatObject, scenarioId);
+  }
+
+  private getWhatObject(whatId: string, scenarioId: string): IActivityDetails {
+    return this.whatList[scenarioId].find(item => item.objectId === whatId);
+  }
+
+  private getWhoObject(whoId: string, scenarioId: string): IActivityDetails {
+    return this.whoList[scenarioId].find(item => item.objectId === whoId);
+  }
+
+  private whatListContains(whatObject: IActivityDetails, scenarioId: string): boolean {
+    if (scenarioId) {
+      const interactionWhatList = this.whatList[scenarioId];
+      if (interactionWhatList) {
+        return (this.whatList[scenarioId].find(item => item.objectId === whatObject.objectId)) ? true : false;
       }
     }
     return false;
   }
-  public removeActivity(interactionId: string) {
-    for (let i = 0; i < this.activityList.length; i++) {
-      if (this.activityList[i].InteractionId === interactionId) {
-        this.addRecentActivity(this.activityList[i]);
-        this.activityList.splice(i, 1);
-        this.activity = null;
-      }
-      this.storeToLocalStorage();
-    }
-  }
-  public getSubject(interactionId: string): string {
-    return this.getActivity(interactionId).Subject;
-  }
-  public setSubject(interactionId: string, subject: string) {
-    for (let i = 0; i < this.activityList.length; i++) {
-      if (this.activityList[i].InteractionId === interactionId) {
-        this.activityList[i].Subject = subject;
-        this.activity = this.activityList[i];
-        this.storeToLocalStorage();
-        break;
-      }
-    }
-  }
-  public getDescription(interactionId: string): string {
-    return this.getActivity(interactionId).Description;
-  }
-  public setDescription(interactionId: string, description: string) {
-    for (let i = 0; i < this.activityList.length; i++) {
-      if (this.activityList[i].InteractionId === interactionId) {
-        this.activityList[i].Description = description;
-        this.activity = this.activityList[i];
-        this.storeToLocalStorage();
-        break;
-      }
-    }
-  }
-  public setActivityWhoObject(interactionId: string, whoObject: IActivityDetails) {
-    for (let i = 0; i < this.activityList.length; i++) {
-      if (this.activityList[i].InteractionId === interactionId) {
-        this.activityList[i].WhoObject = whoObject;
-        this.activity = this.activityList[i];
-        this.storeToLocalStorage();
-        break;
-      }
-    }
-  }
-  public setActivityWhatObject(interactionId: string, whatObject: IActivityDetails) {
-    for (let i = 0; i < this.activityList.length; i++) {
-      if (this.activityList[i].InteractionId === interactionId) {
-        this.activityList[i].WhatObject = whatObject;
-        this.activity = this.activityList[i];
-        this.storeToLocalStorage();
-        break;
-      }
-    }
-  }
-  public clearActivity() {
-    this.activity = null;
-  }
-  public getSearchResultWasReturned(): boolean {
-    return this.searchResultWasReturned;
-  }
-  public setSearchResultWasReturned(searchResultWasReturned: boolean) {
-    this.searchResultWasReturned = searchResultWasReturned;
-    this.storeToLocalStorage();
-  }
-  public getSearchReturnedSingleResult(): boolean {
-    return this.searchReturnedSingleResult;
-  }
-  public setSearchReturnedSingleResult(searchReturnedSingleResult: boolean) {
-    this.searchReturnedSingleResult = searchReturnedSingleResult;
-    this.storeToLocalStorage();
-  }
-  public getCurrentInteraction(): IInteraction {
-    return this.currentInteraction;
-  }
-  public setCurrentInteraction(currentInteraction: IInteraction) {
-    this.currentInteraction = currentInteraction;
-  }
-  public whatListContains(whatObject: IActivityDetails): boolean {
-    for (let i = 0; i < this.whatList.length; i++) {
-      if (this.whatList[i] && (this.whatList[i].objectId === whatObject.objectId)) {
-        return true;
+
+  private whoListContains(whoObject: IActivityDetails, scenarioId: string): boolean {
+    if (scenarioId) {
+      const interactionWhoList = this.whoList[scenarioId];
+      if (interactionWhoList) {
+        return (this.whoList[scenarioId].find(item => item.objectId === whoObject.objectId)) ? true : false;
       }
     }
     return false;
   }
-  public getWhoList(): IActivityDetails[] {
-    return this.whoList;
-  }
-  public setWhoList(activityDetails: IActivityDetails) {
-    this.whoList.push(activityDetails);
+
+  public setWhatList(activityDetails: IActivityDetails, scenarioId: string) {
+    const interactionWhatList = this.whatList[scenarioId];
+    if (!interactionWhatList) {
+      this.whatList[scenarioId] = [];
+    }
+    this.whatList[scenarioId].push(activityDetails);
     this.storeToLocalStorage();
   }
-  public clearWhoList() {
-    this.whoList = [];
+
+  public setWhoList(activityDetails: IActivityDetails, scenarioId: string) {
+    const interactionWhoList = this.whoList[scenarioId];
+    if (!interactionWhoList) {
+      this.whoList[scenarioId] = [];
+    }
+    this.whoList[scenarioId].push(activityDetails);
     this.storeToLocalStorage();
   }
-  public getWhatList(): IActivityDetails[] {
-    return this.whatList;
-  }
-  public setWhatList(activityDetails: IActivityDetails) {
-    this.whatList.push(activityDetails);
+
+  private clearWhatList(scenarioId: string) {
+    delete this.whatList[scenarioId];
     this.storeToLocalStorage();
   }
-  public clearWhatList() {
-    this.whatList = [];
+
+  private clearWhoList(scenarioId: string) {
+    delete this.whoList[scenarioId];
     this.storeToLocalStorage();
   }
-  public getsearchRecordList(): api.IRecordItem[] {
-    return this.searchRecordList;
-  }
-  public getSearchRecord(id) {
-    for (let i = 0; i < this.searchRecordList.length; i++) {
-      if (this.searchRecordList[i].id === id) {
-        return this.searchRecordList[i];
+
+  public updateWhoWhatLists(activityObject: IActivityDetails, scenarioId: string) {
+    if (activityObject.objectType === 'Contact' || activityObject.objectType === 'Lead') {
+      if (!this.whoListContains(activityObject, scenarioId)) {
+        this.setWhoList(activityObject, scenarioId);
+      }
+      if (this.activeScenarioIdList.indexOf(scenarioId) >= 0) {
+        if (this.nameChangesList.indexOf(scenarioId) < 0) {
+          this.selectedWhoValueList[scenarioId] = activityObject.objectId;
+          this.setActivityWhoObject(activityObject, scenarioId);
+        }
+      }
+    } else {
+      if (!this.whatListContains(activityObject, scenarioId)) {
+        this.setWhatList(activityObject, scenarioId);
+      }
+      if (this.activeScenarioIdList.indexOf(scenarioId) >= 0) {
+        if (this.relatedToChangesList.indexOf(scenarioId) < 0) {
+          this.selectedWhatValueList[scenarioId] = activityObject.objectId;
+          this.setActivityWhatObject(activityObject, scenarioId);
+        }
       }
     }
   }
-  public setsearchRecordList(searchRecords: api.IRecordItem[]) {
-    this.searchRecordList = searchRecords;
-    this.storeToLocalStorage();
-  }
-  public clearSearchRecordList() {
-    this.searchRecordList = [];
-    this.storeToLocalStorage();
-  }
-  public whoListContains(whoObject) {
-    for (let i = 0; i < this.whoList.length; i++) {
-      if (this.whoList[i] && (this.whoList[i].objectId === whoObject.objectId)) {
-        return true;
-      }
+
+  public setsearchRecordList(searchRecords: api.IRecordItem[], scenarioId: string) {
+    this.searchRecordList[scenarioId] = searchRecords;
+    if (searchRecords.length > 1) {
+      this.selectedSearchRecordList[scenarioId] = 'DefaultMultiMatch';
     }
-    return false;
-  }
-  public clearDescription() {
-    this.activity.Description = '';
     this.storeToLocalStorage();
   }
-  public onInteractionDisconnect() {
-    this.setCurrentInteraction(null);
-    this.clearSearchRecordList();
-    this.clearActivity();
-    this.setSearchResultWasReturned(false);
-    this.clearWhatList();
-    this.clearWhoList();
+
+  public clearSearchRecordList(scenarioId: string) {
+    delete this.selectedSearchRecordList[scenarioId];
+    delete this.searchRecordList[scenarioId];
+    this.storeToLocalStorage();
   }
+
   public storeToLocalStorage() {
     localStorage.setItem('scenario', JSON.stringify({
-      activityList: this.activityList,
-      activity: this.activity,
-      currentInteraction: this.currentInteraction,
-      searchRecordList: this.searchRecordList,
-      searchResultWasReturned: this.searchResultWasReturned,
-      searchReturnedSingleResult: this.searchReturnedSingleResult,
-      whatList: this.whatList,
-      whoList: this.whoList,
-      currentTicketId: this.currentTicketId,
-      recentActivityList: this.recentActivityList,
-      selectedSearchRecord: this.selectedSearchRecord
+        activityList: this.activityList,
+        currentScenarioId: this.currentScenarioId,
+        searchRecordList: this.searchRecordList,
+        whatList: this.whatList,
+        whoList: this.whoList,
+        recentScenarioIdList: this.recentScenarioIdList,
+        activeScenarioIdList: this.activeScenarioIdList,
+        expiredScenarioIdList: this.expiredScenarioIdList,
+        lstRelatedToChanges: this.relatedToChangesList,
+        lstNameChanges: this.nameChangesList,
+        selectedWhatValueList: this.selectedWhatValueList,
+        selectedWhoValueList: this.selectedWhoValueList,
+        selectedSearchRecordList: this.selectedSearchRecordList,
+        currentTicketId: this.currentTicketId
     }));
   }
+
   public syncWithLocalStorage() {
     const browserStorage = JSON.parse(localStorage.getItem('scenario'));
     if (browserStorage) {
       this.activityList = browserStorage.activityList;
-      this.activity = browserStorage.activity,
-        this.currentInteraction = browserStorage.currentInteraction;
+      this.currentScenarioId = browserStorage.currentScenarioId;
       this.searchRecordList = browserStorage.searchRecordList;
-      this.searchResultWasReturned = browserStorage.searchResultWasReturned;
-      this.searchReturnedSingleResult = browserStorage.searchReturnedSingleResult;
       this.whatList = browserStorage.whatList;
       this.whoList = browserStorage.whoList;
+      this.recentScenarioIdList = browserStorage.recentScenarioIdList;
+      this.activeScenarioIdList = browserStorage.activeScenarioIdList;
+      this.expiredScenarioIdList = browserStorage.expiredScenarioIdList;
+      this.relatedToChangesList = browserStorage.lstRelatedToChanges;
+      this.nameChangesList = browserStorage.lstNameChanges;
+      this.selectedWhatValueList = browserStorage.selectedWhatValueList;
+      this.selectedWhoValueList = browserStorage.selectedWhoValueList;
+      this.selectedSearchRecordList = browserStorage.selectedSearchRecordList;
       this.currentTicketId = browserStorage.currentTicketId;
-      this.recentActivityList = browserStorage.recentActivityList;
-      this.selectedSearchRecord = browserStorage.selectedSearchRecord;
     }
   }
-  public recentActivityListContains(interactionId: string): boolean {
-    return (this.recentActivityList.find(item => item.InteractionId === interactionId)) ? true : false;
-  }
-  public addRecentActivity(activity: IActivity) {
-    if (this.recentActivityList.length === this.maxRecentItems) {
-      this.recentActivityList.pop();
-    }
-    this.recentActivityList.unshift(activity);
-    this.storeToLocalStorage();
-  }
-  public updateRecentActivity(activity: IActivity) {
-    for (let i = 0; i < this.recentActivityList.length; i++) {
-      if (this.recentActivityList[i].InteractionId === activity.InteractionId) {
-        this.recentActivityList[i] = activity;
-        this.storeToLocalStorage();
+
+  public onInteractionDisconnect(scenarioId: string) {
+    this.removeActivity(scenarioId);
+    this.nameChangesList = this.nameChangesList.filter(item => item !== scenarioId);
+    this.relatedToChangesList = this.relatedToChangesList.filter(item => item !== scenarioId);
+    this.clearSearchRecordList(scenarioId);
+    if (this.currentScenarioId === scenarioId) {
+      if (this.activeScenarioIdList.length > 0) {
+        this.setCurrentScenarioId(this.activeScenarioIdList[0]);
+      } else {
+        this.setCurrentScenarioId(null);
       }
     }
   }
-  public getRecentActivity(interactionId: string): IActivity {
-    return (this.recentActivityList.find(item => item.InteractionId === interactionId));
-  }
-  public updateCadFields(interaction: IInteraction, cadActivityMap: any) {
-    const isInteractionCurrent = this.activityListContains(interaction.interactionId);
-    const isInteractionRecent = this.recentActivityListContains(interaction.interactionId);
+
+  public updateCadFields(interaction: IInteraction, cadActivityMap: Object) {
+    const isInteractionCurrent = this.activityListContains(interaction.scenarioId);
+    const isInteractionRecent = this.recentActivityListContains(interaction.scenarioId);
     if (isInteractionCurrent || isInteractionRecent) {
         if (interaction.details) {
           for (const key in cadActivityMap) {
             if (interaction.details.fields[key]) {
-              const objActivity = (isInteractionCurrent) ?
-              this.getActivity(interaction.interactionId) :
-              this.getRecentActivity(interaction.interactionId);
+              const objActivity = this.getActivity(interaction.scenarioId);
               if (!objActivity.CadFields) {
                 objActivity.CadFields = {};
               }
               objActivity.CadFields[cadActivityMap[key]] = interaction.details.fields[key].Value;
-              if (isInteractionCurrent) {
-                this.updateActivity(objActivity);
-              } else {
-                this.updateRecentActivity(objActivity);
-              }
+              this.updateActivity(objActivity);
             }
           }
       }

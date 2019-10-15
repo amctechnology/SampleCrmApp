@@ -25,30 +25,30 @@
     />
   </div>
   <div class="callBody" *ngIf="isSearchInformationMaximized">
-    <div *ngIf="!storageService.searchReturnedSingleResult">
+    <div *ngIf="this.searchRecordList.length > 1">
       <select
         class="multipleSearchResultSelect"
         data-resetperactivity="false"
         (change)="onAgentSelectedCallerInformation($event)"
         id="CallerInfoSelect"
-        [(ngModel)]="this.storageService.selectedSearchRecord"
+        [(ngModel)]="storageService.selectedSearchRecordList[storageService.currentScenarioId]"
       >
         <option selected disabled hidden style="display: none" value="DefaultMultiMatch"
           >Click for Multi-Match Options</option
         >
         <option
-          *ngFor="let searchRecord of storageService.searchRecordList"
+          *ngFor="let searchRecord of this.searchRecordList"
           id="{{ searchRecord.id }}"
           value="{{ searchRecord.id }}"
           >{{ parseSearchRecordForName(searchRecord) }}</option
         >
       </select>
     </div>
-    <div *ngIf="storageService.searchReturnedSingleResult">
+    <div *ngIf="this.searchRecordList.length === 1">
       <input
         readonly
         class="singleSearchResultSelect"
-        *ngFor="let searchRecord of storageService.searchRecordList"
+        *ngFor="let searchRecord of this.searchRecordList"
         id="{{ searchRecord.id }}"
         value="{{ parseSearchRecordForName(searchRecord) }}"
         (click)="onAgentSelectedCallerInformation($event)"
