@@ -27,6 +27,8 @@ export class HomeSalesforceComponent extends Application implements OnInit {
   lastClickToDialSearchRecord: any;
   clickToDialEntity: any;
   DisplayQuickCreate: boolean;
+  public quickCommentOptionRequiredCadArray: any;
+
 
   constructor(
     private loggerService: LoggerService,
@@ -43,6 +45,7 @@ export class HomeSalesforceComponent extends Application implements OnInit {
     this.DisplayQuickCreate = true;
     this.wasClickToDial = false;
     this.appName = 'Salesforce';
+    this.quickCommentOptionRequiredCadArray = {};
     this.loggerService.logger.logDebug(
       'AMCSalesforceHomeComponent: constructor complete'
     );
@@ -118,6 +121,14 @@ export class HomeSalesforceComponent extends Application implements OnInit {
       this.screenpopOnAlert = Boolean(config['variables']['ScreenpopOnAlert']);
     }
     this.quickCommentList = <string[]>config['variables']['QuickComments'];
+    for (let i = 0; i < this.quickCommentList.length; i++) {
+      this.quickCommentList[i] = this.quickCommentList[i].replace(/\\n/g, String.fromCharCode(13, 10));
+      this.quickCommentList[i] = this.quickCommentList[i].replace(/\\t/g, String.fromCharCode(9));
+    }
+    const CADQuickCommentRegex = /\{\{.*?\}\}/g;
+    for (let i = 0; i < this.quickCommentList.length; i++) {
+      this.quickCommentOptionRequiredCadArray[i] = this.quickCommentList[i].match(CADQuickCommentRegex);
+    }
     this.QuickCreateEntities =
       config['QuickCreate']['variables']['QuickCreateKeyList'];
     this.DisplayQuickCreate = (Object.keys(this.QuickCreateEntities).length > 0);

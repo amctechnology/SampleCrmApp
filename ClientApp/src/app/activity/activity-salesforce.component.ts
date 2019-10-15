@@ -11,6 +11,7 @@ import { StorageService } from '../storage.service';
 export class ActivitySalesforceComponent {
   @Input() quickCommentList: string[];
   @Output() ActivitySave: EventEmitter<string> = new EventEmitter<string>();
+  @Input() quickCommentOptionRequiredCadArray: any;
 
   isActivityMaximized: boolean;
 
@@ -72,11 +73,36 @@ export class ActivitySalesforceComponent {
   }
 
   protected loadQuickComment(comment: string) {
-    if (!this.storageService.getDescription()) {
-      this.storageService.setDescription(this.quickCommentList[comment], this.storageService.currentScenarioId);
+    if (this.quickCommentOptionRequiredCadArray[comment]) {
+      // This means the option is configured to accept CAD Automatically
+      // Loop through quickCommentOptionRequiredCadArray and replace {{cad}} with the cad coming from channel app
+      let descriptionToSet = this.quickCommentList[comment];
+      let cadFields = {};
+      if (this.storageService.activityList[this.storageService.currentScenarioId]) {
+          cadFields = this.storageService.scenarioToCADMap[this.storageService.currentScenarioId];
+      }
+      for (let i = 0; i < this.quickCommentOptionRequiredCadArray[comment].length; i++) {
+        let keyToCheckIfCADExists = this.quickCommentOptionRequiredCadArray[comment][i];
+        const stringToBeReplaced = this.quickCommentOptionRequiredCadArray[comment][i];
+        keyToCheckIfCADExists = keyToCheckIfCADExists.replace('{{', '');
+        keyToCheckIfCADExists = keyToCheckIfCADExists.replace('}}', '');
+        if (cadFields[keyToCheckIfCADExists]) {
+          descriptionToSet = descriptionToSet.replace(stringToBeReplaced, cadFields[keyToCheckIfCADExists].Value);
+        }
+      }
+      if (!this.storageService.getDescription()) {
+        this.storageService.setDescription(descriptionToSet, this.storageService.currentScenarioId);
+      } else {
+        this.storageService.setDescription(this.storageService.getDescription() + '\n' +
+        descriptionToSet, this.storageService.currentScenarioId);
+      }
     } else {
-      this.storageService.setDescription(this.storageService.getDescription() + '\n' + this.quickCommentList[comment],
-      this.storageService.currentScenarioId);
+      if (!this.storageService.getDescription()) {
+        this.storageService.setDescription(this.quickCommentList[comment], this.storageService.currentScenarioId);
+      } else {
+        this.storageService.setDescription(this.storageService.getDescription() + '\n' + this.quickCommentList[comment],
+        this.storageService.currentScenarioId);
+      }
     }
   }
 

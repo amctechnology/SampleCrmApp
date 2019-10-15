@@ -36,6 +36,9 @@ export class StorageService {
   public relatedToChangesList: string[];
   public maxExpiredItems: Number;
   public maxRecentItems: Number;
+  public scenarioToCADMap: {
+    [scenarioId: string]: any
+  };
 
   constructor() {
     this.whoList = {};
@@ -55,6 +58,7 @@ export class StorageService {
     this.maxRecentItems = 0;
     this.maxExpiredItems = 2;
     this.currentTicketId = '';
+    this.scenarioToCADMap = {};
   }
 
   public getCurrentScenarioId(): string {
@@ -296,7 +300,8 @@ export class StorageService {
         selectedWhatValueList: this.selectedWhatValueList,
         selectedWhoValueList: this.selectedWhoValueList,
         selectedSearchRecordList: this.selectedSearchRecordList,
-        currentTicketId: this.currentTicketId
+        currentTicketId: this.currentTicketId,
+        scenarioToCADMap: this.scenarioToCADMap
     }));
   }
 
@@ -317,6 +322,7 @@ export class StorageService {
       this.selectedWhoValueList = browserStorage.selectedWhoValueList;
       this.selectedSearchRecordList = browserStorage.selectedSearchRecordList;
       this.currentTicketId = browserStorage.currentTicketId;
+      this.scenarioToCADMap = browserStorage.scenarioToCADMap;
     }
   }
 
@@ -337,6 +343,10 @@ export class StorageService {
   public updateCadFields(interaction: IInteraction, cadActivityMap: Object) {
     const isInteractionCurrent = this.activityListContains(interaction.scenarioId);
     const isInteractionRecent = this.recentActivityListContains(interaction.scenarioId);
+    if (interaction.details && interaction.details.fields && !this.scenarioToCADMap[this.currentScenarioId]) {
+      this.scenarioToCADMap[interaction.scenarioId] = interaction.details.fields;
+      this.storeToLocalStorage();
+    }
     if (isInteractionCurrent || isInteractionRecent) {
         if (interaction.details) {
           for (const key in cadActivityMap) {
