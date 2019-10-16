@@ -11,6 +11,7 @@
     *ngIf="storageService.currentScenarioId"
     (ActivitySave)="saveActivity($event)"
     [quickCommentList]="quickCommentList"
+    [quickCommentOptionRequiredCadArray]="quickCommentOptionRequiredCadArray"
   ></app-activity>
   <app-create
     *ngIf="DisplayQuickCreate"
