@@ -1,4 +1,4 @@
-import { Component, OnInit, Input, Output, EventEmitter } from '@angular/core';
+import { Component, Input, Output, EventEmitter } from '@angular/core';
 import * as api from '@amc-technology/davinci-api';
 import { IActivityDetails } from '../Model/IActivityDetails';
 import { LoggerService } from '../logger.service';
@@ -52,23 +52,6 @@ export class ActivitySalesforceComponent {
   protected onCallNotesChange(event) {
     this.storageService.setDescription(event.srcElement.value.trim(), this.storageService.currentScenarioId);
     this.loggerService.logger.logDebug('activity: Call notes value changed: ' + event.srcElement.value.trim(), api.ErrorCode.ACTIVITY);
-  }
-
-  protected getInteractionDirection(directionNumber) {
-    if (directionNumber === api.InteractionDirectionTypes.Inbound) {
-      return 'Inbound';
-    } else if (directionNumber === api.InteractionDirectionTypes.Outbound) {
-      return 'Outbound';
-    }
-    return 'Internal';
-  }
-
-  protected getSecondsElapsed(startDate): number {
-    const EndDate = new Date();
-    if (typeof startDate === 'string') {
-      startDate = new Date(startDate);
-    }
-    return Math.round((EndDate.getTime() - startDate.getTime()) / 1000);
   }
 
   protected loadQuickComment(comment: string) {

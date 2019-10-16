@@ -9,10 +9,10 @@ import { StorageService } from '../storage.service';
 })
 export class SearchInformationSalesforceComponent {
   @Input() searchRecordList: Array<api.IRecordItem>;
-  @Output() agentSelectedCallerInformation: EventEmitter<any> = new EventEmitter();
+  @Output() agentSelectedCallerInformation: EventEmitter<string> = new EventEmitter();
   isSearchInformationMaximized: boolean;
   imageLocation: string;
-  lastCallerId: string;
+
   constructor(private loggerService: LoggerService, protected storageService: StorageService) {
     this.loggerService.logger.logDebug('searchInformationComponent: Constructor start');
     this.isSearchInformationMaximized = true;
@@ -26,16 +26,19 @@ export class SearchInformationSalesforceComponent {
   protected collapseCallerInformationSection() {
     this.isSearchInformationMaximized = false;
   }
-  protected onAgentSelectedCallerInformation(event) {
+
+  protected onAgentSelectedCallerInformation(event: any) {
     this.loggerService.logger.logDebug(`searchInformationComponent: Agent selected caller info: ${((this.searchRecordList.length === 1) ?
       event.currentTarget.id : event.currentTarget.value)}`, api.ErrorCode.SEARCH_RECORD);
     if (this.searchRecordList.length > 1) {
       this.storageService.selectedSearchRecordList[this.storageService.currentScenarioId] = event.currentTarget.value;
     }
     this.agentSelectedCallerInformation.emit(
-      this.searchRecordList.find(i => i.id === ((this.searchRecordList.length === 1) ? event.currentTarget.id : event.currentTarget.value))
+      this.searchRecordList.find(i => i.id === ((this.searchRecordList.length === 1) ?
+      event.currentTarget.id : event.currentTarget.value)).id
     );
   }
+
   protected parseSearchRecordForName(searchRecord: api.IRecordItem) {
     const keys = Object.keys(searchRecord.fields);
     let nameKey;
@@ -48,12 +51,5 @@ export class SearchInformationSalesforceComponent {
     let name = searchRecord.fields[nameKey].Value;
     name = (searchRecord.displayName ? (searchRecord.displayName + ': ' + name) : (searchRecord.type + ': ' + name) );
     return name;
-  }
-  protected getRecord(id) {
-    for (let i = 0; i < this.searchRecordList.length; i++) {
-      if (this.searchRecordList[i].id === id) {
-        return this.searchRecordList[i];
-      }
-    }
   }
 }
