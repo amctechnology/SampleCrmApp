@@ -9,15 +9,15 @@
     <div class="activityFields">
       <form>
         <div class="editor displayDiv">
-          <label class="displayLabels" title="Call From">Name</label>
-          <select class="dropDownListStyle displayData" data-resetperactivity="false" (change)="onNameSelectChange($event)">
-            <option *ngFor="let who of storageService.whoList[storageService.currentScenarioId]" value="{{who.objectId}}">{{parseWhoObject(who)}}</option>
+          <label class="displayLabels" title="Name">Name</label>
+          <select class="dropDownListStyle displayData" [(ngModel)]="storageService.selectedWhoValueList[storageService.currentScenarioId]" name="whoItem" (change)="onNameSelectChange($event)">
+            <option *ngFor="let whoItem of storageService.whoList[storageService.currentScenarioId]" value="{{whoItem.objectId}}">{{parseWhoObject(whoItem)}}</option>
           </select>
         </div>
         <div class="editor displayDiv">
           <label class="displayLabels" title="Related To">Related To</label>
-          <select class="dropDownListStyle displayData" (change)="onRelatedToChange($event)" data-resetperactivity="false">
-            <option *ngFor="let what of storageService.whatList[storageService.currentScenarioId]" value="{{what.objectId}}">{{parseWhatObject(what)}}</option>
+          <select class="dropDownListStyle displayData" (change)="onRelatedToChange($event)" [(ngModel)]="storageService.selectedWhatValueList[storageService.currentScenarioId]" name="whatItem">
+            <option *ngFor="let whatItem of storageService.whatList[storageService.currentScenarioId]" value="{{whatItem.objectId}}">{{parseWhatObject(whatItem)}}</option>
           </select>
         </div>
         <div class="editor displayDiv">
@@ -38,7 +38,7 @@
                     value="{{i+1}}" (click)="loadQuickComment(i)" title="{{quickComment}}">
                 </div>
                 <div class="submitDiv">
-                  <input class="submitButton" type="button" value="Submit" (click)="activitySave(false, true)">
+                  <input class="submitButton" type="button" value="Submit" (click)="activitySave(storageService.currentScenarioId)">
                 </div>
               </div>
             </div>

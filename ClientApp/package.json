@@ -16,8 +16,8 @@
   },
   "private": true,
   "dependencies": {
-    "@amc-technology/applicationangularframework": "~1.0.78",
-    "@amc-technology/davinci-api": "0.0.7",
+    "@amc-technology/applicationangularframework": "^1.0.83",
+    "@amc-technology/davinci-api": "0.0.15",
     "@angular/animations": "^5.2.0",
     "@angular/common": "^5.2.0",
     "@angular/compiler": "^5.2.0",
