@@ -3,7 +3,7 @@ import { NgModule, APP_INITIALIZER } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { HttpClientModule } from '@angular/common/http';
 import { RouterModule } from '@angular/router';
-
+import { RecentactivitiesComponent } from './recentactivities/recentactivities.component';
 import { SalesforceComponent } from './salesforce.component';
 import { HomeSalesforceComponent } from './home/home-salesforce.component';
 import { ActivitySalesforceComponent } from './activity/activity-salesforce.component';
@@ -20,7 +20,8 @@ import { ConfigurationService } from './configuration.service';
     HomeSalesforceComponent,
     ActivitySalesforceComponent,
     CreateSalesforceComponent,
-    SearchInformationSalesforceComponent
+    SearchInformationSalesforceComponent,
+    RecentactivitiesComponent
   ],
   imports: [
     BrowserModule.withServerTransition({ appId: 'ng-cli-universal' }),

@@ -13,6 +13,8 @@
     [quickCommentList]="quickCommentList"
     [quickCommentOptionRequiredCadArray]="quickCommentOptionRequiredCadArray"
   ></app-activity>
+  <app-recentactivities *ngIf="checkIfRecentActivitiesExist()" (ActivitySave)="saveActivity($event, true)">
+</app-recentactivities>
   <app-create
     *ngIf="DisplayQuickCreate"
     [Entities]="QuickCreateEntities"

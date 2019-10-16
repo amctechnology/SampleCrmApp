@@ -136,6 +136,10 @@ export class HomeSalesforceComponent extends Application implements OnInit {
     return this.reverseString(formattedNumber);
   }
 
+  protected checkIfRecentActivitiesExist() {
+    return (this.storageService.recentScenarioIdList.length > 0) ? true : false;
+  }
+
   protected reverseString(input: string): string {
     let reverse = '';
     for (let i = 0; i < input.length; i++) {
