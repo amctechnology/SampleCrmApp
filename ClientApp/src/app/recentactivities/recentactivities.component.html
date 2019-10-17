@@ -1,0 +1,77 @@
+<div class="callSection">
+  <div *ngIf="collapseToggle" class="callDisplay">
+    <div class="editor callHeader">
+      <label class="headerLabel">
+        <b>Recent Calls</b>
+      </label>
+      <img class="ViewResizeImage" src="/assets/Images/section_collapse.png" title="Collapse" (click)="expandAndCollapse(false)" />
+    </div>
+    <div class="callBody">
+      <div *ngFor="let recentScenarioId of storageService.recentScenarioIdList">
+        <div *ngIf="this.storageService.workingRecentScenarioId === recentScenarioId" class="RecentCall">
+          <div class="editor callHeader">
+            <label class="headerLabel">
+              <b>{{ storageService.activityList[recentScenarioId].Subject }}</b>
+            </label>
+            <img class="ViewResizeImage" src="/assets/Images/section_collapse.png" title="Collapse"
+              (click)="expandAndCollapseRecentActivity(false, recentScenarioId)" />
+          </div>
+          <div class="callBody">
+            <div class="activityFields">
+              <form>
+                <div class="editor displayDiv">
+                  <label class="displayLabels" title="Subject">Subject</label>
+                  <input class="activitySubjectTextBoxStyle displayData" type="text" (change)="onSubjectChange($event)" name="storageService.activityList[recentScenarioId].Subject" [(ngModel)]="storageService.activityList[recentScenarioId].Subject" value="{{ storageService.activityList[recentScenarioId].Subject }}" />
+                </div>
+                <div class="editor displayDiv">
+                  <label class="displayLabels" title="Name">Name</label>
+                  <select class="dropDownListStyle displayData" (change)="onNameSelectChange($event)" [(ngModel)]="storageService.selectedWhoValueList[recentScenarioId]" name="whoItem">
+                    <option *ngFor="let whoItem of storageService.whoList[recentScenarioId]" value="{{ whoItem.objectId }}">{{ parseWhoObject(whoItem) }}</option>
+                  </select>
+                </div>
+                <div class="editor displayDiv">
+                  <label class="displayLabels" title="Regarding">Related To</label>
+                  <select class="dropDownListStyle displayData" [(ngModel)]="storageService.selectedWhatValueList[recentScenarioId]" (change)="onRelatedToChange($event)" name="whatItem">
+                    <option *ngFor="let whatItem of storageService.whatList[recentScenarioId]" value="{{ whatItem.objectId }}">{{ parseWhatObject(whatItem) }}</option>
+                  </select>
+                </div>
+                <div class="editor displayDiv">
+                  <div class="callNotesSection">
+                    <div class="callNotesTextArea">
+                      <textarea placeholder="Click to add a comment" (change)="onCallNotesChange($event)" name="storageService.activityList[recentScenarioId].Description" [(ngModel)]="storageService.activityList[recentScenarioId].Description"
+                        class="activityCommentsTextBoxStyle" value="{{ storageService.activityList[recentScenarioId].Description }}"
+                        rows="5" title="">
+                      </textarea>
+                    </div>
+                    <div class="callNotesButtonsSection">
+                      <input class="submitButton" type="button" value="Submit" (click)="activitySave(recentScenarioId)" />
+                    </div>
+                  </div>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+        <div *ngIf="!(this.storageService.workingRecentScenarioId === recentScenarioId)" class="RecentCall">
+          <div class="editor callHeader">
+            <label class="headerLabel">
+              <b>{{ storageService.activityList[recentScenarioId].Subject }}</b>
+            </label>
+            <img class="ViewResizeImage" src="/assets/Images/section_expand.png" title="Expand"
+              (click)="expandAndCollapseRecentActivity(true, recentScenarioId)" />
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div *ngIf="!collapseToggle" class="callDisplay">
+    <div class="editor callHeader">
+      <label class="headerLabel">
+        <b>Recent Calls</b>
+      </label>
+      <img class="ViewResizeImage" src="/assets/Images/section_expand.png" title="Expand" (click)="expandAndCollapse(true)" />
+    </div>
+  </div>
+</div>
+

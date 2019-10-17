@@ -26,8 +26,8 @@
             type="text" value="{{storageService.getSubject()}}">
         </div>
         <div class="editor displayDiv">
-          <div class="callNotesContainer">
-            <div class="textAreaDiv">
+          <div class="callNotesSection">
+            <div class="callNotesTextArea">
               <textarea value="{{storageService.getDescription()}}" placeholder="Click to add a comment" class="activityCommentsTextBoxStyle"
                 (change)="onCallNotesChange($event)" cols="20" rows="2" title=""></textarea>
             </div>
@@ -37,7 +37,7 @@
                   <input *ngFor="let quickComment of quickCommentList; let i = index;" class="quickNotesBotton" type="button"
                     value="{{i+1}}" (click)="loadQuickComment(i)" title="{{quickComment}}">
                 </div>
-                <div class="submitDiv">
+                <div class="callNotesButtonsSection">
                   <input class="submitButton" type="button" value="Submit" (click)="activitySave(storageService.currentScenarioId)">
                 </div>
               </div>
