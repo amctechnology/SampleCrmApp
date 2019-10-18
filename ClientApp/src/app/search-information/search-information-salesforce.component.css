@@ -1,7 +1,8 @@
 .callHeader {
-  background-color: #F4F5FB !important;
+  background-color: #f4f5fb !important;
   width: 100% !important;
   margin-top: 0px !important;
+  border: 1px solid #939598 !important;
 }
 
 .displayDiv {
@@ -30,6 +31,10 @@
 }
 
 .callBody {
+  border: 1px solid #939598;
+  border-top-color: rgb(147, 149, 152);
+  border-top-style: solid;
+  border-top-width: 1px;
   border-top: 0;
   position: relative;
 }
