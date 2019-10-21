@@ -6,13 +6,6 @@
   background-color: #FFFFFF;
 }
 
-.callHeader {
-  /* border: 1px solid #939598 !important; */
-  background-color: #F4F5FB !important;
-  width: 100% !important;
-  margin-top: 0px !important;
-}
-
 .submitButton {
   border: 0;
   float: right;
@@ -39,7 +32,12 @@
   }
 
 .callBody {
-  border-top: 0;
+  border: 1px solid #939598;
+  border-top: 1px solid #ffffff;
+  position: relative;
+}
+
+.callBodyBorderless {
   position: relative;
 }
 
@@ -58,7 +56,7 @@
   white-space: nowrap;
   text-overflow: ellipsis;
   border: 0;
-  padding-top: 2px;
+  padding-top: 5px;
   box-sizing: border-box;
   -webkit-box-sizing: border-box;
   -moz-box-sizing: border-box;
@@ -129,9 +127,7 @@
 
 .callNotesTextArea {
   background-color: #ffffff;
-  border-left: 1px solid #939598;
   border-bottom: 1px solid #939598;
-  border-right: 1px solid #939598;
   border-top: 1px solid #939598;
   border-top-left-radius: 3px !IMPORTANT;
   border-top-right-radius: 3px !IMPORTANT;
@@ -141,14 +137,50 @@
   float: left;
   height: 100%;
   width: 100%;
-  margin-right: 5px;
-  margin-left: 5px;
+  background-color: #f6f7fb;
 }
 
-.RecentCall {
-  margin-left: 4%;
-  margin-right: 4%;
-  margin-top: 10px;
-  padding-top: 5px;
-  padding-bottom: 5px;
+.callHeaderRecentActivitySelected {
+  cursor: pointer;
+  border-left: 1px solid #939598 !important;
+  border-right: 1px solid #939598 !important;
+  background-color: #cfecf2 !important;
+  width: 100% !important;
+  margin-top: 0px !important;
+}
+
+.callHeaderRecentActivityUnselected {
+  cursor: pointer;
+  border-left: 1px solid #939598 !important;
+  border-right: 1px solid #939598 !important;
+  background-color: #e6f4f7 !important;
+  width: 100% !important;
+  margin-top: 0px !important;
+}
+
+.callHeader {
+  border: 1px solid #939598 !important;
+  background-color: #F4F5FB !important;
+  width: 100% !important;
+  margin-top: 0px !important;
+}
+
+.callHeaderBottomBorder {
+  cursor: pointer;
+  border-bottom: 1px solid #939598 !important;
+  border-left: 1px solid #939598 !important;
+  border-right: 1px solid #939598 !important;
+  background-color: #e6f4f7 !important;
+  width: 100% !important;
+  margin-top: 0px !important;
+}
+
+.RecentCallsImg {
+  height: 15px;
+  vertical-align: text-bottom;
+}
+
+.headerLabelClickableLook {
+  cursor: pointer;
+  margin-left: 10px;
 }
