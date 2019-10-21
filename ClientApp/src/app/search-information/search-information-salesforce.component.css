@@ -59,7 +59,8 @@
 }
 
 .singleSearchResultSelect {
-  border: 0px !IMPORTANT;
+  border: 1px solid #939598 !IMPORTANT;
+  border-radius: 3px !IMPORTANT;
   width: 96% !IMPORTANT;
   height: 20px !IMPORTANT;
   text-align: left !IMPORTANT;
