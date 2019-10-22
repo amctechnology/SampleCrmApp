@@ -9,26 +9,26 @@
     <div class="activityFields">
       <form>
         <div class="editor displayDiv">
-          <label class="displayLabels" title="Call From">Name</label>
-          <select class="dropDownListStyle displayData" data-resetperactivity="false" (change)="onNameSelectChange($event)">
-            <option *ngFor="let who of storageService.whoList" value="{{who.objectId}}">{{parseWhoObject(who)}}</option>
+          <label class="displayLabels" title="Name">Name</label>
+          <select class="dropDownListStyle displayData" [(ngModel)]="storageService.selectedWhoValueList[storageService.currentScenarioId]" name="whoItem" (change)="onNameSelectChange($event)">
+            <option *ngFor="let whoItem of storageService.whoList[storageService.currentScenarioId]" value="{{whoItem.objectId}}">{{parseWhoObject(whoItem)}}</option>
           </select>
         </div>
         <div class="editor displayDiv">
           <label class="displayLabels" title="Related To">Related To</label>
-          <select class="dropDownListStyle displayData" (change)="onRelatedToChange($event)" data-resetperactivity="false">
-            <option *ngFor="let what of storageService.whatList" value="{{what.objectId}}">{{parseWhatObject(what)}}</option>
+          <select class="dropDownListStyle displayData" (change)="onRelatedToChange($event)" [(ngModel)]="storageService.selectedWhatValueList[storageService.currentScenarioId]" name="whatItem">
+            <option *ngFor="let whatItem of storageService.whatList[storageService.currentScenarioId]" value="{{whatItem.objectId}}">{{parseWhatObject(whatItem)}}</option>
           </select>
         </div>
         <div class="editor displayDiv">
           <label class="displayLabels" title="Subject">Subject</label>
-          <input class="activitySubjectTextBoxStyle displayData" (change)="onSubjectChange($event)" title="{{storageService.activity.Subject}}"
-            type="text" value="{{storageService.activity.Subject}}">
+          <input class="activitySubjectTextBoxStyle displayData" (change)="onSubjectChange($event)" title="{{storageService.getSubject()}}"
+            type="text" value="{{storageService.getSubject()}}">
         </div>
         <div class="editor displayDiv">
-          <div class="callNotesContainer">
-            <div class="textAreaDiv">
-              <textarea value="{{storageService.activity.Description}}" placeholder="Click to add a comment" class="activityCommentsTextBoxStyle"
+          <div class="callNotesSection">
+            <div class="callNotesTextArea">
+              <textarea value="{{storageService.getDescription()}}" placeholder="Click to add a comment" class="activityCommentsTextBoxStyle"
                 (change)="onCallNotesChange($event)" cols="20" rows="2" title=""></textarea>
             </div>
             <div class="notesBottonBorder">
@@ -37,8 +37,8 @@
                   <input *ngFor="let quickComment of quickCommentList; let i = index;" class="quickNotesBotton" type="button"
                     value="{{i+1}}" (click)="loadQuickComment(i)" title="{{quickComment}}">
                 </div>
-                <div class="submitDiv">
-                  <input class="submitButton" type="button" value="Submit" (click)="activitySave(false, true)">
+                <div class="callNotesButtonsSection">
+                  <input class="submitButton" type="button" value="Submit" (click)="activitySave(storageService.currentScenarioId)">
                 </div>
               </div>
             </div>

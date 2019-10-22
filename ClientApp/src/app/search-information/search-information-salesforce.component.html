@@ -3,56 +3,19 @@
     <label class="headerLabel">
       <b>Caller Information</b>
     </label>
-    <img
-      title="Multiple Matches Available"
-      *ngIf="!storageService.searchReturnedSingleResult"
-      src="../../assets/images/MultiMatchAlert.png"
-      class="multiMatchImg"
-    />
-    <img
-      *ngIf="isSearchInformationMaximized"
-      class="ViewResizeImage"
-      src="assets/images/section_collapse.png"
-      (click)="collapseCallerInformationSection()"
-      title="Collapse"
-    />
-    <img
-      *ngIf="!isSearchInformationMaximized"
-      class="ViewResizeImage"
-      src="assets/images/section_expand.png"
-      (click)="expandCallerInformationSection()"
-      title="Expand"
-    />
+    <img title="Multiple Matches Available" *ngIf="this.searchRecordList.length > 1" src="../../assets/images/MultiMatchAlert.png" class="multiMatchImg"/>
+    <img *ngIf="isSearchInformationMaximized" class="ViewResizeImage" src="assets/images/section_collapse.png" (click)="collapseCallerInformationSection()" title="Collapse"/>
+    <img *ngIf="!isSearchInformationMaximized" class="ViewResizeImage" src="assets/images/section_expand.png" (click)="expandCallerInformationSection()" title="Expand"/>
   </div>
   <div class="callBody" *ngIf="isSearchInformationMaximized">
-    <div *ngIf="!storageService.searchReturnedSingleResult">
-      <select
-        class="multipleSearchResultSelect"
-        data-resetperactivity="false"
-        (change)="onAgentSelectedCallerInformation($event)"
-        id="CallerInfoSelect"
-        [(ngModel)]="this.storageService.selectedSearchRecord"
-      >
-        <option selected disabled hidden style="display: none" value="DefaultMultiMatch"
-          >Click for Multi-Match Options</option
-        >
-        <option
-          *ngFor="let searchRecord of storageService.searchRecordList"
-          id="{{ searchRecord.id }}"
-          value="{{ searchRecord.id }}"
-          >{{ parseSearchRecordForName(searchRecord) }}</option
-        >
+    <div *ngIf="this.searchRecordList.length > 1">
+      <select class="multipleSearchResultSelect" (change)="onAgentSelectedCallerInformation($event)" name="callerinfo" [(ngModel)]="storageService.selectedSearchRecordList[storageService.currentScenarioId]">
+        <option selected disabled hidden style="display: none" value="DefaultMultiMatch">Click for Multi-Match Options</option>
+        <option *ngFor="let searchRecord of this.searchRecordList" value="{{ searchRecord.id }}">{{ parseSearchRecordForName(searchRecord) }}</option>
       </select>
     </div>
-    <div *ngIf="storageService.searchReturnedSingleResult">
-      <input
-        readonly
-        class="singleSearchResultSelect"
-        *ngFor="let searchRecord of storageService.searchRecordList"
-        id="{{ searchRecord.id }}"
-        value="{{ parseSearchRecordForName(searchRecord) }}"
-        (click)="onAgentSelectedCallerInformation($event)"
-      />
+    <div *ngIf="this.searchRecordList.length === 1">
+      <input readonly (click)="onAgentSelectedCallerInformation($event)" id="{{ this.searchRecordList[0].id }}" class="singleSearchResultSelect" value="{{ parseSearchRecordForName(this.searchRecordList[0]) }}" />
     </div>
   </div>
 </div>

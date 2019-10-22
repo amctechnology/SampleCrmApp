@@ -1,0 +1,186 @@
+.callSection {
+  margin-left: 0px;
+  font-family: Arial;
+  position: relative;
+  margin-top: 5px;
+  background-color: #FFFFFF;
+}
+
+.submitButton {
+  border: 0;
+  float: right;
+  margin-top: 2px;
+  outline: none;
+  cursor: pointer;
+  background-color: #6cb047;
+  color: #ffffff;
+  border-radius: 4px;
+  font-size: 98%;
+  margin-bottom: 2px;
+}
+
+.callNotesButtonsSection {
+  text-align: right;
+  padding-right: 4px;
+}
+
+.ViewResizeImage {
+  width: 20px;
+  height: 20px;
+  float: right;
+  cursor: pointer;
+  }
+
+.callBody {
+  border: 1px solid #939598;
+  border-top: 1px solid #ffffff;
+  position: relative;
+}
+
+.callBodyBorderless {
+  position: relative;
+}
+
+.callDisplay {
+  display:grid;
+  margin-bottom: 8px;
+  background-color: #ffffff;
+}
+
+.editor {
+  font-size: 0.9em;
+  width: 70%;
+  text-align: left;
+  margin: 4px 5% 0 0px;
+  font-family: Arial;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  border: 0;
+  padding-top: 5px;
+  box-sizing: border-box;
+  -webkit-box-sizing: border-box;
+  -moz-box-sizing: border-box;
+}
+
+.dropDownListStyle {
+  border: 1px solid #939598 !IMPORTANT;
+  border-radius: 3px !IMPORTANT;
+  width: 70% !IMPORTANT;
+  height: 20px !IMPORTANT;
+  text-align: left !IMPORTANT;
+  white-space: nowrap !IMPORTANT;
+  text-overflow: ellipsis !IMPORTANT;
+  margin: 0 5px 0 0;
+  cursor: pointer;
+}
+
+.activitySubjectTextBoxStyle {
+  border: 1px solid #939598 !IMPORTANT;
+  border-radius: 3px !IMPORTANT;
+  width: 70% !IMPORTANT;
+  height: 20px !IMPORTANT;
+  text-align: left !IMPORTANT;
+  box-sizing: border-box;
+  -webkit-box-sizing: border-box;
+  -moz-box-sizing: border-box;
+  margin: 0 5px 0 0;
+  padding-left:2px;
+}
+
+.activityCommentsTextBoxStyle {
+  color: #333333 !IMPORTANT;
+  text-align: left !IMPORTANT;
+  margin: 0px 0px 0px 0px;
+  box-sizing: border-box;
+  -webkit-box-sizing: border-box;
+  -moz-box-sizing: border-box;
+  resize: none;
+  width: 100%;
+  height: 100%;
+  border: none;
+}
+
+.displayDiv {
+  width: 100%;
+  display: flex;
+}
+
+.displayLabels {
+  margin-left: 5px;
+  width: 25%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.displayData {
+  width: 70%;
+}
+
+.headerLabel {
+  margin-left: 10px;
+}
+
+.activityFields {
+  position: relative;
+  z-index: 0;
+}
+
+.callNotesTextArea {
+  background-color: #ffffff;
+  border-bottom: 1px solid #939598;
+  border-top: 1px solid #939598;
+  border-top-left-radius: 3px !IMPORTANT;
+  border-top-right-radius: 3px !IMPORTANT;
+}
+
+.callNotesSection {
+  float: left;
+  height: 100%;
+  width: 100%;
+  background-color: #f6f7fb;
+}
+
+.callHeaderRecentActivitySelected {
+  cursor: pointer;
+  border-left: 1px solid #939598 !important;
+  border-right: 1px solid #939598 !important;
+  background-color: #cfecf2 !important;
+  width: 100% !important;
+  margin-top: 0px !important;
+}
+
+.callHeaderRecentActivityUnselected {
+  cursor: pointer;
+  border-left: 1px solid #939598 !important;
+  border-right: 1px solid #939598 !important;
+  background-color: #e6f4f7 !important;
+  width: 100% !important;
+  margin-top: 0px !important;
+}
+
+.callHeader {
+  border: 1px solid #939598 !important;
+  background-color: #F4F5FB !important;
+  width: 100% !important;
+  margin-top: 0px !important;
+}
+
+.callHeaderBottomBorder {
+  cursor: pointer;
+  border-bottom: 1px solid #939598 !important;
+  border-left: 1px solid #939598 !important;
+  border-right: 1px solid #939598 !important;
+  background-color: #e6f4f7 !important;
+  width: 100% !important;
+  margin-top: 0px !important;
+}
+
+.RecentCallsImg {
+  height: 15px;
+  vertical-align: text-bottom;
+}
+
+.headerLabelClickableLook {
+  cursor: pointer;
+  margin-left: 10px;
+}

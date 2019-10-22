@@ -4,25 +4,17 @@
   height: 20px;
 }
 
-.callSection {
-  margin-left: 5px;
-  font-family: Arial;
-  position: relative;
-  margin-top: 10px;
-  background-color: #FFFFFF;
-}
-
 .miscSection {
   position: relative;
   margin-top: 20px;
-  background-color: #E5E6F2
+  background-color: #e5e6f2;
 }
 
 .callHeader {
-  /* border: 1px solid #939598 !important; */
-  background-color: #F4F5FB !important;
+  background-color: #f4f5fb !important;
   width: 100% !important;
   margin-top: 0px !important;
+  border: 1px solid #939598 !important;
 }
 
 .notesBottonBorder {
@@ -44,8 +36,6 @@
   margin: 2px;
   outline: none;
   font-size: 70%;
-
-
 }
 
 .submitButton {
@@ -58,10 +48,14 @@
   color: #ffffff;
   border-radius: 4px;
   font-size: 98%;
-  margin-bottom: 2px
+  margin-bottom: 2px;
 }
 
 .callBody {
+  border: 1px solid #939598;
+  border-top-color: rgb(147, 149, 152);
+  border-top-style: solid;
+  border-top-width: 1px;
   border-top: 0;
   position: relative;
 }
@@ -79,7 +73,7 @@
   width: 50%;
   height: 20px;
   margin-top: 5px;
-  margin-left: 10px
+  margin-left: 10px;
 }
 
 .callDisplay {
@@ -166,6 +160,7 @@
   width: 100%;
   display: flex;
   align-items: center;
+  background-color: #f6f7fb;
 }
 
 .quickCommentsDiv {
@@ -176,10 +171,9 @@
   margin: 2px;
 }
 
-.submitDiv {
+.callNotesButtonsSection {
   text-align: right;
   padding-right: 4px;
-
 }
 
 .newEntityImages {
@@ -191,19 +185,20 @@
 }
 
 body {
-  font-size: .85em;
-  font-family: "Segoe UI", Verdana, Helvetica, Sans-Serif;
+  font-size: 0.85em;
+  font-family: 'Segoe UI', Verdana, Helvetica, Sans-Serif;
   color: #232323;
   background-color: #fff;
   font-family: Arial;
 }
 
-.callNotesContainer {
+.callNotesSection {
   float: left;
   height: 100%;
   width: 100%;
   margin-right: 5px;
   margin-left: 5px;
+  margin-bottom: 5px;
 }
 
 .ViewResizeImage {
@@ -214,10 +209,10 @@ body {
 }
 
 .headerLabel {
-  margin-left: 10px
+  margin-left: 10px;
 }
 
-.textAreaDiv {
+.callNotesTextArea {
   background-color: #ffffff;
   border-left: 1px solid #939598;
   border-bottom: 1px solid #939598;
@@ -225,5 +220,4 @@ body {
   border-top: 1px solid #939598;
   border-top-left-radius: 3px !IMPORTANT;
   border-top-right-radius: 3px !IMPORTANT;
-
 }

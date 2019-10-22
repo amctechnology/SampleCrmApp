@@ -10,7 +10,7 @@ export interface IActivity {
   ActivityDate: string;
   TimeStamp: Date;
   ActivityId: string;
-  InteractionId: string;
+  ScenarioId: string;
   contactSource: {
     sourceType: string;
     source: string;
@@ -18,5 +18,5 @@ export interface IActivity {
   CadFields: {
     [key: string]: string
   };
-  saveToSalesforce: boolean;
+  IsActive: boolean;
 }

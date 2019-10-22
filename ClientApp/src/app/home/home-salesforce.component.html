@@ -1,15 +1,20 @@
 <div class="body">
   <app-search-information
-    *ngIf="storageService.searchResultWasReturned"
-    (agentSelectedCallerInformation)="agentSelectedCallerInformation($event)"
-  ></app-search-information>
+  *ngIf="storageService.currentScenarioId &&
+  storageService.searchRecordList &&
+  storageService.searchRecordList[storageService.currentScenarioId] &&
+  storageService.searchRecordList[storageService.currentScenarioId].length > 0"
+  (agentSelectedCallerInformation)="agentSelectedCallerInformation($event)"
+  [searchRecordList]="storageService.searchRecordList[storageService.currentScenarioId]">
+  </app-search-information>
   <app-activity
-    *ngIf="storageService.currentInteraction"
-    [autoSave]="autoSave"
-    [interactionDisconnected]="interactionDisconnected"
+    *ngIf="storageService.currentScenarioId"
     (ActivitySave)="saveActivity($event)"
     [quickCommentList]="quickCommentList"
+    [quickCommentOptionRequiredCadArray]="quickCommentOptionRequiredCadArray"
   ></app-activity>
+  <app-recentactivities *ngIf="checkIfRecentActivitiesExist()" (ActivitySave)="saveActivity($event, true)">
+</app-recentactivities>
   <app-create
     *ngIf="DisplayQuickCreate"
     [Entities]="QuickCreateEntities"

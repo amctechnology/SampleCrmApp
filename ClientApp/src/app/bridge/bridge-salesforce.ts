@@ -23,6 +23,7 @@ class BridgeSalesforce extends Bridge {
     this.initialize();
     this.eventService.subscribe('getSearchLayout', this.getSearchLayout);
     this.eventService.subscribe('isToolbarVisible', this.isToolbarVisible);
+    this.eventService.subscribe('search', this.screenpopHandler);
     this.eventService.subscribe('saveActivity', this.saveActivity);
     this.eventService.subscribe('createNewEntity', this.createNewEntity);
     this.eventService.subscribe('agentSelectedCallerInformation', this.tryScreenpop);
@@ -136,7 +137,7 @@ class BridgeSalesforce extends Bridge {
         this.lastOnFocusWasAnEntity = true;
       }
       if (this.layoutObjectList.includes(entity.objectType) && entity.objectId !== '') {
-        this.eventService.sendEvent('setActivityDetails', entity);
+        this.eventService.sendEvent('onFocus', entity);
         this.eventService.sendEvent('logDebug', 'bridge: onFocus event sent to home');
       }
     }
@@ -168,6 +169,7 @@ class BridgeSalesforce extends Bridge {
   async screenpopHandler(event): Promise<any> {
     this.eventService.sendEvent('logVerbose', `bridge: screenpopHandler START: ${event}`);
     try {
+      const isSearch = event['search'] ? true : false;
       let screenpopRecords = null;
       const versionIsLightning = this.isLightning;
       if (event.type === 'ClickToDialNoScreenpop' || event.type === 'ClickToDialScreenpop') {
@@ -191,15 +193,7 @@ class BridgeSalesforce extends Bridge {
           }
 
           const entityId = Object.keys(formattedRecord);
-          const entityForSetActivityDetails = {
-              'displayName': formattedRecord[entityId[0]].RecordType,
-              'objectId': entityId[0],
-              'objectName': formattedRecord[entityId[0]].Name,
-              'objectType': formattedRecord[entityId[0]].RecordType,
-              'AddToList': null
-          };
-          this.eventService.sendEvent('setActivityDetails', entityForSetActivityDetails);
-          if (event.type === 'ClickToDialScreenpop') {
+          if (event.type === 'ClickToDialScreenpop' && !isSearch) {
             screenpopRecords = await this.tryScreenpop(entityId[0]);
           }
           return formattedRecord;
@@ -213,23 +207,25 @@ class BridgeSalesforce extends Bridge {
         for (const cadField of event.cadFields) {
           screenpopRecords = await this.cadSearch(cadField);
           if (screenpopRecords != null) {
-            screenpopRecords = this.trySearch(cadField.value, InteractionDirectionTypes.Inbound, event.cadString, true);
+            screenpopRecords = this.trySearch(cadField.value, InteractionDirectionTypes.Inbound, event.cadString, !isSearch);
             break;
           }
         }
       }
       if (event.phoneNumbers && screenpopRecords == null && event.phoneNumbers.length > 0) {
         for (const phoneNumber of event.phoneNumbers) {
-          screenpopRecords = await this.trySearch(phoneNumber, InteractionDirectionTypes.Inbound, event.cadString);
+          screenpopRecords = await this.trySearch(phoneNumber, InteractionDirectionTypes.Inbound, event.cadString, !isSearch);
           if (screenpopRecords != null) { break; }
         }
       }
       if (event.otherFields) {
         if (event.otherFields.Email && screenpopRecords == null) {
-          screenpopRecords = await this.trySearch(event.otherFields.Email.value, InteractionDirectionTypes.Inbound, event.cadString);
+          screenpopRecords = await this.trySearch(event.otherFields.Email.value, InteractionDirectionTypes.Inbound, event.cadString,
+            !isSearch);
         }
         if (event.otherFields.FullName && screenpopRecords == null) {
-          screenpopRecords = await this.trySearch(event.otherFields.FullName.value, InteractionDirectionTypes.Inbound, event.cadString);
+          screenpopRecords = await this.trySearch(event.otherFields.FullName.value, InteractionDirectionTypes.Inbound, event.cadString,
+            !isSearch);
         }
       }
       return screenpopRecords;
@@ -450,6 +446,7 @@ class BridgeSalesforce extends Bridge {
           },
           callback: result => {
             if (result.success) {
+              activity.ActivityId = result.returnValue.recordId;
               this.eventService.sendEvent('logDebug', `Activity ${JSON.stringify(activity)}
               saved in Lightning, sending updated activity back to home`);
               resolve(activity);

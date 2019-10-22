@@ -1,4 +1,5 @@
-import { Component, Output, EventEmitter } from '@angular/core';
+import { Component, Input, Output, EventEmitter } from '@angular/core';
+import * as api from '@amc-technology/davinci-api';
 import { LoggerService } from '../logger.service';
 import { StorageService } from '../storage.service';
 @Component({
@@ -7,10 +8,11 @@ import { StorageService } from '../storage.service';
   styleUrls: ['./search-information-salesforce.component.css']
 })
 export class SearchInformationSalesforceComponent {
-  @Output() agentSelectedCallerInformation: EventEmitter<any> = new EventEmitter();
+  @Input() searchRecordList: Array<api.IRecordItem>;
+  @Output() agentSelectedCallerInformation: EventEmitter<string> = new EventEmitter();
   isSearchInformationMaximized: boolean;
   imageLocation: string;
-  lastCallerId: string;
+
   constructor(private loggerService: LoggerService, protected storageService: StorageService) {
     this.loggerService.logger.logDebug('searchInformationComponent: Constructor start');
     this.isSearchInformationMaximized = true;
@@ -24,20 +26,20 @@ export class SearchInformationSalesforceComponent {
   protected collapseCallerInformationSection() {
     this.isSearchInformationMaximized = false;
   }
-  protected onAgentSelectedCallerInformation(event) {
-    if (this.storageService.searchReturnedSingleResult) {
-      this.loggerService.logger.logDebug(`searchInformationComponent: Agent selected caller info: ${event.currentTarget.id}`);
-      this.agentSelectedCallerInformation.emit(event.currentTarget.id);
-    } else {
-      if (this.lastCallerId !== event.currentTarget.value) {
-        this.loggerService.logger.logDebug(`searchInformationComponent: Agent selected caller info: ${event.currentTarget.value}`);
-        this.agentSelectedCallerInformation.emit(event.currentTarget.value);
-        this.lastCallerId = event.currentTarget.value;
-        this.storageService.storeToLocalStorage();
-      }
+
+  protected onAgentSelectedCallerInformation(event: any) {
+    this.loggerService.logger.logDebug(`searchInformationComponent: Agent selected caller info: ${((this.searchRecordList.length === 1) ?
+      event.currentTarget.id : event.currentTarget.value)}`, api.ErrorCode.SEARCH_RECORD);
+    if (this.searchRecordList.length > 1) {
+      this.storageService.selectedSearchRecordList[this.storageService.currentScenarioId] = event.currentTarget.value;
     }
+    this.agentSelectedCallerInformation.emit(
+      this.searchRecordList.find(i => i.id === ((this.searchRecordList.length === 1) ?
+      event.currentTarget.id : event.currentTarget.value)).id
+    );
   }
-  protected parseSearchRecordForName(searchRecord) {
+
+  protected parseSearchRecordForName(searchRecord: api.IRecordItem) {
     const keys = Object.keys(searchRecord.fields);
     let nameKey;
     for (let i = 0; i < keys.length; i++) {
@@ -47,14 +49,7 @@ export class SearchInformationSalesforceComponent {
       }
     }
     let name = searchRecord.fields[nameKey].Value;
-    name = (searchRecord.displayName ? (searchRecord.displayName + ': ' + name) : (searchRecord.RecordType + ': ' + name) );
+    name = (searchRecord.displayName ? (searchRecord.displayName + ': ' + name) : (searchRecord.type + ': ' + name) );
     return name;
-  }
-  protected getRecord(id) {
-    for (let i = 0; i < this.storageService.searchRecordList.length; i++) {
-      if (this.storageService.searchRecordList[i].id === id) {
-        return this.storageService.searchRecordList[i];
-      }
-    }
   }
 }
