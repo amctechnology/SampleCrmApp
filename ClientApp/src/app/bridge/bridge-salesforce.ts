@@ -193,15 +193,7 @@ class BridgeSalesforce extends Bridge {
           }
 
           const entityId = Object.keys(formattedRecord);
-          const entityForSetActivityDetails = {
-              'displayName': formattedRecord[entityId[0]].RecordType,
-              'objectId': entityId[0],
-              'objectName': formattedRecord[entityId[0]].Name,
-              'objectType': formattedRecord[entityId[0]].RecordType,
-              'AddToList': null
-          };
-          this.eventService.sendEvent('setActivityDetails', entityForSetActivityDetails);
-          if (event.type === 'ClickToDialScreenpop') {
+          if (event.type === 'ClickToDialScreenpop' && !isSearch) {
             screenpopRecords = await this.tryScreenpop(entityId[0]);
           }
           return formattedRecord;
@@ -454,6 +446,7 @@ class BridgeSalesforce extends Bridge {
           },
           callback: result => {
             if (result.success) {
+              activity.ActivityId = result.returnValue.recordId;
               this.eventService.sendEvent('logDebug', `Activity ${JSON.stringify(activity)}
               saved in Lightning, sending updated activity back to home`);
               resolve(activity);

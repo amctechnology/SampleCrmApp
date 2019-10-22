@@ -3,7 +3,7 @@
     <label class="headerLabel">
       <b>Caller Information</b>
     </label>
-    <img title="Multiple Matches Available" *ngIf="!storageService.searchReturnedSingleResult" src="../../assets/images/MultiMatchAlert.png" class="multiMatchImg"/>
+    <img title="Multiple Matches Available" *ngIf="this.searchRecordList.length > 1" src="../../assets/images/MultiMatchAlert.png" class="multiMatchImg"/>
     <img *ngIf="isSearchInformationMaximized" class="ViewResizeImage" src="assets/images/section_collapse.png" (click)="collapseCallerInformationSection()" title="Collapse"/>
     <img *ngIf="!isSearchInformationMaximized" class="ViewResizeImage" src="assets/images/section_expand.png" (click)="expandCallerInformationSection()" title="Expand"/>
   </div>
