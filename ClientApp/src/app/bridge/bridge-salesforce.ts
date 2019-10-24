@@ -282,7 +282,14 @@ class BridgeSalesforce extends Bridge {
             resolve(response.returnValue);
           }
         };
-        sforce.opencti.runApex(cadSearchRequest);
+        if (this.isLightning) {
+          sforce.opencti.runApex(cadSearchRequest);
+        } else {
+          sforce.interaction.runApex(cadSearchRequest.apexClass, cadSearchRequest.methodName, cadSearchRequest.methodParams,
+            function(response) {
+              resolve(safeJSONParse(response.result));
+          });
+        }
       });
 
     }
