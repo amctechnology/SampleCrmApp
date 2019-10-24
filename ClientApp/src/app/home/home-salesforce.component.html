@@ -4,6 +4,7 @@
   storageService.searchRecordList &&
   storageService.searchRecordList[storageService.currentScenarioId] &&
   storageService.searchRecordList[storageService.currentScenarioId].length > 0"
+  [searchLayout]="searchLayout"
   (agentSelectedCallerInformation)="agentSelectedCallerInformation($event)"
   [searchRecordList]="storageService.searchRecordList[storageService.currentScenarioId]">
   </app-search-information>

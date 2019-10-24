@@ -16,6 +16,7 @@ export class HomeSalesforceComponent extends Application implements OnInit {
   protected quickCommentList: string[];
   protected QuickCreateEntities: any;
   protected cadActivityMap: Object;
+  public searchLayout: api.SearchLayouts;
   screenpopOnAlert: Boolean;
   clickToDialList: {
     [key: string]: string
@@ -66,6 +67,7 @@ export class HomeSalesforceComponent extends Application implements OnInit {
     this.loggerService.logger.logDebug('AMCSalesforceHomeComponent: ngOnInit start');
 
     this.bridgeEventsService.subscribe('clickToDial', this.clickToDialHandler);
+    this.searchLayout = await this.getSearchLayout();
     this.readConfig(config);
     api.registerOnLogout(this.removeLocalStorageOnLogout);
     this.loggerService.logger.logDebug('AMCSalesforceHomeComponent: ngOnInit complete');
@@ -365,8 +367,9 @@ export class HomeSalesforceComponent extends Application implements OnInit {
         url: ''
       },
       Subject: this.buildSubjectText(interaction),
-      CallType: '',
-      CallDurationInSeconds: '0',
+      CallType: (interaction.direction === api.InteractionDirectionTypes.Inbound ? 'Inbound' :
+        (interaction.direction === api.InteractionDirectionTypes.Outbound ? 'Outbound' : 'Internal')),
+      CallDurationInSeconds: 0,
       Description: '',
       Status: 'Open',
       ActivityDate: this.formatDate(date),
@@ -399,6 +402,7 @@ export class HomeSalesforceComponent extends Application implements OnInit {
     let activity = this.storageService.getActivity(scenarioId);
     this.loggerService.logger.logDebug('Salesforce Home: Save activity: ' + JSON.stringify(activity), api.ErrorCode.ACTIVITY);
     if (activity.IsActive && isComplete) {
+      activity.CallDurationInSeconds = this.getSecondsElapsed(activity.TimeStamp);
       activity.IsActive = false;
     }
     activity.Status = (isComplete) ? 'Completed' : 'Not Completed';
@@ -519,6 +523,14 @@ export class HomeSalesforceComponent extends Application implements OnInit {
     }
     result.setLayout([api.ChannelTypes.Telephony], telephonyLayout);
     return result;
+  }
+
+  protected getSecondsElapsed(startDate): number {
+    const EndDate = new Date();
+    if (typeof startDate === 'string') {
+      startDate = new Date(startDate);
+    }
+    return Math.round((EndDate.getTime() - startDate.getTime()) / 1000);
   }
 
   @bind
