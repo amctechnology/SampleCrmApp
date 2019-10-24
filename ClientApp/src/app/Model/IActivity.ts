@@ -3,7 +3,7 @@ export interface IActivity {
   WhoObject: IActivityDetails;
   WhatObject: IActivityDetails;
   CallType: string;
-  CallDurationInSeconds: string;
+  CallDurationInSeconds: number;
   Subject: string;
   Description: string;
   Status: string;
