@@ -8,6 +8,7 @@ import { StorageService } from '../storage.service';
   styleUrls: ['./search-information-salesforce.component.css']
 })
 export class SearchInformationSalesforceComponent {
+  @Input() searchLayout: api.SearchLayouts;
   @Input() searchRecordList: Array<api.IRecordItem>;
   @Output() agentSelectedCallerInformation: EventEmitter<string> = new EventEmitter();
   isSearchInformationMaximized: boolean;
@@ -40,16 +41,22 @@ export class SearchInformationSalesforceComponent {
   }
 
   protected parseSearchRecordForName(searchRecord: api.IRecordItem) {
-    const keys = Object.keys(searchRecord.fields);
-    let nameKey;
-    for (let i = 0; i < keys.length; i++) {
-      if (keys[i].includes('Name')) {
-        nameKey = keys[i];
-        break;
+    if (this.searchLayout && this.searchLayout.layouts) {
+      const sLayoutInfo = this.searchLayout.layouts[0][this.storageService.getActivity().CallType].
+      find(i => i.DevName === searchRecord.type);
+      if (sLayoutInfo.DisplayFields && sLayoutInfo.DisplayFields[0].DevName) {
+        const nameKey = sLayoutInfo.DisplayFields[0].DevName;
+        const keys = Object.keys(searchRecord.fields);
+        for (let i = 0; i < keys.length; i++) {
+          if (searchRecord.fields[keys[i]] && searchRecord.fields[keys[i]].DevName === nameKey) {
+            let displayRecord = searchRecord.fields[keys[i]].Value;
+            displayRecord = (searchRecord.displayName ? (searchRecord.displayName + ': ' + displayRecord) :
+            (searchRecord.type + ': ' + displayRecord) );
+            return displayRecord;
+          }
+        }
       }
     }
-    let name = searchRecord.fields[nameKey].Value;
-    name = (searchRecord.displayName ? (searchRecord.displayName + ': ' + name) : (searchRecord.type + ': ' + name) );
-    return name;
+    return '';
   }
 }
