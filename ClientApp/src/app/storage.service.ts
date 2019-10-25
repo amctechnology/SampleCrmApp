@@ -350,12 +350,13 @@ export class StorageService {
     if (isInteractionCurrent || isInteractionRecent) {
         if (interaction.details) {
           for (const key in cadActivityMap) {
-            if (interaction.details.fields[key]) {
+            if (interaction.details.fields[key] || interaction[key]) {
               const objActivity = this.getActivity(interaction.scenarioId);
               if (!objActivity.CadFields) {
                 objActivity.CadFields = {};
               }
-              objActivity.CadFields[cadActivityMap[key]] = interaction.details.fields[key].Value;
+              objActivity.CadFields[cadActivityMap[key]] = interaction.details.fields[key] ? interaction.details.fields[key].Value :
+              interaction[key];
               this.updateActivity(objActivity);
             }
           }

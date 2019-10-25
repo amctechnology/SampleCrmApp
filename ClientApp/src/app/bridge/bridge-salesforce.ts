@@ -449,7 +449,8 @@ class BridgeSalesforce extends Bridge {
             Subject: activity.Subject,
             Description: activity.Description,
             Status: activity.Status,
-            ActivityDate: activity.ActivityDate
+            ActivityDate: activity.ActivityDate,
+            TaskSubtype: activity.TaskSubtype
           },
           callback: result => {
             if (result.success) {
@@ -477,7 +478,7 @@ class BridgeSalesforce extends Bridge {
       activityString = `WhoId=${activity.WhoObject.objectId}&WhatId=${activity.WhatObject.objectId}` +
         `&CallType=${activity.CallType}&CallDurationInSeconds=${activity.CallDurationInSeconds}` +
         `&Subject=${activity.Subject}&Description=${activity.Description}&Status=${activity.Status}` +
-        `&ActivityDate=${activity.ActivityDate}`;
+        `&ActivityDate=${activity.ActivityDate}&TaskSubtype=${activity.TaskSubtype}`;
       if (activity.ActivityId) {
         activityString = activityString + '&Id=' + activity.ActivityId;
       }
