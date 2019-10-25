@@ -11,6 +11,7 @@ export interface IActivity {
   TimeStamp: Date;
   ActivityId: string;
   ScenarioId: string;
+  TaskSubtype: string;
   contactSource: {
     sourceType: string;
     source: string;
