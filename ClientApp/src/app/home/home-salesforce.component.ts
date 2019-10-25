@@ -305,6 +305,21 @@ export class HomeSalesforceComponent extends Application implements OnInit {
     return 'Unknown';
   }
 
+  protected buildTaskSubType(interaction: api.IInteraction): string {
+    const channelType = api.ChannelTypes[interaction.channelType];
+    switch (interaction.channelType) {
+      case api.ChannelTypes.Telephony: {
+        return 'Call';
+      }
+      case api.ChannelTypes.Email: {
+        return 'Email';
+      }
+      default: {
+        return 'Task';
+      }
+    }
+  }
+
   protected formatCrmResults(crmResults: any): api.SearchRecords {
     const ignoreFields = ['Name', 'displayName', 'object', 'Id', 'RecordType'];
     const result = new api.SearchRecords();
@@ -376,17 +391,18 @@ export class HomeSalesforceComponent extends Application implements OnInit {
       TimeStamp: date,
       ActivityId: '',
       ScenarioId: interaction.scenarioId,
+      TaskSubtype: this.buildTaskSubType(interaction),
       contactSource: this.getContactSource(interaction),
       CadFields: {},
       IsActive: true
     };
     for (const key in this.cadActivityMap) {
-      if (interaction.details.fields[key]) {
+      if (interaction.details.fields[key] || interaction[key]) {
         if (!activity.CadFields) {
           activity.CadFields = {};
         }
-        activity.CadFields[this.cadActivityMap[key]] =
-          interaction.details.fields[key].Value;
+        activity.CadFields[this.cadActivityMap[key]] = interaction.details.fields[key] ?
+          interaction.details.fields[key].Value : interaction[key];
       }
     }
     this.loggerService.logger.logDebug(
