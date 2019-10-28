@@ -15,7 +15,9 @@
       </select>
     </div>
     <div *ngIf="this.searchRecordList.length === 1">
-      <input readonly (click)="onAgentSelectedCallerInformation($event)" id="{{ this.searchRecordList[0].id }}" class="singleSearchResultSelect" value="{{ parseSearchRecordForName(this.searchRecordList[0]) }}" />
+    <!-- <div *ngFor="let i of parseSearchRecordForNameSingleMatch(this.searchRecordList[0])"> -->
+      <input readonly (click)="onAgentSelectedCallerInformation($event)" *ngFor="let i of parseSearchRecordForNameSingleMatch(this.searchRecordList[0])" id="{{ this.searchRecordList[0].id }}" class="singleSearchResultSelect" value="{{i}}" />
+    <!-- </div> -->
     </div>
   </div>
 </div>

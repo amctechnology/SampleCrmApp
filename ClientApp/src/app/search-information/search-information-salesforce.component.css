@@ -59,14 +59,13 @@
 }
 
 .singleSearchResultSelect {
-  border: 1px solid #939598 !IMPORTANT;
-  border-radius: 3px !IMPORTANT;
+  border: 0px solid #939598 !IMPORTANT;
   width: 96% !IMPORTANT;
   height: 20px !IMPORTANT;
   text-align: left !IMPORTANT;
   white-space: nowrap !IMPORTANT;
   text-overflow: ellipsis !IMPORTANT;
-  margin: 5px 0% 5px 6px;
+  margin: 0px 0% 0px 6px;
   cursor: pointer;
 }
 

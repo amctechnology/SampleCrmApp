@@ -59,4 +59,35 @@ export class SearchInformationSalesforceComponent {
     }
     return '';
   }
+
+  protected parseSearchRecordForNameSingleMatch(searchRecord: api.IRecordItem) {
+    const results = [];
+    if (this.searchLayout && this.searchLayout.layouts) {
+      const sLayoutInfo = this.searchLayout.layouts[0][this.storageService.getActivity().CallType].
+      find(i => i.DevName === searchRecord.type);
+      for (let j = 0; j < sLayoutInfo.DisplayFields.length; j++) {
+      if (sLayoutInfo.DisplayFields && sLayoutInfo.DisplayFields[j].DevName) {
+        const nameKey = sLayoutInfo.DisplayFields[j].DevName;
+        const keys = Object.keys(searchRecord.fields);
+        for (let i = 0; i < keys.length; i++) {
+          if (searchRecord.fields[keys[i]] && searchRecord.fields[keys[i]].DevName === nameKey) {
+            let displayRecord = searchRecord.fields[keys[i]].Value;
+            if (j === 0) {
+              displayRecord = (searchRecord.displayName ? (searchRecord.displayName + ': ' + displayRecord) :
+              (searchRecord.type + ': ' + displayRecord) );
+            } else {
+              displayRecord = (sLayoutInfo.DisplayFields[j].DisplayName ?
+              (sLayoutInfo.DisplayFields[j].DisplayName + ': ' + displayRecord) :
+              (sLayoutInfo.DisplayFields[j].DevName + ': ' + displayRecord) );
+            }
+            results.push(displayRecord);
+          }
+        }
+      }
+    }
+    return results;
+    }
+    return '';
+  }
+
 }
