@@ -30,6 +30,21 @@
   -moz-box-sizing: border-box;
 }
 
+.editorFull {
+  font-size: 0.9em;
+  width: 100%;
+  text-align: left;
+  /* margin: 4px 5% 0 0px; */
+  font-family: Arial;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  border: 0;
+  padding-top: 2px;
+  box-sizing: border-box;
+  -webkit-box-sizing: border-box;
+  -moz-box-sizing: border-box;
+}
+
 .callBody {
   border: 1px solid #939598;
   border-top-color: rgb(147, 149, 152);
@@ -60,7 +75,7 @@
 
 .singleSearchResultSelect {
   border: 0px solid #939598 !IMPORTANT;
-  width: 96% !IMPORTANT;
+  width: 70% !IMPORTANT;
   height: 20px !IMPORTANT;
   text-align: left !IMPORTANT;
   white-space: nowrap !IMPORTANT;
@@ -74,19 +89,8 @@
   width: 25%;
 }
 
-.editor {
-  font-size: 0.9em;
-  width: 70%;
-  text-align: left;
-  margin: 4px 5% 0 0px;
-  font-family: Arial;
-  white-space: nowrap;
-  text-overflow: ellipsis;
-  border: 0;
-  padding-top: 2px;
-  box-sizing: border-box;
-  -webkit-box-sizing: border-box;
-  -moz-box-sizing: border-box;
+.matchedRecordsMargin {
+  margin-top: 1%;
 }
 
 .ViewResizeImage {

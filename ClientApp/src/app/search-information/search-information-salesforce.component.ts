@@ -73,12 +73,12 @@ export class SearchInformationSalesforceComponent {
           if (searchRecord.fields[keys[i]] && searchRecord.fields[keys[i]].DevName === nameKey) {
             let displayRecord = searchRecord.fields[keys[i]].Value;
             if (j === 0) {
-              displayRecord = (searchRecord.displayName ? (searchRecord.displayName + ': ' + displayRecord) :
-              (searchRecord.type + ': ' + displayRecord) );
+              displayRecord = (searchRecord.displayName ? ([searchRecord.displayName, displayRecord]) :
+              ([searchRecord.type, displayRecord]));
             } else {
               displayRecord = (sLayoutInfo.DisplayFields[j].DisplayName ?
-              (sLayoutInfo.DisplayFields[j].DisplayName + ': ' + displayRecord) :
-              (sLayoutInfo.DisplayFields[j].DevName + ': ' + displayRecord) );
+              ([sLayoutInfo.DisplayFields[j].DisplayName, displayRecord]) :
+              ([sLayoutInfo.DisplayFields[j].DevName, displayRecord]));
             }
             results.push(displayRecord);
           }
