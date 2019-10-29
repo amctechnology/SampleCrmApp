@@ -13,6 +13,7 @@ export class SearchInformationSalesforceComponent {
   @Output() agentSelectedCallerInformation: EventEmitter<string> = new EventEmitter();
   isSearchInformationMaximized: boolean;
   imageLocation: string;
+  singleMatchIconSrc: string;
 
   constructor(private loggerService: LoggerService, protected storageService: StorageService) {
     this.loggerService.logger.logDebug('searchInformationComponent: Constructor start');
@@ -62,6 +63,19 @@ export class SearchInformationSalesforceComponent {
 
   protected parseSearchRecordForNameSingleMatch(searchRecord: api.IRecordItem) {
     const results = [];
+    let src = '';
+    if (searchRecord.type) {
+      if (searchRecord.type.toUpperCase() === 'CONTACT') {
+        src = '../../assets/images/Icon_Contact.png';
+      } else if (searchRecord.type.toUpperCase() === 'ACCOUNT') {
+        src = '../../assets/images/Icon_Account.png';
+      } else if (searchRecord.type.toUpperCase() === 'LEAD') {
+        src = '../../assets/images/Icon_Lead.png';
+      } else {
+        src = '../../assets/images/Miscellaneous_Icon.png';
+      }
+    }
+    this.singleMatchIconSrc = src;
     if (this.searchLayout && this.searchLayout.layouts) {
       const sLayoutInfo = this.searchLayout.layouts[0][this.storageService.getActivity().CallType].
       find(i => i.DevName === searchRecord.type);

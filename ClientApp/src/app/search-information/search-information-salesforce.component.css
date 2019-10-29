@@ -34,7 +34,6 @@
   font-size: 0.9em;
   width: 100%;
   text-align: left;
-  /* margin: 4px 5% 0 0px; */
   font-family: Arial;
   white-space: nowrap;
   text-overflow: ellipsis;
@@ -43,6 +42,14 @@
   box-sizing: border-box;
   -webkit-box-sizing: border-box;
   -moz-box-sizing: border-box;
+}
+
+.CRMResultImage {
+  width: 18px;
+  height: 18px;
+  margin-right: -5px;
+  margin-left: 5px;
+  margin-bottom: 5px;
 }
 
 .callBody {
@@ -75,18 +82,27 @@
 
 .singleSearchResultSelect {
   border: 0px solid #939598 !IMPORTANT;
-  width: 70% !IMPORTANT;
+  /* width: 50% !IMPORTANT; */
   height: 20px !IMPORTANT;
   text-align: left !IMPORTANT;
   white-space: nowrap !IMPORTANT;
   text-overflow: ellipsis !IMPORTANT;
   margin: 0px 0% 0px 6px;
   cursor: pointer;
+  outline: none;
+}
+
+.wrapper{
+  width: 50% !IMPORTANT;
 }
 
 .displayLabels {
   margin-left: 5px;
   width: 25%;
+  font-weight: 400;
+  margin-bottom: 0px;
+  margin-top: 0px;
+  outline: none;
 }
 
 .matchedRecordsMargin {
@@ -102,4 +118,18 @@
 
 .headerLabel {
   margin-left: 10px
+}
+
+.firstSingleMatchResult {
+  font-weight: 400;
+  border: 0px solid #939598 !IMPORTANT;
+  /* width: 50% !IMPORTANT; */
+  height: 20px !IMPORTANT;
+  text-align: left !IMPORTANT;
+  white-space: nowrap !IMPORTANT;
+  text-overflow: ellipsis !IMPORTANT;
+  margin: 0px 0% 0px 4px;
+  cursor: pointer;
+  outline: none;
+
 }

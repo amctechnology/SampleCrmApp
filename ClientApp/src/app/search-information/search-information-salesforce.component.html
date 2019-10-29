@@ -15,10 +15,13 @@
       </select>
     </div>
     <div *ngIf="this.searchRecordList.length === 1">
-      <div class="editorFull displayDiv" *ngFor="let i of parseSearchRecordForNameSingleMatch(this.searchRecordList[0])">
+      <div class="editorFull displayDiv" *ngFor="let i of parseSearchRecordForNameSingleMatch(this.searchRecordList[0]); let index = index; let first = first;">
         <span style="width: 100%;">
-            <label class="displayLabels matchedRecordsMargin" >{{i[0]}}</label>
-            <input class="singleSearchResultSelect" value="{{i[1]}}">
+            <label class="displayLabels matchedRecordsMargin"  [class.firstSingleMatchResult]='first'>{{i[0]}}</label>
+            <span class="wrapper">
+            <img *ngIf="index == 0" id = "EntityIcon" src="{{singleMatchIconSrc}}" class="CRMResultImage">
+            <input class="singleSearchResultSelect" id="{{ this.searchRecordList[0].id }}" [class.firstSingleMatchResult]='first' value="{{i[1]}}" (click)="onAgentSelectedCallerInformation($event)" readonly>
+          </span>
         </span>
       </div>
       <!-- <input readonly (click)="onAgentSelectedCallerInformation($event)" *ngFor="let i of parseSearchRecordForNameSingleMatch(this.searchRecordList[0])" id="{{ this.searchRecordList[0].id }}" class="singleSearchResultSelect" value="{{i}}" /> -->
