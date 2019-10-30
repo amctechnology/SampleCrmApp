@@ -9,17 +9,22 @@
   </div>
   <div class="callBody" *ngIf="isSearchInformationMaximized">
     <div *ngIf="this.searchRecordList.length > 1">
-      <select class="multipleSearchResultSelect" (change)="onAgentSelectedCallerInformation($event)" name="callerinfo" [(ngModel)]="storageService.selectedSearchRecordList[storageService.currentScenarioId]">
-        <option selected disabled hidden style="display: none" value="DefaultMultiMatch">Click for Multi-Match Options</option>
-        <option *ngFor="let searchRecord of this.searchRecordList" value="{{ searchRecord.id }}">{{ parseSearchRecordForName(searchRecord) }}</option>
-      </select>
+      <!-- <select class="multipleSearchResultSelect" (change)="onAgentSelectedCallerInformation($event)" name="callerinfo" [(ngModel)]="storageService.selectedSearchRecordList[storageService.currentScenarioId]"> -->
+        <!-- <option selected disabled hidden style="display: none" value="DefaultMultiMatch">Click for Multi-Match Options</option> -->
+        <!-- <option *ngFor="let searchRecord of this.searchRecordList" value="{{ searchRecord.id }}">{{ parseSearchRecordForName(searchRecord) }}</option> -->
+      <!-- </select> -->
+      <span style="width: 100%;">
+        <label class="displayLabels matchedRecordsMargin" title="Matched Records">
+          Results
+        </label>
+        <img class="CRMResultImage" src="{{this.multiMatchDataToShow[0][0][2]}}">
+      </span>
     </div>
     <div *ngIf="this.searchRecordList.length === 1">
         <div class="editorFull displayDiv" *ngFor="let i of this.dataToShow | slice:0:1; let index = index; let first = first;">
         <span style="width: 100%;">
         <label class="displayLabels matchedRecordsMargin firstSingleMatchResult">{{i[0]}}</label>
         <span class="wrapper">
-            <!-- <img *ngIf="index == 0" id = "EntityIcon" src="{{singleMatchIconSrc}}" class="CRMResultImage"> -->
             <img id = "EntityIcon" src="{{this.singleMatchIconSrc}}" class="CRMResultImage">
             <input class="singleSearchResultSelect" style="cursor: pointer" id="{{ this.searchRecordList[0].id }}" [class.firstSingleMatchResult]='first' value="{{i[1]}}" (click)="onAgentSelectedCallerInformation($event)" readonly>
           </span>
@@ -30,7 +35,6 @@
         <span style="width: 100%;">
             <label class="displayLabels matchedRecordsMargin"  >{{i[0]}}</label>
             <span class="wrapper">
-            <!-- <img *ngIf="index == 0" id = "EntityIcon" src="{{singleMatchIconSrc}}" class="CRMResultImage"> -->
             <input class="singleSearchResultSelect" id="{{ this.searchRecordList[0].id }}" value="{{i[1]}}" readonly>
           </span>
         </span>
