@@ -1,4 +1,4 @@
-import { Component, Input, Output, EventEmitter } from '@angular/core';
+import { Component, Input, Output, EventEmitter, OnInit } from '@angular/core';
 import * as api from '@amc-technology/davinci-api';
 import { LoggerService } from '../logger.service';
 import { StorageService } from '../storage.service';
@@ -7,18 +7,25 @@ import { StorageService } from '../storage.service';
   templateUrl: './search-information-salesforce.component.html',
   styleUrls: ['./search-information-salesforce.component.css']
 })
-export class SearchInformationSalesforceComponent {
+export class SearchInformationSalesforceComponent implements OnInit {
   @Input() searchLayout: api.SearchLayouts;
   @Input() searchRecordList: Array<api.IRecordItem>;
   @Output() agentSelectedCallerInformation: EventEmitter<string> = new EventEmitter();
   isSearchInformationMaximized: boolean;
   imageLocation: string;
   singleMatchIconSrc: string;
+  dataToShow: any;
 
   constructor(private loggerService: LoggerService, protected storageService: StorageService) {
     this.loggerService.logger.logDebug('searchInformationComponent: Constructor start');
     this.isSearchInformationMaximized = true;
     this.loggerService.logger.logDebug('searchInformationComponent: Constructor complete');
+    this.dataToShow = null;
+  }
+  ngOnInit() {
+    if (this.searchRecordList.length === 1) {
+      this.dataToShow = this.parseSearchRecordForNameSingleMatch(this.searchRecordList[0]);
+    }
   }
 
   protected expandCallerInformationSection() {

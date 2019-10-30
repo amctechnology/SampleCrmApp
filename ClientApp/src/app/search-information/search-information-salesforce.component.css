@@ -49,7 +49,8 @@
   height: 18px;
   margin-right: -5px;
   margin-left: 5px;
-  margin-bottom: 5px;
+  /* margin-bottom: 5px; */
+  margin-top: -5px;
 }
 
 .callBody {
@@ -88,7 +89,6 @@
   white-space: nowrap !IMPORTANT;
   text-overflow: ellipsis !IMPORTANT;
   margin: 0px 0% 0px 6px;
-  cursor: pointer;
   outline: none;
 }
 
@@ -128,8 +128,6 @@
   text-align: left !IMPORTANT;
   white-space: nowrap !IMPORTANT;
   text-overflow: ellipsis !IMPORTANT;
-  margin: 0px 0% 0px 4px;
-  cursor: pointer;
+  margin: 0px 0% 0px 5px;
   outline: none;
-
 }
