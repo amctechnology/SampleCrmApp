@@ -9,15 +9,13 @@
   </div>
   <div class="callBody" *ngIf="isSearchInformationMaximized">
     <div *ngIf="this.searchRecordList.length > 1">
-      <!-- <select class="multipleSearchResultSelect" (change)="onAgentSelectedCallerInformation($event)" name="callerinfo" [(ngModel)]="storageService.selectedSearchRecordList[storageService.currentScenarioId]"> -->
-        <!-- <option selected disabled hidden style="display: none" value="DefaultMultiMatch">Click for Multi-Match Options</option> -->
-        <!-- <option *ngFor="let searchRecord of this.searchRecordList" value="{{ searchRecord.id }}">{{ parseSearchRecordForName(searchRecord) }}</option> -->
-      <!-- </select> -->
       <span style="width: 100%;">
         <label class="displayLabels matchedRecordsMargin" title="Matched Records">
           Results
         </label>
-        <img class="CRMResultImage" src="{{this.multiMatchDataToShow[0][0][2]}}">
+        <img class="CRMResultImageMultiMatch" src="{{this.multiMatchDataToShow[0][0][2]}}">
+        <input id="{{this.multiMatchDataToShow[0][0][1]}}" name="{{this.multiMatchDataToShow[0][0][1]}}" readonly style="border:0px;cursor:pointer;" title="{{this.multiMatchDataToShow[0][0][1]}}" type="text" value="{{this.multiMatchDataToShow[0][0][1]}}">
+        <img class="CRMExpandImage" src="../../assets/images/section_expand.png" >
       </span>
     </div>
     <div *ngIf="this.searchRecordList.length === 1">
@@ -27,10 +25,9 @@
         <span class="wrapper">
             <img id = "EntityIcon" src="{{this.singleMatchIconSrc}}" class="CRMResultImage">
             <input class="singleSearchResultSelect" style="cursor: pointer" id="{{ this.searchRecordList[0].id }}" [class.firstSingleMatchResult]='first' value="{{i[1]}}" (click)="onAgentSelectedCallerInformation($event)" readonly>
-          </span>
+        </span>
         </span>
         </div>
-
       <div class="editorFull displayDiv" *ngFor="let i of this.dataToShow | slice:1; let index = index; let first = first;">
         <span style="width: 100%;">
             <label class="displayLabels matchedRecordsMargin"  >{{i[0]}}</label>

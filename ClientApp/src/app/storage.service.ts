@@ -39,6 +39,10 @@ export class StorageService {
   public scenarioToCADMap: {
     [scenarioId: string]: any
   };
+  public searchLayout: any;
+  public scenarioToCallerInfoMap: {
+    [scenarioId: string]: any
+  };
 
   constructor() {
     this.whoList = {};
@@ -59,8 +63,18 @@ export class StorageService {
     this.maxExpiredItems = 2;
     this.currentTicketId = '';
     this.scenarioToCADMap = {};
+    this.scenarioToCallerInfoMap = {};
+    this.searchLayout = null;
   }
 
+  public setSearchLayout(searchLayout: any) {
+    this.searchLayout = searchLayout;
+    this.storeToLocalStorage();
+  }
+
+  public getSearchLayout() {
+    return this.searchLayout[0];
+  }
   public getCurrentScenarioId(): string {
     return this.currentScenarioId;
   }
@@ -301,7 +315,8 @@ export class StorageService {
         selectedWhoValueList: this.selectedWhoValueList,
         selectedSearchRecordList: this.selectedSearchRecordList,
         currentTicketId: this.currentTicketId,
-        scenarioToCADMap: this.scenarioToCADMap
+        scenarioToCADMap: this.scenarioToCADMap,
+        searchLayout: this.searchLayout
     }));
   }
 
@@ -323,6 +338,7 @@ export class StorageService {
       this.selectedSearchRecordList = browserStorage.selectedSearchRecordList;
       this.currentTicketId = browserStorage.currentTicketId;
       this.scenarioToCADMap = browserStorage.scenarioToCADMap;
+      this.searchLayout = browserStorage.searchLayout;
     }
   }
 

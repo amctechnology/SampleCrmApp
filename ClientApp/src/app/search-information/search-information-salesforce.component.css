@@ -49,8 +49,22 @@
   height: 18px;
   margin-right: -5px;
   margin-left: 5px;
-  /* margin-bottom: 5px; */
   margin-top: -5px;
+}
+
+.CRMResultImageMultiMatch {
+  width: 18px;
+  height: 18px;
+  margin-right: 2px;
+  margin-left: 5px;
+  margin-top: -5px;
+}
+
+.CRMExpandImage {
+  width: 18px;
+  height: 18px;
+  cursor: pointer;
+  border: 1px solid #939598;
 }
 
 .callBody {

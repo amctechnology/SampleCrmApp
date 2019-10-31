@@ -16,16 +16,23 @@ export class SearchInformationSalesforceComponent implements OnInit {
   singleMatchIconSrc: string;
   dataToShow: any;
   multiMatchDataToShow: any[];
+  shouldShowAllMultiMatchOptions: boolean;
   constructor(private loggerService: LoggerService, protected storageService: StorageService) {
     this.loggerService.logger.logDebug('searchInformationComponent: Constructor start');
     this.isSearchInformationMaximized = true;
     this.loggerService.logger.logDebug('searchInformationComponent: Constructor complete');
     this.dataToShow = null;
     this.multiMatchDataToShow = [];
+    this.shouldShowAllMultiMatchOptions = false;
   }
   ngOnInit() {
+    this.shouldShowAllMultiMatchOptions = false;
+    if (this.searchLayout !== undefined) {
+      this.storageService.setSearchLayout(this.searchLayout);
+    }
     if (this.searchRecordList.length === 1) {
-      this.dataToShow = this.parseSearchRecordForNameSingleMatch(this.searchRecordList[0]);
+      this.dataToShow =
+      this.parseSearchRecordForNameSingleMatch(this.storageService.searchRecordList[this.storageService.currentScenarioId][0]);
     } else if (this.searchRecordList.length > 1) {
       for (let i = 0; i < this.searchRecordList.length; i++) {
         this.multiMatchDataToShow.push(this.parseSearchRecordForNameMultiMatch(this.searchRecordList[i]));
@@ -76,7 +83,9 @@ export class SearchInformationSalesforceComponent implements OnInit {
 
   protected parseSearchRecordForNameSingleMatch(searchRecord: api.IRecordItem) {
     const results = [];
+    const searchLayout = this.storageService.searchLayout;
     let src = '';
+    let isFromStorageService = null;
     if (searchRecord.type) {
       if (searchRecord.type.toUpperCase() === 'CONTACT') {
         src = '../../assets/images/Icon_Contact.png';
@@ -89,9 +98,19 @@ export class SearchInformationSalesforceComponent implements OnInit {
       }
     }
     this.singleMatchIconSrc = src;
-    if (this.searchLayout && this.searchLayout.layouts) {
-      const sLayoutInfo = this.searchLayout.layouts[0][this.storageService.getActivity().CallType].
+    if (searchLayout && searchLayout.layouts) {
+      isFromStorageService = false;
+    } else {
+      isFromStorageService = true;
+    }
+    let sLayoutInfo = null;
+    if (!isFromStorageService) {
+      sLayoutInfo = searchLayout.layouts[0][this.storageService.getActivity().CallType].
       find(i => i.DevName === searchRecord.type);
+    } else {
+      sLayoutInfo = searchLayout[0][this.storageService.getActivity().CallType].
+      find(i => i.DevName === searchRecord.type);
+    }
       for (let j = 0; j < sLayoutInfo.DisplayFields.length; j++) {
       if (sLayoutInfo.DisplayFields && sLayoutInfo.DisplayFields[j].DevName) {
         const nameKey = sLayoutInfo.DisplayFields[j].DevName;
@@ -114,8 +133,6 @@ export class SearchInformationSalesforceComponent implements OnInit {
     }
     return results;
     }
-    return '';
-  }
 
   protected parseSearchRecordForNameMultiMatch(searchRecord: api.IRecordItem) {
     const results = [];
