@@ -40,7 +40,12 @@ export class SearchInformationSalesforceComponent implements OnInit {
     }
     console.log('asdf');
   }
-
+  protected collapseCallerInfoResults() {
+    this.shouldShowAllMultiMatchOptions = false;
+  }
+  protected expandCallerInfoResults() {
+    this.shouldShowAllMultiMatchOptions = true;
+  }
   protected expandCallerInformationSection() {
     this.isSearchInformationMaximized = true;
   }
@@ -54,11 +59,13 @@ export class SearchInformationSalesforceComponent implements OnInit {
       event.currentTarget.id : event.currentTarget.value)}`, api.ErrorCode.SEARCH_RECORD);
     if (this.searchRecordList.length > 1) {
       this.storageService.selectedSearchRecordList[this.storageService.currentScenarioId] = event.currentTarget.value;
+      this.agentSelectedCallerInformation.emit(event.currentTarget.id);
+    } else {
+      this.agentSelectedCallerInformation.emit(
+        this.searchRecordList.find(i => i.id === ((this.searchRecordList.length === 1) ?
+        event.currentTarget.id : event.currentTarget.value)).id
+      );
     }
-    this.agentSelectedCallerInformation.emit(
-      this.searchRecordList.find(i => i.id === ((this.searchRecordList.length === 1) ?
-      event.currentTarget.id : event.currentTarget.value)).id
-    );
   }
 
   protected parseSearchRecordForName(searchRecord: api.IRecordItem) {
@@ -137,6 +144,13 @@ export class SearchInformationSalesforceComponent implements OnInit {
   protected parseSearchRecordForNameMultiMatch(searchRecord: api.IRecordItem) {
     const results = [];
     let src = '';
+    const searchLayout = this.storageService.searchLayout;
+    let isFromStorageService = null;
+    if (searchLayout && searchLayout.layouts) {
+      isFromStorageService = false;
+    } else {
+      isFromStorageService = true;
+    }
     if (searchRecord.type) {
       if (searchRecord.type.toUpperCase() === 'CONTACT') {
         src = '../../assets/images/Icon_Contact.png';
@@ -148,9 +162,14 @@ export class SearchInformationSalesforceComponent implements OnInit {
         src = '../../assets/images/Miscellaneous_Icon.png';
       }
     }
-    if (this.searchLayout && this.searchLayout.layouts) {
-      const sLayoutInfo = this.searchLayout.layouts[0][this.storageService.getActivity().CallType].
+    let sLayoutInfo = null;
+    if (!isFromStorageService) {
+      sLayoutInfo = searchLayout.layouts[0][this.storageService.getActivity().CallType].
       find(i => i.DevName === searchRecord.type);
+    } else {
+      sLayoutInfo = searchLayout[0][this.storageService.getActivity().CallType].
+      find(i => i.DevName === searchRecord.type);
+    }
       for (let j = 0; j < sLayoutInfo.DisplayFields.length; j++) {
       if (sLayoutInfo.DisplayFields && sLayoutInfo.DisplayFields[j].DevName) {
         const nameKey = sLayoutInfo.DisplayFields[j].DevName;
@@ -174,8 +193,6 @@ export class SearchInformationSalesforceComponent implements OnInit {
       }
     }
     return results;
-    }
-    return '';
   }
 
 }

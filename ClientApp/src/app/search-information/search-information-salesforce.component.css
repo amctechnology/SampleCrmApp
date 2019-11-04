@@ -145,3 +145,9 @@
   margin: 0px 0% 0px 5px;
   outline: none;
 }
+
+.multiMatchLabel {
+  border:0px;
+  cursor:pointer;
+  outline: none;
+}

@@ -14,9 +14,18 @@
           Results
         </label>
         <img class="CRMResultImageMultiMatch" src="{{this.multiMatchDataToShow[0][0][2]}}">
-        <input id="{{this.multiMatchDataToShow[0][0][1]}}" name="{{this.multiMatchDataToShow[0][0][1]}}" readonly style="border:0px;cursor:pointer;" title="{{this.multiMatchDataToShow[0][0][1]}}" type="text" value="{{this.multiMatchDataToShow[0][0][1]}}">
-        <img class="CRMExpandImage" src="../../assets/images/section_expand.png" >
+        <input id="{{ this.searchRecordList[0].id }}" name="{{this.multiMatchDataToShow[0][0][1]}}" (click)="onAgentSelectedCallerInformation($event)" readonly class="multiMatchLabel" title="{{this.multiMatchDataToShow[0][0][1]}}" type="text" value="{{this.multiMatchDataToShow[0][0][1]}}">
+        <img *ngIf="!this.shouldShowAllMultiMatchOptions" class="CRMExpandImage" src="../../assets/images/section_expand.png" (click)="expandCallerInfoResults()">
+        <img *ngIf="this.shouldShowAllMultiMatchOptions" class="CRMExpandImage" src="../../assets/images/section_collapse.png" (click)="collapseCallerInfoResults()">
       </span>
+      <div *ngIf="this.shouldShowAllMultiMatchOptions">
+      <span style="width: 100%;" *ngFor="let i of this.multiMatchDataToShow | slice:1; let index = index;">
+        <label class="displayLabels matchedRecordsMargin" title="Matched Records">
+        </label>
+        <img class="CRMResultImageMultiMatch" src="{{i[0][2]}}">
+        <input id="{{ this.searchRecordList[index + 1].id }}" name="{{i[0][1]}}" readonly class="multiMatchLabel" (click)="onAgentSelectedCallerInformation($event)" title="{{i[0][1]}}" type="text" value="{{i[0][1]}}">
+      </span>
+    </div>
     </div>
     <div *ngIf="this.searchRecordList.length === 1">
         <div class="editorFull displayDiv" *ngFor="let i of this.dataToShow | slice:0:1; let index = index; let first = first;">
