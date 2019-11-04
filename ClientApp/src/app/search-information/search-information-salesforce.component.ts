@@ -67,57 +67,11 @@ export class SearchInformationSalesforceComponent implements OnInit {
       );
     }
   }
-
-  protected parseSearchRecordForName(searchRecord: api.IRecordItem) {
-    if (this.searchLayout && this.searchLayout.layouts) {
-      const sLayoutInfo = this.searchLayout.layouts[0][this.storageService.getActivity().CallType].
-      find(i => i.DevName === searchRecord.type);
-      if (sLayoutInfo.DisplayFields && sLayoutInfo.DisplayFields[0].DevName) {
-        const nameKey = sLayoutInfo.DisplayFields[0].DevName;
-        const keys = Object.keys(searchRecord.fields);
-        for (let i = 0; i < keys.length; i++) {
-          if (searchRecord.fields[keys[i]] && searchRecord.fields[keys[i]].DevName === nameKey) {
-            let displayRecord = searchRecord.fields[keys[i]].Value;
-            displayRecord = (searchRecord.displayName ? (searchRecord.displayName + ': ' + displayRecord) :
-            (searchRecord.type + ': ' + displayRecord) );
-            return displayRecord;
-          }
-        }
-      }
-    }
-    return '';
-  }
-
   protected parseSearchRecordForNameSingleMatch(searchRecord: api.IRecordItem) {
     const results = [];
-    const searchLayout = this.storageService.searchLayout;
-    let src = '';
-    let isFromStorageService = null;
-    if (searchRecord.type) {
-      if (searchRecord.type.toUpperCase() === 'CONTACT') {
-        src = '../../assets/images/Icon_Contact.png';
-      } else if (searchRecord.type.toUpperCase() === 'ACCOUNT') {
-        src = '../../assets/images/Icon_Account.png';
-      } else if (searchRecord.type.toUpperCase() === 'LEAD') {
-        src = '../../assets/images/Icon_Lead.png';
-      } else {
-        src = '../../assets/images/Miscellaneous_Icon.png';
-      }
-    }
+    const src = this.getEntityImgToDisplay(searchRecord);
     this.singleMatchIconSrc = src;
-    if (searchLayout && searchLayout.layouts) {
-      isFromStorageService = false;
-    } else {
-      isFromStorageService = true;
-    }
-    let sLayoutInfo = null;
-    if (!isFromStorageService) {
-      sLayoutInfo = searchLayout.layouts[0][this.storageService.getActivity().CallType].
-      find(i => i.DevName === searchRecord.type);
-    } else {
-      sLayoutInfo = searchLayout[0][this.storageService.getActivity().CallType].
-      find(i => i.DevName === searchRecord.type);
-    }
+    const sLayoutInfo = this.getSearchLayoutInfoForDisplay(searchRecord);
       for (let j = 0; j < sLayoutInfo.DisplayFields.length; j++) {
       if (sLayoutInfo.DisplayFields && sLayoutInfo.DisplayFields[j].DevName) {
         const nameKey = sLayoutInfo.DisplayFields[j].DevName;
@@ -143,33 +97,9 @@ export class SearchInformationSalesforceComponent implements OnInit {
 
   protected parseSearchRecordForNameMultiMatch(searchRecord: api.IRecordItem) {
     const results = [];
-    let src = '';
-    const searchLayout = this.storageService.searchLayout;
-    let isFromStorageService = null;
-    if (searchLayout && searchLayout.layouts) {
-      isFromStorageService = false;
-    } else {
-      isFromStorageService = true;
-    }
-    if (searchRecord.type) {
-      if (searchRecord.type.toUpperCase() === 'CONTACT') {
-        src = '../../assets/images/Icon_Contact.png';
-      } else if (searchRecord.type.toUpperCase() === 'ACCOUNT') {
-        src = '../../assets/images/Icon_Account.png';
-      } else if (searchRecord.type.toUpperCase() === 'LEAD') {
-        src = '../../assets/images/Icon_Lead.png';
-      } else {
-        src = '../../assets/images/Miscellaneous_Icon.png';
-      }
-    }
-    let sLayoutInfo = null;
-    if (!isFromStorageService) {
-      sLayoutInfo = searchLayout.layouts[0][this.storageService.getActivity().CallType].
-      find(i => i.DevName === searchRecord.type);
-    } else {
-      sLayoutInfo = searchLayout[0][this.storageService.getActivity().CallType].
-      find(i => i.DevName === searchRecord.type);
-    }
+    const src = this.getEntityImgToDisplay(searchRecord);
+    const sLayoutInfo = this.getSearchLayoutInfoForDisplay(searchRecord);
+
       for (let j = 0; j < sLayoutInfo.DisplayFields.length; j++) {
       if (sLayoutInfo.DisplayFields && sLayoutInfo.DisplayFields[j].DevName) {
         const nameKey = sLayoutInfo.DisplayFields[j].DevName;
@@ -193,6 +123,41 @@ export class SearchInformationSalesforceComponent implements OnInit {
       }
     }
     return results;
+  }
+
+  protected getEntityImgToDisplay (searchRecord: api.IRecordItem) {
+    let src = '';
+    if (searchRecord.type) {
+      if (searchRecord.type.toUpperCase() === 'CONTACT') {
+        src = '../../assets/images/Icon_Contact.png';
+      } else if (searchRecord.type.toUpperCase() === 'ACCOUNT') {
+        src = '../../assets/images/Icon_Account.png';
+      } else if (searchRecord.type.toUpperCase() === 'LEAD') {
+        src = '../../assets/images/Icon_Lead.png';
+      } else {
+        src = '../../assets/images/Miscellaneous_Icon.png';
+      }
+    }
+    return src;
+  }
+
+  protected getSearchLayoutInfoForDisplay(searchRecord: api.IRecordItem) {
+    const searchLayout = this.storageService.searchLayout;
+    let isFromStorageService = null;
+    if (searchLayout && searchLayout.layouts) {
+      isFromStorageService = false;
+    } else {
+      isFromStorageService = true;
+    }
+    let sLayoutInfo = null;
+    if (!isFromStorageService) {
+      sLayoutInfo = searchLayout.layouts[0][this.storageService.getActivity().CallType].
+      find(i => i.DevName === searchRecord.type);
+    } else {
+      sLayoutInfo = searchLayout[0][this.storageService.getActivity().CallType].
+      find(i => i.DevName === searchRecord.type);
+    }
+    return sLayoutInfo;
   }
 
 }

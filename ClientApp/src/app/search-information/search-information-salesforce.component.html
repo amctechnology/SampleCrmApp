@@ -10,13 +10,15 @@
   <div class="callBody" *ngIf="isSearchInformationMaximized">
     <div *ngIf="this.searchRecordList.length > 1">
       <span style="width: 100%;">
-        <label class="displayLabels matchedRecordsMargin" title="Matched Records">
+        <label class="displayLabels matchedRecordsMargin" title="Matched Records" style="font-weight: 700; font-size: 12.6px;">
           Results
         </label>
         <img class="CRMResultImageMultiMatch" src="{{this.multiMatchDataToShow[0][0][2]}}">
         <input id="{{ this.searchRecordList[0].id }}" name="{{this.multiMatchDataToShow[0][0][1]}}" (click)="onAgentSelectedCallerInformation($event)" readonly class="multiMatchLabel" title="{{this.multiMatchDataToShow[0][0][1]}}" type="text" value="{{this.multiMatchDataToShow[0][0][1]}}">
-        <img *ngIf="!this.shouldShowAllMultiMatchOptions" class="CRMExpandImage" src="../../assets/images/section_expand.png" (click)="expandCallerInfoResults()">
-        <img *ngIf="this.shouldShowAllMultiMatchOptions" class="CRMExpandImage" src="../../assets/images/section_collapse.png" (click)="collapseCallerInfoResults()">
+        <span style="float: right; margin-right: 4%;">
+            <img *ngIf="!this.shouldShowAllMultiMatchOptions" class="CRMExpandImage" src="../../assets/images/down-arrow.png" (click)="expandCallerInfoResults()">
+            <img *ngIf="this.shouldShowAllMultiMatchOptions" class="CRMExpandImage" src="../../assets/images/up-arrow.png" (click)="collapseCallerInfoResults()">
+        </span>
       </span>
       <div *ngIf="this.shouldShowAllMultiMatchOptions">
       <span style="width: 100%;" *ngFor="let i of this.multiMatchDataToShow | slice:1; let index = index;">
@@ -30,18 +32,19 @@
     <div *ngIf="this.searchRecordList.length === 1">
         <div class="editorFull displayDiv" *ngFor="let i of this.dataToShow | slice:0:1; let index = index; let first = first;">
         <span style="width: 100%;">
-        <label class="displayLabels matchedRecordsMargin firstSingleMatchResult">{{i[0]}}</label>
-        <span class="wrapper">
-            <img id = "EntityIcon" src="{{this.singleMatchIconSrc}}" class="CRMResultImage">
-            <input class="singleSearchResultSelect" style="cursor: pointer" id="{{ this.searchRecordList[0].id }}" [class.firstSingleMatchResult]='first' value="{{i[1]}}" (click)="onAgentSelectedCallerInformation($event)" readonly>
+        <label class="displayLabels firstSingleMatchResult" style="font-weight: 700;">{{i[0]}}</label>
+        <span class="wrapper" style="margin-left: 10px">
+              <img id = "EntityIcon" src="{{this.singleMatchIconSrc}}" class="CRMResultImage">
+              <input class="singleSearchResultSelect" style="cursor: pointer" id="{{ this.searchRecordList[0].id }}" [class.firstSingleMatchResult]='first' value="{{i[1]}}" (click)="onAgentSelectedCallerInformation($event)" readonly>
         </span>
         </span>
         </div>
       <div class="editorFull displayDiv" *ngFor="let i of this.dataToShow | slice:1; let index = index; let first = first;">
         <span style="width: 100%;">
-            <label class="displayLabels matchedRecordsMargin"  >{{i[0]}}</label>
+            <label style="width: 5px;"></label>
+            <label class="displayLabelsTabbed"  >{{i[0]}}</label>
             <span class="wrapper">
-            <input class="singleSearchResultSelect" id="{{ this.searchRecordList[0].id }}" value="{{i[1]}}" readonly>
+            <input class="singleSearchResultSelect" style="margin-left: 13px;" id="{{ this.searchRecordList[0].id }}" value="{{i[1]}}" readonly>
           </span>
         </span>
       </div>
