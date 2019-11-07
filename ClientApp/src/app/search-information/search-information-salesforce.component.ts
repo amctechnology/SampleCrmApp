@@ -27,9 +27,6 @@ export class SearchInformationSalesforceComponent implements OnInit {
   }
   ngOnInit() {
     this.shouldShowAllMultiMatchOptions = false;
-    if (this.searchLayout !== undefined) {
-      this.storageService.setSearchLayout(this.searchLayout);
-    }
     if (this.searchRecordList.length === 1) {
       this.dataToShow =
       this.parseSearchRecordForNameSingleMatch(this.storageService.searchRecordList[this.storageService.currentScenarioId][0]);
@@ -38,7 +35,6 @@ export class SearchInformationSalesforceComponent implements OnInit {
         this.multiMatchDataToShow.push(this.parseSearchRecordForNameMultiMatch(this.searchRecordList[i]));
       }
     }
-    console.log('asdf');
   }
   protected collapseCallerInfoResults() {
     this.shouldShowAllMultiMatchOptions = false;
@@ -142,21 +138,9 @@ export class SearchInformationSalesforceComponent implements OnInit {
   }
 
   protected getSearchLayoutInfoForDisplay(searchRecord: api.IRecordItem) {
-    const searchLayout = this.storageService.searchLayout;
-    let isFromStorageService = null;
-    if (searchLayout && searchLayout.layouts) {
-      isFromStorageService = false;
-    } else {
-      isFromStorageService = true;
-    }
     let sLayoutInfo = null;
-    if (!isFromStorageService) {
-      sLayoutInfo = searchLayout.layouts[0][this.storageService.getActivity().CallType].
+      sLayoutInfo = this.searchLayout.layouts[0][this.storageService.getActivity().CallType].
       find(i => i.DevName === searchRecord.type);
-    } else {
-      sLayoutInfo = searchLayout[0][this.storageService.getActivity().CallType].
-      find(i => i.DevName === searchRecord.type);
-    }
     return sLayoutInfo;
   }
 
