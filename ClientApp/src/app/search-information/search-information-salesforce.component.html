@@ -3,19 +3,146 @@
     <label class="headerLabel">
       <b>Caller Information</b>
     </label>
-    <img title="Multiple Matches Available" *ngIf="this.searchRecordList.length > 1" src="../../assets/images/MultiMatchAlert.png" class="multiMatchImg"/>
-    <img *ngIf="isSearchInformationMaximized" class="ViewResizeImage" src="assets/images/section_collapse.png" (click)="collapseCallerInformationSection()" title="Collapse"/>
-    <img *ngIf="!isSearchInformationMaximized" class="ViewResizeImage" src="assets/images/section_expand.png" (click)="expandCallerInformationSection()" title="Expand"/>
+    <img
+      title="Multiple Matches Available"
+      *ngIf="this.searchRecordList.length > 1"
+      src="../../assets/images/MultiMatchAlert.png"
+      class="multiMatchImg"
+    />
+    <img
+      *ngIf="isSearchInformationMaximized"
+      class="ViewResizeImage"
+      src="assets/images/section_collapse.png"
+      (click)="collapseCallerInformationSection()"
+      title="Collapse"
+    />
+    <img
+      *ngIf="!isSearchInformationMaximized"
+      class="ViewResizeImage"
+      src="assets/images/section_expand.png"
+      (click)="expandCallerInformationSection()"
+      title="Expand"
+    />
   </div>
   <div class="callBody" *ngIf="isSearchInformationMaximized">
     <div *ngIf="this.searchRecordList.length > 1">
-      <select class="multipleSearchResultSelect" (change)="onAgentSelectedCallerInformation($event)" name="callerinfo" [(ngModel)]="storageService.selectedSearchRecordList[storageService.currentScenarioId]">
-        <option selected disabled hidden style="display: none" value="DefaultMultiMatch">Click for Multi-Match Options</option>
-        <option *ngFor="let searchRecord of this.searchRecordList" value="{{ searchRecord.id }}">{{ parseSearchRecordForName(searchRecord) }}</option>
-      </select>
+      <span style="width: 100%;">
+        <label
+          class="displayLabels matchedRecordsMargin"
+          title="Matched Records"
+          style="font-weight: 700; font-size: 12.6px;"
+        >
+          Results
+        </label>
+        <img
+          class="CRMResultImageMultiMatch"
+          src="{{ this.multiMatchData[0][0][2] }}"
+        />
+        <input
+          id="{{ this.searchRecordList[0].id }}"
+          name="{{ this.multiMatchData[0][0][1] }}"
+          (click)="onAgentSelectedCallerInformation($event)"
+          readonly
+          class="multiMatchLabel"
+          title="{{ this.multiMatchData[0][0][1] }}"
+          type="text"
+          value="{{ this.multiMatchData[0][0][1] }}"
+        />
+        <span style="float: right; margin-right: 4%;">
+          <img
+            *ngIf="!this.shouldShowAllMultiMatchOptions"
+            class="CRMExpandImage"
+            src="../../assets/images/down-arrow.png"
+            (click)="expandCallerInfoResults()"
+          />
+          <img
+            *ngIf="this.shouldShowAllMultiMatchOptions"
+            class="CRMExpandImage"
+            src="../../assets/images/up-arrow.png"
+            (click)="collapseCallerInfoResults()"
+          />
+        </span>
+      </span>
+      <div *ngIf="this.shouldShowAllMultiMatchOptions">
+        <span
+          style="width: 100%;"
+          *ngFor="let i of this.multiMatchData | slice: 1; let index = index"
+        >
+          <label
+            class="displayLabels matchedRecordsMargin"
+            title="Matched Records"
+          >
+          </label>
+          <img class="CRMResultImageMultiMatch" src="{{ i[0][2] }}" />
+          <input
+            id="{{ this.searchRecordList[index + 1].id }}"
+            name="{{ i[0][1] }}"
+            readonly
+            class="multiMatchLabel"
+            (click)="onAgentSelectedCallerInformation($event)"
+            title="{{ i[0][1] }}"
+            type="text"
+            value="{{ i[0][1] }}"
+          />
+        </span>
+      </div>
     </div>
     <div *ngIf="this.searchRecordList.length === 1">
-      <input readonly (click)="onAgentSelectedCallerInformation($event)" id="{{ this.searchRecordList[0].id }}" class="singleSearchResultSelect" value="{{ parseSearchRecordForName(this.searchRecordList[0]) }}" />
+      <div
+        class="editorFull displayDiv"
+        *ngFor="
+          let i of this.singleMatchData | slice: 0:1;
+          let index = index;
+          let first = first
+        "
+      >
+        <span style="width: 100%;">
+          <label
+            class="displayLabels firstSingleMatchResult"
+            style="font-weight: 700;"
+            >{{ i[0] }}</label
+          >
+          <span class="wrapper" style="margin-left: 10px">
+            <img
+              id="EntityIcon"
+              src="{{ this.singleMatchIconSrc }}"
+              class="CRMResultImage"
+            />
+            <input
+              class="singleSearchResultSelect"
+              style="cursor: pointer"
+              id="{{ this.searchRecordList[0].id }}"
+              [class.firstSingleMatchResult]="first"
+              value="{{ i[1] }}"
+              (click)="onAgentSelectedCallerInformation($event)"
+              readonly
+            />
+          </span>
+        </span>
+      </div>
+      <div
+        class="editorFull displayDiv"
+        *ngFor="
+          let i of this.singleMatchData | slice: 1;
+          let index = index;
+          let first = first
+        "
+      >
+        <span style="width: 100%;">
+          <label style="width: 5px;"></label>
+          <label class="displayLabelsTabbed">{{ i[0] }}</label>
+          <span class="wrapper">
+            <input
+              class="singleSearchResultSelect"
+              style="margin-left: 13px;"
+              id="{{ this.searchRecordList[0].id }}"
+              value="{{ i[1] }}"
+              readonly
+            />
+          </span>
+        </span>
+      </div>
+      <!-- <input readonly (click)="onAgentSelectedCallerInformation($event)" *ngFor="let i of parseSearchRecordForNameSingleMatch(this.searchRecordList[0])" id="{{ this.searchRecordList[0].id }}" class="singleSearchResultSelect" value="{{i}}" /> -->
     </div>
   </div>
 </div>
