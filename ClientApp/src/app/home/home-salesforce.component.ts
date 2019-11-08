@@ -28,15 +28,10 @@ export class HomeSalesforceComponent extends Application implements OnInit {
   ScreenpopOnClickToDialListView: boolean;
   DisplayQuickCreate: boolean;
   public quickCommentOptionRequiredCadArray: any;
-  public searchLayoutHasLoadedFlag: boolean;
-
 
   constructor(private loggerService: LoggerService, protected storageService: StorageService) {
     super(loggerService.logger);
     this.loggerService.logger.logDebug('AMCSalesforceHomeComponent: constructor start');
-
-    this.storageService.syncWithLocalStorage();
-    this.searchLayoutHasLoadedFlag = false;
     this.phoneNumberFormat = null;
     this.screenpopOnAlert = true;
     this.ScreenpopOnClickToDialListView = false;
@@ -72,7 +67,7 @@ export class HomeSalesforceComponent extends Application implements OnInit {
     this.searchLayout = await this.getSearchLayout();
     this.readConfig(config);
     api.registerOnLogout(this.removeLocalStorageOnLogout);
-    this.searchLayoutHasLoadedFlag = true;
+    this.storageService.syncWithLocalStorage();
     this.loggerService.logger.logDebug('AMCSalesforceHomeComponent: ngOnInit complete');
   }
 

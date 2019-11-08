@@ -10,29 +10,43 @@ import { StorageService } from '../storage.service';
 export class SearchInformationSalesforceComponent implements OnInit {
   @Input() searchLayout: api.SearchLayouts;
   @Input() searchRecordList: Array<api.IRecordItem>;
-  @Output() agentSelectedCallerInformation: EventEmitter<string> = new EventEmitter();
+  @Output() agentSelectedCallerInformation: EventEmitter<
+    string
+  > = new EventEmitter();
   isSearchInformationMaximized: boolean;
   imageLocation: string;
   singleMatchIconSrc: string;
-  dataToShow: any;
-  multiMatchDataToShow: any[];
+  singleMatchData: any;
+  multiMatchData: any[];
   shouldShowAllMultiMatchOptions: boolean;
-  constructor(private loggerService: LoggerService, protected storageService: StorageService) {
-    this.loggerService.logger.logDebug('searchInformationComponent: Constructor start');
+  constructor(
+    private loggerService: LoggerService,
+    protected storageService: StorageService
+  ) {
+    this.loggerService.logger.logDebug(
+      'searchInformationComponent: Constructor start'
+    );
     this.isSearchInformationMaximized = true;
-    this.loggerService.logger.logDebug('searchInformationComponent: Constructor complete');
-    this.dataToShow = null;
-    this.multiMatchDataToShow = [];
+    this.loggerService.logger.logDebug(
+      'searchInformationComponent: Constructor complete'
+    );
+    this.singleMatchData = null;
+    this.multiMatchData = [];
     this.shouldShowAllMultiMatchOptions = false;
   }
   ngOnInit() {
     this.shouldShowAllMultiMatchOptions = false;
     if (this.searchRecordList.length === 1) {
-      this.dataToShow =
-      this.parseSearchRecordForNameSingleMatch(this.storageService.searchRecordList[this.storageService.currentScenarioId][0]);
+      this.singleMatchData = this.parseSearchRecordForNameSingleMatch(
+        this.storageService.searchRecordList[
+          this.storageService.currentScenarioId
+        ][0]
+      );
     } else if (this.searchRecordList.length > 1) {
       for (let i = 0; i < this.searchRecordList.length; i++) {
-        this.multiMatchDataToShow.push(this.parseSearchRecordForNameMultiMatch(this.searchRecordList[i]));
+        this.multiMatchData.push(
+          this.parseSearchRecordForNameMultiMatch(this.searchRecordList[i])
+        );
       }
     }
   }
@@ -51,15 +65,28 @@ export class SearchInformationSalesforceComponent implements OnInit {
   }
 
   protected onAgentSelectedCallerInformation(event: any) {
-    this.loggerService.logger.logDebug(`searchInformationComponent: Agent selected caller info: ${((this.searchRecordList.length === 1) ?
-      event.currentTarget.id : event.currentTarget.value)}`, api.ErrorCode.SEARCH_RECORD);
+    this.loggerService.logger.logDebug(
+      `searchInformationComponent: Agent selected caller info: ${
+        this.searchRecordList.length === 1
+          ? event.currentTarget.id
+          : event.currentTarget.value
+      }`,
+      api.ErrorCode.SEARCH_RECORD
+    );
     if (this.searchRecordList.length > 1) {
-      this.storageService.selectedSearchRecordList[this.storageService.currentScenarioId] = event.currentTarget.value;
+      this.storageService.selectedSearchRecordList[
+        this.storageService.currentScenarioId
+      ] = event.currentTarget.value;
       this.agentSelectedCallerInformation.emit(event.currentTarget.id);
     } else {
       this.agentSelectedCallerInformation.emit(
-        this.searchRecordList.find(i => i.id === ((this.searchRecordList.length === 1) ?
-        event.currentTarget.id : event.currentTarget.value)).id
+        this.searchRecordList.find(
+          i =>
+            i.id ===
+            (this.searchRecordList.length === 1
+              ? event.currentTarget.id
+              : event.currentTarget.value)
+        ).id
       );
     }
   }
@@ -68,20 +95,24 @@ export class SearchInformationSalesforceComponent implements OnInit {
     const src = this.getEntityImgToDisplay(searchRecord);
     this.singleMatchIconSrc = src;
     const sLayoutInfo = this.getSearchLayoutInfoForDisplay(searchRecord);
-      for (let j = 0; j < sLayoutInfo.DisplayFields.length; j++) {
+    for (let j = 0; j < sLayoutInfo.DisplayFields.length; j++) {
       if (sLayoutInfo.DisplayFields && sLayoutInfo.DisplayFields[j].DevName) {
         const nameKey = sLayoutInfo.DisplayFields[j].DevName;
         const keys = Object.keys(searchRecord.fields);
         for (let i = 0; i < keys.length; i++) {
-          if (searchRecord.fields[keys[i]] && searchRecord.fields[keys[i]].DevName === nameKey) {
+          if (
+            searchRecord.fields[keys[i]] &&
+            searchRecord.fields[keys[i]].DevName === nameKey
+          ) {
             let displayRecord = searchRecord.fields[keys[i]].Value;
             if (j === 0) {
-              displayRecord = (searchRecord.displayName ? ([searchRecord.displayName, displayRecord]) :
-              ([searchRecord.type, displayRecord]));
+              displayRecord = searchRecord.displayName
+                ? [searchRecord.displayName, displayRecord]
+                : [searchRecord.type, displayRecord];
             } else {
-              displayRecord = (sLayoutInfo.DisplayFields[j].DisplayName ?
-              ([sLayoutInfo.DisplayFields[j].DisplayName, displayRecord]) :
-              ([sLayoutInfo.DisplayFields[j].DevName, displayRecord]));
+              displayRecord = sLayoutInfo.DisplayFields[j].DisplayName
+                ? [sLayoutInfo.DisplayFields[j].DisplayName, displayRecord]
+                : [sLayoutInfo.DisplayFields[j].DevName, displayRecord];
             }
             results.push(displayRecord);
           }
@@ -89,27 +120,31 @@ export class SearchInformationSalesforceComponent implements OnInit {
       }
     }
     return results;
-    }
+  }
 
   protected parseSearchRecordForNameMultiMatch(searchRecord: api.IRecordItem) {
     const results = [];
     const src = this.getEntityImgToDisplay(searchRecord);
     const sLayoutInfo = this.getSearchLayoutInfoForDisplay(searchRecord);
 
-      for (let j = 0; j < sLayoutInfo.DisplayFields.length; j++) {
+    for (let j = 0; j < sLayoutInfo.DisplayFields.length; j++) {
       if (sLayoutInfo.DisplayFields && sLayoutInfo.DisplayFields[j].DevName) {
         const nameKey = sLayoutInfo.DisplayFields[j].DevName;
         const keys = Object.keys(searchRecord.fields);
         for (let i = 0; i < keys.length; i++) {
-          if (searchRecord.fields[keys[i]] && searchRecord.fields[keys[i]].DevName === nameKey) {
+          if (
+            searchRecord.fields[keys[i]] &&
+            searchRecord.fields[keys[i]].DevName === nameKey
+          ) {
             let displayRecord = searchRecord.fields[keys[i]].Value;
             if (j === 0) {
-              displayRecord = (searchRecord.displayName ? ([searchRecord.displayName, displayRecord]) :
-              ([searchRecord.type, displayRecord]));
+              displayRecord = searchRecord.displayName
+                ? [searchRecord.displayName, displayRecord]
+                : [searchRecord.type, displayRecord];
             } else {
-              displayRecord = (sLayoutInfo.DisplayFields[j].DisplayName ?
-              ([sLayoutInfo.DisplayFields[j].DisplayName, displayRecord]) :
-              ([sLayoutInfo.DisplayFields[j].DevName, displayRecord]));
+              displayRecord = sLayoutInfo.DisplayFields[j].DisplayName
+                ? [sLayoutInfo.DisplayFields[j].DisplayName, displayRecord]
+                : [sLayoutInfo.DisplayFields[j].DevName, displayRecord];
             }
             displayRecord.push(src);
             results.push(displayRecord);
@@ -121,7 +156,7 @@ export class SearchInformationSalesforceComponent implements OnInit {
     return results;
   }
 
-  protected getEntityImgToDisplay (searchRecord: api.IRecordItem) {
+  protected getEntityImgToDisplay(searchRecord: api.IRecordItem) {
     let src = '';
     if (searchRecord.type) {
       if (searchRecord.type.toUpperCase() === 'CONTACT') {
@@ -139,9 +174,9 @@ export class SearchInformationSalesforceComponent implements OnInit {
 
   protected getSearchLayoutInfoForDisplay(searchRecord: api.IRecordItem) {
     let sLayoutInfo = null;
-      sLayoutInfo = this.searchLayout.layouts[0][this.storageService.getActivity().CallType].
-      find(i => i.DevName === searchRecord.type);
+    sLayoutInfo = this.searchLayout.layouts[0][
+      this.storageService.getActivity().CallType
+    ].find(i => i.DevName === searchRecord.type);
     return sLayoutInfo;
   }
-
 }
