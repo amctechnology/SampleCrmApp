@@ -39,6 +39,9 @@ export class StorageService {
   public scenarioToCADMap: {
     [scenarioId: string]: any
   };
+  public scenarioToCallerInfoMap: {
+    [scenarioId: string]: any
+  };
 
   constructor() {
     this.whoList = {};
@@ -59,6 +62,7 @@ export class StorageService {
     this.maxExpiredItems = 2;
     this.currentTicketId = '';
     this.scenarioToCADMap = {};
+    this.scenarioToCallerInfoMap = {};
   }
 
   public getCurrentScenarioId(): string {
@@ -301,7 +305,7 @@ export class StorageService {
         selectedWhoValueList: this.selectedWhoValueList,
         selectedSearchRecordList: this.selectedSearchRecordList,
         currentTicketId: this.currentTicketId,
-        scenarioToCADMap: this.scenarioToCADMap
+        scenarioToCADMap: this.scenarioToCADMap,
     }));
   }
 
