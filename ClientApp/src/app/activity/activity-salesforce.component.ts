@@ -12,7 +12,6 @@ export class ActivitySalesforceComponent {
   @Input() quickCommentList: string[];
   @Output() ActivitySave: EventEmitter<string> = new EventEmitter<string>();
   @Input() quickCommentOptionRequiredCadArray: any;
-
   isActivityMaximized: boolean;
 
   constructor(private loggerService: LoggerService, protected storageService: StorageService) {
