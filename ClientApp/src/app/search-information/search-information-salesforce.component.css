@@ -110,6 +110,16 @@
   width: 50% !IMPORTANT;
 }
 
+.singleMatchFirstWrapper {
+  cursor: pointer;
+  width:  64%;
+}
+
+.singleMatchTabbedItemsWrapper {
+  margin-left: 13px;
+  width: 70%;
+}
+
 .displayLabels {
   margin-left: 5px;
   width: calc(20% + 5px);

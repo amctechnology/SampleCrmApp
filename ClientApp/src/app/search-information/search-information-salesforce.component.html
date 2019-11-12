@@ -110,8 +110,7 @@
               class="CRMResultImage"
             />
             <input
-              class="singleSearchResultSelect"
-              style="cursor: pointer; width:  64%;"
+              class="singleSearchResultSelect singleMatchFirstWrapper"
               id="{{ this.searchRecordList[0].id }}"
               [class.firstSingleMatchResult]="first"
               value="{{ i[1] }}"
@@ -134,8 +133,7 @@
           <label title="{{ i[0] }}" class="displayLabelsTabbed">{{ i[0] }}</label>
           <span class="wrapper">
             <input
-              class="singleSearchResultSelect"
-              style="margin-left: 13px; width: 70%;"
+              class="singleSearchResultSelect singleMatchTabbedItemsWrapper"
               id="{{ this.searchRecordList[0].id }}"
               value="{{ i[1] }}"
               readonly
