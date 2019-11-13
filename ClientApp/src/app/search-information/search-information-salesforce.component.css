@@ -95,10 +95,10 @@
   cursor: pointer;
 }
 
-.multiMatchSpan {
+.overflowWrapper {
   width: 100%;
   white-space: nowrap;
-  overflow-x: auto;
+  overflow-x: hidden;
   overflow-y: hidden;
 }
 
@@ -113,13 +113,13 @@
   outline: none;
 }
 
-.wrapper{
+.wrapper {
   width: 50% !IMPORTANT;
 }
 
 .singleMatchFirstWrapper {
   cursor: pointer;
-  width:  60%;
+  width: 60%;
 }
 
 .singleMatchTabbedItemsWrapper {
@@ -173,7 +173,7 @@
 }
 
 .headerLabel {
-  margin-left: 10px
+  margin-left: 10px;
 }
 
 .firstSingleMatchResult {
@@ -189,11 +189,21 @@
 }
 
 .multiMatchLabel {
-  border:0px;
-  cursor:pointer;
+  border: 0px;
+  cursor: pointer;
   outline: none;
   overflow: hidden;
   text-overflow: ellipsis;
   display: inline-block;
   width: 50%;
+}
+
+.singleMatchLabel {
+  border: 0px;
+  cursor: pointer;
+  outline: none;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: inline-block;
+  width: 60%;
 }
