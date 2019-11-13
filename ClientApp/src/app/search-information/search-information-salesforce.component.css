@@ -95,6 +95,13 @@
   cursor: pointer;
 }
 
+.multiMatchSpan {
+  width: 100%;
+  white-space: nowrap;
+  overflow-x: auto;
+  overflow-y: hidden;
+}
+
 .singleSearchResultSelect {
   border: 0px solid #939598 !IMPORTANT;
   /* width: 50% !IMPORTANT; */
@@ -187,4 +194,6 @@
   outline: none;
   overflow: hidden;
   text-overflow: ellipsis;
+  display: inline-block;
+  width: 50%;
 }

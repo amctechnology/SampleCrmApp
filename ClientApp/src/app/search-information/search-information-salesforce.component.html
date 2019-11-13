@@ -26,7 +26,7 @@
   </div>
   <div class="callBody" *ngIf="isSearchInformationMaximized">
     <div *ngIf="this.searchRecordList.length > 1">
-      <span style="width: 100%;">
+      <span class="multiMatchSpan">
         <label
           class="displayLabelsMultiMatch matchedRecordsMargin"
           title="Matched Records"
@@ -65,7 +65,7 @@
       </span>
       <div *ngIf="this.shouldShowAllMultiMatchOptions">
         <span
-          style="width: 100%;"
+          class="multiMatchSpan"
           *ngFor="let i of this.multiMatchData | slice: 1; let index = index"
         >
           <label
