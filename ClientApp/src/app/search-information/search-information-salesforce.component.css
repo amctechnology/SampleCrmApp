@@ -95,6 +95,13 @@
   cursor: pointer;
 }
 
+.overflowWrapper {
+  width: 100%;
+  white-space: nowrap;
+  overflow-x: hidden;
+  overflow-y: hidden;
+}
+
 .singleSearchResultSelect {
   border: 0px solid #939598 !IMPORTANT;
   /* width: 50% !IMPORTANT; */
@@ -106,8 +113,18 @@
   outline: none;
 }
 
-.wrapper{
+.wrapper {
   width: 50% !IMPORTANT;
+}
+
+.singleMatchFirstWrapper {
+  cursor: pointer;
+  width: 60%;
+}
+
+.singleMatchTabbedItemsWrapper {
+  margin-left: 13px;
+  width: 70%;
 }
 
 .displayLabels {
@@ -156,7 +173,7 @@
 }
 
 .headerLabel {
-  margin-left: 10px
+  margin-left: 10px;
 }
 
 .firstSingleMatchResult {
@@ -172,9 +189,21 @@
 }
 
 .multiMatchLabel {
-  border:0px;
-  cursor:pointer;
+  border: 0px;
+  cursor: pointer;
   outline: none;
   overflow: hidden;
   text-overflow: ellipsis;
+  display: inline-block;
+  width: 50%;
+}
+
+.singleMatchLabel {
+  border: 0px;
+  cursor: pointer;
+  outline: none;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: inline-block;
+  width: 60%;
 }
