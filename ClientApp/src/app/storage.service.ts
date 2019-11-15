@@ -215,7 +215,7 @@ export class StorageService {
     if (this.currentScenarioId === scenarioId) {
       this.nameChangesList.push(scenarioId);
     }
-    if (currentWhoObject.objectType.toUpperCase() === 'LEAD') { // whoException
+    if (currentWhoObject.objectType.toUpperCase() === 'LEAD') {
       this.selectedWhatValueList[scenarioId] = this.emptyIActivityDetails.objectId;
       this.setActivityWhatObject(this.emptyIActivityDetails, scenarioId);
     }
@@ -324,7 +324,7 @@ export class StorageService {
         if (this.nameChangesList.indexOf(scenarioId) < 0) {
           this.selectedWhoValueList[scenarioId] = activityObject.objectId;
           this.setActivityWhoObject(activityObject, scenarioId);
-          if (activityObject.objectType.toUpperCase() === 'LEAD') { // whoException
+          if (activityObject.objectType.toUpperCase() === 'LEAD') {
             this.selectedWhatValueList[scenarioId] = this.emptyIActivityDetails.objectId;
             this.setActivityWhatObject(this.emptyIActivityDetails, scenarioId);
           }
