@@ -26,9 +26,9 @@
   </div>
   <div class="callBody" *ngIf="isSearchInformationMaximized">
     <div *ngIf="this.searchRecordList.length > 1">
-      <span style="width: 100%;">
+      <span class="overflowWrapper">
         <label
-          class="displayLabels matchedRecordsMargin"
+          class="displayLabelsMultiMatch matchedRecordsMargin"
           title="Matched Records"
           style="font-weight: 700; font-size: 12.6px;"
         >
@@ -65,7 +65,7 @@
       </span>
       <div *ngIf="this.shouldShowAllMultiMatchOptions">
         <span
-          style="width: 100%;"
+          class="overflowWrapper"
           *ngFor="let i of this.multiMatchData | slice: 1; let index = index"
         >
           <label
@@ -87,6 +87,7 @@
         </span>
       </div>
     </div>
+    <!-- Below is the HTML loaded on Single Match -->
     <div *ngIf="this.searchRecordList.length === 1">
       <div
         class="editorFull displayDiv"
@@ -96,10 +97,11 @@
           let first = first
         "
       >
-        <span style="width: 100%;">
+        <span class="overflowWrapper">
           <label
             class="displayLabels firstSingleMatchResult"
-            style="font-weight: 700;"
+            style="font-weight: 700; margin-top: 1px; margin-bottom: -2px;"
+            title="{{ i[0] }}"
             >{{ i[0] }}</label
           >
           <span class="wrapper" style="margin-left: 10px">
@@ -109,11 +111,11 @@
               class="CRMResultImage"
             />
             <input
-              class="singleSearchResultSelect"
-              style="cursor: pointer"
+              class="singleSearchResultSelect singleMatchFirstWrapper singleMatchLabel"
               id="{{ this.searchRecordList[0].id }}"
               [class.firstSingleMatchResult]="first"
               value="{{ i[1] }}"
+              title="{{ i[1] }}"
               (click)="onAgentSelectedCallerInformation($event)"
               readonly
             />
@@ -128,21 +130,22 @@
           let first = first
         "
       >
-        <span style="width: 100%;">
+        <span class="overflowWrapper">
           <label style="width: 5px;"></label>
-          <label class="displayLabelsTabbed">{{ i[0] }}</label>
+          <label title="{{ i[0] }}" class="displayLabelsTabbed">{{
+            i[0]
+          }}</label>
           <span class="wrapper">
             <input
-              class="singleSearchResultSelect"
-              style="margin-left: 13px;"
+              class="singleSearchResultSelect singleMatchTabbedItemsWrapper singleMatchLabel"
               id="{{ this.searchRecordList[0].id }}"
               value="{{ i[1] }}"
+              title="{{ i[1] }}"
               readonly
             />
           </span>
         </span>
       </div>
-      <!-- <input readonly (click)="onAgentSelectedCallerInformation($event)" *ngFor="let i of parseSearchRecordForNameSingleMatch(this.searchRecordList[0])" id="{{ this.searchRecordList[0].id }}" class="singleSearchResultSelect" value="{{i}}" /> -->
     </div>
   </div>
 </div>

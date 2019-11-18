@@ -12,12 +12,14 @@
           <label class="displayLabels" title="Name">Name</label>
           <select class="dropDownListStyle displayData" [(ngModel)]="storageService.selectedWhoValueList[storageService.currentScenarioId]" name="whoItem" (change)="onNameSelectChange($event)">
             <option *ngFor="let whoItem of storageService.whoList[storageService.currentScenarioId]" value="{{whoItem.objectId}}">{{parseWhoObject(whoItem)}}</option>
+            <option value="UserSelectedForEmptyRecord"></option>
           </select>
         </div>
-        <div class="editor displayDiv">
+        <div class="editor displayDiv" *ngIf='(this.storageService.activityList[this.storageService.currentScenarioId].WhoObject && this.storageService.activityList[this.storageService.currentScenarioId].WhoObject.objectType !== "Lead")'>
           <label class="displayLabels" title="Related To">Related To</label>
           <select class="dropDownListStyle displayData" (change)="onRelatedToChange($event)" [(ngModel)]="storageService.selectedWhatValueList[storageService.currentScenarioId]" name="whatItem">
             <option *ngFor="let whatItem of storageService.whatList[storageService.currentScenarioId]" value="{{whatItem.objectId}}">{{parseWhatObject(whatItem)}}</option>
+            <option value="UserSelectedForEmptyRecord"></option>
           </select>
         </div>
         <div class="editor displayDiv">
