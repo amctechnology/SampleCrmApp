@@ -101,8 +101,8 @@
           <label
             class="displayLabels firstSingleMatchResult"
             style="font-weight: 700; margin-top: 1px; margin-bottom: -2px;"
-            title="{{ i[0] }}"
-            >{{ i[0] }}</label
+            title="{{ (this.storageService.searchRecordList[this.storageService.currentScenarioId][0].type ? this.storageService.searchRecordList[this.storageService.currentScenarioId][0].type :this.storageService.searchRecordList[this.storageService.currentScenarioId][0].DisplayName ) }}"
+            >{{ (this.storageService.searchRecordList[this.storageService.currentScenarioId][0].type ? this.storageService.searchRecordList[this.storageService.currentScenarioId][0].type :this.storageService.searchRecordList[this.storageService.currentScenarioId][0].DisplayName ) }}</label
           >
           <span class="wrapper" style="margin-left: 10px">
             <img
