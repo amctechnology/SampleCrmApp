@@ -200,7 +200,6 @@
 
 .singleMatchLabel {
   border: 0px;
-  cursor: pointer;
   outline: none;
   overflow: hidden;
   text-overflow: ellipsis;
