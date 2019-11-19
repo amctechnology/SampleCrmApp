@@ -65,7 +65,7 @@ export class ActivitySalesforceComponent {
     let descriptionToSet = this.quickCommentList[comment];
     if (this.quickCommentOptionRequiredCadArray[comment]) {
       // This means the option is configured to accept CAD Automatically
-      // Loop through quickCommentOptionRequiredCadArray and replace {{cad}} with the cad coming from channel app      
+      // Loop through quickCommentOptionRequiredCadArray and replace {{cad}} with the cad coming from channel app
       let cadFields = {};
       if (this.storageService.activityList[this.scenarioId]) {
           cadFields = this.storageService.scenarioToCADMap[this.scenarioId];
@@ -78,7 +78,7 @@ export class ActivitySalesforceComponent {
         if (cadFields[keyToCheckIfCADExists]) {
           descriptionToSet = descriptionToSet.replace(stringToBeReplaced, cadFields[keyToCheckIfCADExists].Value);
         }
-      }      
+      }
     }
     if (!this.storageService.getDescription()) {
       this.storageService.setDescription(descriptionToSet, this.scenarioId);
