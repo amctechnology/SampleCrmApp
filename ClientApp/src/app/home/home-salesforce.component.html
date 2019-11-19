@@ -1,33 +1,27 @@
 <div class="body">
   <app-search-information
-    *ngIf="
-      storageService.currentScenarioId &&
-      storageService.searchRecordList &&
-      storageService.searchRecordList[storageService.currentScenarioId] &&
-      storageService.searchRecordList[storageService.currentScenarioId].length >
-        0
-    "
+    *ngIf="storageService.currentScenarioId &&
+    storageService.searchRecordList &&
+    storageService.searchRecordList[storageService.currentScenarioId] &&
+    storageService.searchRecordList[storageService.currentScenarioId].length > 0"
     [searchLayout]="searchLayout"
     (agentSelectedCallerInformation)="agentSelectedCallerInformation($event)"
-    [searchRecordList]="
-      storageService.searchRecordList[storageService.currentScenarioId]
-    "
-  >
+    [searchRecordList]="storageService.searchRecordList[storageService.currentScenarioId]">
   </app-search-information>
   <app-activity
     *ngIf="storageService.currentScenarioId"
-    (ActivitySave)="saveActivity($event)"
+    (saveActivity)="saveActivity($event)"
+    [scenarioId]="storageService.currentScenarioId"
     [quickCommentList]="quickCommentList"
-    [quickCommentOptionRequiredCadArray]="quickCommentOptionRequiredCadArray"
-  ></app-activity>
+    [quickCommentOptionRequiredCadArray]="quickCommentOptionRequiredCadArray">
+  </app-activity>
   <app-recentactivities
     *ngIf="checkIfRecentActivitiesExist()"
-    (ActivitySave)="saveActivity($event, true)"
-  >
+    (saveActivity)="saveActivity($event, true)">
   </app-recentactivities>
   <app-create
     *ngIf="DisplayQuickCreate"
     [Entities]="QuickCreateEntities"
-    (CreateNewEntity)="createNewEntity($event)"
-  ></app-create>
+    (CreateNewEntity)="createNewEntity($event)">
+  </app-create>
 </div>

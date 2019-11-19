@@ -3,6 +3,7 @@ import { IInteraction } from '@amc-technology/davinci-api';
 import { IActivity } from './Model/IActivity';
 import { IActivityDetails } from './Model/IActivityDetails';
 import { Injectable } from '@angular/core';
+import { IActivityFields } from './Model/IActivityFields';
 @Injectable()
 export class StorageService {
   public whoList: {
@@ -43,6 +44,9 @@ export class StorageService {
     [scenarioId: string]: any;
   };
   public emptyIActivityDetails: IActivityDetails;
+  public savedActivityFields: {
+    [scenarioId: string]: IActivityFields
+  };
 
   constructor() {
     this.whoList = {};
@@ -71,6 +75,7 @@ export class StorageService {
       objectType: '',
       url: ''
     };
+    this.savedActivityFields = {};
   }
 
   public getCurrentScenarioId(): string {
@@ -127,6 +132,7 @@ export class StorageService {
       delete this.selectedWhatValueList[scenarioId];
       delete this.selectedWhoValueList[scenarioId];
       if (this.maxRecentItems !== 0 || deleteExpiredActivity) {
+        delete this.savedActivityFields[scenarioId];
         delete this.activityList[scenarioId];
       }
     }
@@ -247,10 +253,7 @@ export class StorageService {
     return this.whoList[scenarioId].find(item => item.objectId === whoId);
   }
 
-  private whatListContains(
-    whatObject: IActivityDetails,
-    scenarioId: string
-  ): boolean {
+  private whatListContains(whatObject: IActivityDetails, scenarioId: string): boolean {
     if (scenarioId) {
       const interactionWhatList = this.whatList[scenarioId];
       if (interactionWhatList) {
@@ -264,10 +267,7 @@ export class StorageService {
     return false;
   }
 
-  private whoListContains(
-    whoObject: IActivityDetails,
-    scenarioId: string
-  ): boolean {
+  private whoListContains(whoObject: IActivityDetails, scenarioId: string): boolean {
     if (scenarioId) {
       const interactionWhoList = this.whoList[scenarioId];
       if (interactionWhoList) {
@@ -309,14 +309,8 @@ export class StorageService {
     this.storeToLocalStorage();
   }
 
-  public updateWhoWhatLists(
-    activityObject: IActivityDetails,
-    scenarioId: string
-  ) {
-    if (
-      activityObject.objectType === 'Contact' ||
-      activityObject.objectType === 'Lead'
-    ) {
+  public updateWhoWhatLists(activityObject: IActivityDetails, scenarioId: string) {
+    if (activityObject.objectType === 'Contact' || activityObject.objectType === 'Lead') {
       if (!this.whoListContains(activityObject, scenarioId)) {
         this.setWhoList(activityObject, scenarioId);
       }
@@ -341,12 +335,10 @@ export class StorageService {
         }
       }
     }
+    this.compareActivityFields(scenarioId);
   }
 
-  public setsearchRecordList(
-    searchRecords: api.IRecordItem[],
-    scenarioId: string
-  ) {
+  public setsearchRecordList(searchRecords: api.IRecordItem[], scenarioId: string) {
     this.searchRecordList[scenarioId] = searchRecords;
     if (searchRecords.length > 1) {
       this.selectedSearchRecordList[scenarioId] = 'DefaultMultiMatch';
@@ -357,6 +349,41 @@ export class StorageService {
   public clearSearchRecordList(scenarioId: string) {
     delete this.selectedSearchRecordList[scenarioId];
     delete this.searchRecordList[scenarioId];
+    this.storeToLocalStorage();
+  }
+
+  public updateActivityFields(scenarioId: string) {
+    const activityFields = this.getActivityFields(scenarioId);
+    if (!this.savedActivityFields) {
+      this.savedActivityFields = {};
+    }
+    this.savedActivityFields[scenarioId] = activityFields;
+    this.storeToLocalStorage();
+  }
+
+  public getActivityFields(scenarioId: string): IActivityFields {
+    const activityFields: IActivityFields = {
+      whoId: this.selectedWhoValueList[scenarioId] ? this.selectedWhoValueList[scenarioId] :
+      this.activityList[scenarioId].WhoObject.objectId,
+      whatId: this.selectedWhatValueList[scenarioId] ? this.selectedWhatValueList[scenarioId] :
+      this.activityList[scenarioId].WhatObject.objectId,
+      subject: this.getActivity(scenarioId).Subject,
+      description: this.getActivity(scenarioId).Description
+    };
+    return activityFields;
+  }
+
+  public compareActivityFields(scenarioId: string) {
+    const latestActivityData = this.getActivityFields(scenarioId);
+    const keys = Object.keys(this.savedActivityFields[scenarioId]);
+    for (const key in keys) {
+      if (this.savedActivityFields[scenarioId][keys[key]] !== latestActivityData[keys[key]]) {
+        this.activityList[scenarioId].IsUnSaved = true;
+        this.storeToLocalStorage();
+        return;
+      }
+    }
+    this.activityList[scenarioId].IsUnSaved = false;
     this.storeToLocalStorage();
   }
 
@@ -378,7 +405,8 @@ export class StorageService {
         selectedWhoValueList: this.selectedWhoValueList,
         selectedSearchRecordList: this.selectedSearchRecordList,
         currentTicketId: this.currentTicketId,
-        scenarioToCADMap: this.scenarioToCADMap
+        scenarioToCADMap: this.scenarioToCADMap,
+        savedActivityFields: this.savedActivityFields,
       })
     );
   }
@@ -401,6 +429,7 @@ export class StorageService {
       this.selectedSearchRecordList = browserStorage.selectedSearchRecordList;
       this.currentTicketId = browserStorage.currentTicketId;
       this.scenarioToCADMap = browserStorage.scenarioToCADMap;
+      this.savedActivityFields = browserStorage.savedActivityFields;
     }
   }
 
@@ -446,10 +475,8 @@ export class StorageService {
             if (!objActivity.CadFields) {
               objActivity.CadFields = {};
             }
-            objActivity.CadFields[cadActivityMap[key]] = interaction.details
-              .fields[key]
-              ? interaction.details.fields[key].Value
-              : interaction[key];
+            objActivity.CadFields[cadActivityMap[key]] = interaction.details.fields[key] ? interaction.details.fields[key].Value :
+            interaction[key];
             this.updateActivity(objActivity);
           }
         }
