@@ -392,7 +392,9 @@ export class HomeSalesforceComponent extends Application implements OnInit {
       TaskSubtype: this.buildTaskSubType(interaction),
       contactSource: this.getContactSource(interaction),
       CadFields: {},
-      IsActive: true
+      IsActive: true,
+      IsProcessing: false,
+      IsUnSaved: false,
     };
     for (const key in this.cadActivityMap) {
       if (interaction.details.fields[key] || interaction[key]) {
@@ -428,6 +430,9 @@ export class HomeSalesforceComponent extends Application implements OnInit {
       api.ErrorCode.ACTIVITY
     );
     this.storageService.updateActivity(activity);
+    activity.IsProcessing = false;
+    this.storageService.updateActivityFields(scenarioId);
+    this.storageService.compareActivityFields(scenarioId);
     return Promise.resolve(activity.ActivityId);
   }
 

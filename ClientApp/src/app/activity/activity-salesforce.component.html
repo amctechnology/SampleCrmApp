@@ -10,28 +10,28 @@
       <form>
         <div class="editor displayDiv">
           <label class="displayLabels" title="Name">Name</label>
-          <select class="dropDownListStyle displayData" [(ngModel)]="storageService.selectedWhoValueList[storageService.currentScenarioId]" name="whoItem" (change)="onNameSelectChange($event)">
-            <option *ngFor="let whoItem of storageService.whoList[storageService.currentScenarioId]" value="{{whoItem.objectId}}">{{parseWhoObject(whoItem)}}</option>
+          <select class="dropDownListStyle displayData" [(ngModel)]="storageService.selectedWhoValueList[this.scenarioId]" name="whoItem" (change)="onNameSelectChange($event)">
+            <option *ngFor="let whoItem of storageService.whoList[this.scenarioId]" value="{{whoItem.objectId}}">{{parseWhoObject(whoItem)}}</option>
             <option value="UserSelectedForEmptyRecord"></option>
           </select>
         </div>
-        <div class="editor displayDiv" *ngIf='(this.storageService.activityList[this.storageService.currentScenarioId].WhoObject && this.storageService.activityList[this.storageService.currentScenarioId].WhoObject.objectType !== "Lead")'>
+        <div class="editor displayDiv" *ngIf='(this.storageService.activityList[this.scenarioId].WhoObject && this.storageService.activityList[this.scenarioId].WhoObject.objectType !== "Lead")'>
           <label class="displayLabels" title="Related To">Related To</label>
-          <select class="dropDownListStyle displayData" (change)="onRelatedToChange($event)" [(ngModel)]="storageService.selectedWhatValueList[storageService.currentScenarioId]" name="whatItem">
-            <option *ngFor="let whatItem of storageService.whatList[storageService.currentScenarioId]" value="{{whatItem.objectId}}">{{parseWhatObject(whatItem)}}</option>
+          <select class="dropDownListStyle displayData" (change)="onRelatedToChange($event)" [(ngModel)]="storageService.selectedWhatValueList[this.scenarioId]" name="whatItem">
+            <option *ngFor="let whatItem of storageService.whatList[this.scenarioId]" value="{{whatItem.objectId}}">{{parseWhatObject(whatItem)}}</option>
             <option value="UserSelectedForEmptyRecord"></option>
           </select>
         </div>
         <div class="editor displayDiv">
           <label class="displayLabels" title="Subject">Subject</label>
-          <input class="activitySubjectTextBoxStyle displayData" (change)="onSubjectChange($event)" title="{{storageService.getSubject()}}"
+          <input class="activitySubjectTextBoxStyle displayData" (keyup)="onSubjectChange($event)" (change)="onSubjectChange($event)" title="{{storageService.getSubject()}}"
             type="text" value="{{storageService.getSubject()}}">
         </div>
         <div class="editor displayDiv">
           <div class="callNotesSection">
             <div class="callNotesTextArea">
               <textarea value="{{storageService.getDescription()}}" placeholder="Click to add a comment" class="activityCommentsTextBoxStyle"
-                (change)="onCallNotesChange($event)" cols="20" rows="2" title=""></textarea>
+              (keyup)="onCallNotesChange($event)" (change)="onCallNotesChange($event)" cols="20" rows="2" title=""></textarea>
             </div>
             <div class="notesBottonBorder">
               <div class="commentsButtonDiv">
@@ -40,7 +40,8 @@
                     value="{{i+1}}" (click)="loadQuickComment(i)" title="{{quickComment}}">
                 </div>
                 <div class="callNotesButtonsSection">
-                  <input class="submitButton" type="button" value="Submit" (click)="activitySave(storageService.currentScenarioId)">
+                  <input *ngIf="!storageService.getActivity().IsProcessing" class="submitButton" type="button" value="Submit" (click)="submitActivity(storageService.getActivity().ScenarioId)" [disabled]="!storageService.getActivity().IsUnSaved" />
+                  <img *ngIf="storageService.getActivity().IsProcessing" class="loadingIcon" src="assets/images/loading.gif" title="Updating Activity" />
                 </div>
               </div>
             </div>

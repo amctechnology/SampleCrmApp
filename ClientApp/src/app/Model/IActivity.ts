@@ -20,4 +20,6 @@ export interface IActivity {
     [key: string]: string
   };
   IsActive: boolean;
+  IsProcessing: boolean;
+  IsUnSaved: boolean;
 }
