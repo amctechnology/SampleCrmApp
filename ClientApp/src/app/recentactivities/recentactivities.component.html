@@ -46,7 +46,7 @@
                       </textarea>
                     </div>
                     <div class="callNotesButtonsSection">
-                      <input *ngIf="!storageService.activityList[recentScenarioId].IsProcessing" class="submitButton" type="button" value="Submit" (click)="submitActivity(recentScenarioId)" [disabled]="!storageService.activityList[recentScenarioId].IsUnSaved"/>
+                      <input *ngIf="!storageService.activityList[recentScenarioId].IsProcessing" class="submitButton" type="button" value="Save" (click)="submitActivity(recentScenarioId)" [disabled]="!storageService.activityList[recentScenarioId].IsUnSaved"/>
                       <img *ngIf="storageService.activityList[recentScenarioId].IsProcessing" class="loadingIcon" src="assets/images/loading.gif" title="Updating Activity" />
                     </div>
                   </div>
