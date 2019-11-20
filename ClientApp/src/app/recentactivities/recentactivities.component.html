@@ -23,7 +23,7 @@
               <form>
                 <div class="editor displayDiv">
                   <label class="displayLabels" title="Subject">Subject</label>
-                  <input class="activitySubjectTextBoxStyle displayData" type="text" (change)="onSubjectChange($event)" name="storageService.activityList[recentScenarioId].Subject" [(ngModel)]="storageService.activityList[recentScenarioId].Subject" value="{{ storageService.activityList[recentScenarioId].Subject }}" />
+                  <input class="activitySubjectTextBoxStyle displayData" type="text" (keyup)="onSubjectChange($event)" (change)="onSubjectChange($event)" name="storageService.activityList[recentScenarioId].Subject" [(ngModel)]="storageService.activityList[recentScenarioId].Subject" value="{{ storageService.activityList[recentScenarioId].Subject }}" />
                 </div>
                 <div class="editor displayDiv">
                   <label class="displayLabels" title="Name">Name</label>
@@ -40,13 +40,14 @@
                 <div class="editor displayDiv">
                   <div class="callNotesSection">
                     <div class="callNotesTextArea">
-                      <textarea placeholder="Click to add a comment" (change)="onCallNotesChange($event)" name="storageService.activityList[recentScenarioId].Description" [(ngModel)]="storageService.activityList[recentScenarioId].Description"
+                      <textarea placeholder="Click to add a comment" (keyup)="onCallNotesChange($event)" (change)="onCallNotesChange($event)" name="storageService.activityList[recentScenarioId].Description" [(ngModel)]="storageService.activityList[recentScenarioId].Description"
                         class="activityCommentsTextBoxStyle" value="{{ storageService.activityList[recentScenarioId].Description }}"
                         rows="5" title="">
                       </textarea>
                     </div>
                     <div class="callNotesButtonsSection">
-                      <input class="submitButton" type="button" value="Submit" (click)="activitySave(recentScenarioId)" />
+                      <input *ngIf="!storageService.activityList[recentScenarioId].IsProcessing" class="submitButton" type="button" value="Save" (click)="submitActivity(recentScenarioId)" [disabled]="!storageService.activityList[recentScenarioId].IsUnSaved"/>
+                      <img *ngIf="storageService.activityList[recentScenarioId].IsProcessing" class="loadingIcon" src="assets/images/loading.gif" title="Updating Activity" />
                     </div>
                   </div>
                 </div>
@@ -57,10 +58,7 @@
         <div *ngIf="!(this.storageService.workingRecentScenarioId === recentScenarioId)">
           <div [class.callHeaderBottomBorder]='last' (click)="expandAndCollapseRecentActivity(true, recentScenarioId)" class="editor callHeaderRecentActivityUnselected">
             <label class="headerLabelClickableLook">
-                <img
-                src="/assets/Images/Phone_Number_Icon.png"
-                class="RecentCallsImg"
-              />
+                <img src="/assets/Images/Phone_Number_Icon.png" class="RecentCallsImg"/>
               <b>{{ storageService.activityList[recentScenarioId].Subject }}</b>
             </label>
           </div>

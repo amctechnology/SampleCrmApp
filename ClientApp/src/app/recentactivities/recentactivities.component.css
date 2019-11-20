@@ -184,3 +184,17 @@
   cursor: pointer;
   margin-left: 10px;
 }
+
+.loadingIcon {
+  margin-left: auto;
+  margin-right: 5px;
+  height: 10px;
+  width: 30px;
+  margin-top: 5px;
+  padding-bottom: 0px;
+}
+
+input[type="button"]:disabled {
+  background-color: lightgrey;
+  cursor:auto;
+}

@@ -221,3 +221,17 @@ body {
   border-top-left-radius: 3px !IMPORTANT;
   border-top-right-radius: 3px !IMPORTANT;
 }
+
+.loadingIcon {
+  float: right;
+  margin-right: 5px;
+  height: 10px;
+  width: 30px;
+  margin-top: 8px;
+  padding-bottom: 0px;
+}
+
+input[type="button"]:disabled {
+  background-color: lightgrey;
+  cursor:auto;
+}

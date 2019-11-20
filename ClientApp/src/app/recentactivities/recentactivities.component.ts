@@ -10,7 +10,7 @@ import { LoggerService } from '../logger.service';
   styleUrls: ['./recentactivities.component.css']
 })
 export class RecentactivitiesComponent {
-  @Output() ActivitySave: EventEmitter<string> = new EventEmitter<string>();
+  @Output() saveActivity: EventEmitter<string> = new EventEmitter<string>();
 
   collapseToggle: boolean;
 
@@ -20,8 +20,9 @@ export class RecentactivitiesComponent {
     this.loggerService.logger.logDebug('main: Constructor complete');
   }
 
-  protected activitySave(scenarioId: string) {
-    this.ActivitySave.emit(scenarioId);
+  protected submitActivity(scenarioId: string) {
+    this.storageService.activityList[scenarioId].IsProcessing = true;
+    this.saveActivity.emit(scenarioId);
     this.loggerService.logger.logDebug(`activity: Calling Save activity: ${scenarioId}`
     , api.ErrorCode.ACTIVITY
     );
@@ -45,6 +46,7 @@ export class RecentactivitiesComponent {
 
   protected onNameSelectChange(event: any) {
     this.storageService.UpdateWhoObjectSelectionChange(event.currentTarget.value, this.storageService.workingRecentScenarioId);
+    this.storageService.compareActivityFields(this.storageService.workingRecentScenarioId);
     this.loggerService.logger.logDebug(`activity: Call from select box value changed: ${event.currentTarget.value}`,
       api.ErrorCode.ACTIVITY
     );
@@ -52,6 +54,7 @@ export class RecentactivitiesComponent {
 
   protected onRelatedToChange(event: any) {
     this.storageService.UpdateWhatObjectSelectionChange(event.currentTarget.value, this.storageService.workingRecentScenarioId);
+    this.storageService.compareActivityFields(this.storageService.workingRecentScenarioId);
     this.loggerService.logger.logDebug(`activity: Related to select box value changed:  ${event.currentTarget.value}`,
       api.ErrorCode.ACTIVITY
     );
@@ -59,11 +62,13 @@ export class RecentactivitiesComponent {
 
   protected onSubjectChange(event: any) {
     this.storageService.setSubject(event.srcElement.value, this.storageService.workingRecentScenarioId);
+    this.storageService.compareActivityFields(this.storageService.workingRecentScenarioId);
     this.loggerService.logger.logDebug('activity: Subject value changed: ', api.ErrorCode.ACTIVITY);
   }
 
   protected onCallNotesChange(event: any) {
     this.storageService.setDescription(event.srcElement.value.trim(), this.storageService.workingRecentScenarioId);
+    this.storageService.compareActivityFields(this.storageService.workingRecentScenarioId);
     this.loggerService.logger.logDebug('activity: Call notes value changed: ' + event.srcElement.value.trim(), api.ErrorCode.ACTIVITY);
   }
 
