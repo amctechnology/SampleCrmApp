@@ -97,7 +97,6 @@
 
 .overflowWrapper {
   width: 100%;
-  white-space: nowrap;
   overflow-x: hidden;
   overflow-y: hidden;
 }

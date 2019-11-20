@@ -322,41 +322,43 @@ export class HomeSalesforceComponent extends Application implements OnInit {
     const ignoreFields = ['Name', 'displayName', 'object', 'Id', 'RecordType'];
     const result = new api.SearchRecords();
     for (const id of Object.keys(crmResults)) {
-      let recordItem: api.RecordItem = null;
-      if (crmResults[id].Id && crmResults[id].RecordType) {
-        recordItem = new api.RecordItem(
-          crmResults[id].Id,
-          crmResults[id].RecordType,
-          crmResults[id].RecordType
-        );
-      } else if (crmResults[id].object && crmResults[id].displayName) {
-        recordItem = new api.RecordItem(
-          id,
-          crmResults[id].object,
-          crmResults[id].displayName
-        );
-      }
-      if (recordItem !== null) {
-        if (crmResults[id].Name) {
-          if (recordItem.getMetadata().Type === 'Account') {
-            recordItem.setAccountName('Name', 'Name', crmResults[id].Name);
-          } else if (recordItem.getMetadata().Type === 'Contact') {
-            recordItem.setFullName('Name', 'Name', crmResults[id].Name);
-          } else {
-            recordItem.setField('Name', 'Name', 'Name', crmResults[id].Name);
-          }
+      if (crmResults[id]) {
+        let recordItem: api.RecordItem = null;
+        if (crmResults[id].Id && crmResults[id].RecordType) {
+          recordItem = new api.RecordItem(
+            crmResults[id].Id,
+            crmResults[id].RecordType,
+            crmResults[id].RecordType
+          );
+        } else if (crmResults[id].object && crmResults[id].displayName) {
+          recordItem = new api.RecordItem(
+            id,
+            crmResults[id].object,
+            crmResults[id].displayName
+          );
         }
-        for (const fieldName of Object.keys(crmResults[id])) {
-          if (ignoreFields.indexOf(fieldName) < 0) {
-            recordItem.setField(
-              fieldName,
-              fieldName,
-              fieldName,
-              crmResults[id][fieldName]
-            );
+        if (recordItem !== null) {
+          if (crmResults[id].Name) {
+            if (recordItem.getMetadata().Type === 'Account') {
+              recordItem.setAccountName('Name', 'Name', crmResults[id].Name);
+            } else if (recordItem.getMetadata().Type === 'Contact') {
+              recordItem.setFullName('Name', 'Name', crmResults[id].Name);
+            } else {
+              recordItem.setField('Name', 'Name', 'Name', crmResults[id].Name);
+            }
           }
+          for (const fieldName of Object.keys(crmResults[id])) {
+            if (ignoreFields.indexOf(fieldName) < 0) {
+              recordItem.setField(
+                fieldName,
+                fieldName,
+                fieldName,
+                crmResults[id][fieldName]
+              );
+            }
+          }
+          result.addSearchRecord(recordItem);
         }
-        result.addSearchRecord(recordItem);
       }
     }
     return result;
