@@ -1,4 +1,4 @@
-import { Component, Input, Output, EventEmitter, OnInit } from '@angular/core';
+import { Component, Input, Output, EventEmitter, OnInit, OnChanges } from '@angular/core';
 import * as api from '@amc-technology/davinci-api';
 import { LoggerService } from '../logger.service';
 import { StorageService } from '../storage.service';
@@ -7,7 +7,7 @@ import { StorageService } from '../storage.service';
   templateUrl: './search-information-salesforce.component.html',
   styleUrls: ['./search-information-salesforce.component.css']
 })
-export class SearchInformationSalesforceComponent implements OnInit {
+export class SearchInformationSalesforceComponent implements OnChanges {
   @Input() searchLayout: api.SearchLayouts;
   @Input() searchRecordList: Array<api.IRecordItem>;
   @Output() agentSelectedCallerInformation: EventEmitter<
@@ -34,7 +34,15 @@ export class SearchInformationSalesforceComponent implements OnInit {
     this.multiMatchData = [];
     this.shouldShowAllMultiMatchOptions = false;
   }
-  ngOnInit() {
+
+  ngOnChanges() {
+    this.renderData();
+  }
+
+  protected renderData() {
+    this.singleMatchData = null;
+    this.multiMatchData = [];
+    this.shouldShowAllMultiMatchOptions = false;
     this.shouldShowAllMultiMatchOptions = false;
     if (this.searchRecordList.length === 1) {
       this.singleMatchData = this.parseSearchRecordForNameSingleMatch(
