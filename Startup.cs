@@ -87,8 +87,17 @@ namespace Salesforce {
             }
 
             app.UseDefaultFiles ();
-            app.UseStaticFiles ();
-
+            app.UseStaticFiles(new StaticFileOptions
+            {
+                OnPrepareResponse = context =>
+                {
+                    if (context.File.Name == "index.html")
+                    {
+                        context.Context.Response.Headers.Add("Cache-Control", "no-cache, no-store");
+                        context.Context.Response.Headers.Add("Expires", "-1");
+                    }
+                }
+            });
             app.UseMvc (routes => {
                 routes.MapRoute (
                     name: "default",
