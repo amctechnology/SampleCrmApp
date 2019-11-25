@@ -99,19 +99,18 @@
       >
         <span class="overflowWrapper">
           <label
-            class="displayLabels firstSingleMatchResult"
+            class=" displayLabelsTabbed firstSingleMatchResult"
             style="font-weight: 700; margin-top: 1px; margin-bottom: -2px;"
-            title="{{ (this.storageService.searchRecordList[this.storageService.currentScenarioId][0].type ? this.storageService.searchRecordList[this.storageService.currentScenarioId][0].type :this.storageService.searchRecordList[this.storageService.currentScenarioId][0].DisplayName ) }}"
-            >{{ (this.storageService.searchRecordList[this.storageService.currentScenarioId][0].type ? this.storageService.searchRecordList[this.storageService.currentScenarioId][0].type :this.storageService.searchRecordList[this.storageService.currentScenarioId][0].DisplayName ) }}</label
+            title="Matched Records"
+            >Results</label
           >
-          <span class="wrapper" style="margin-left: 10px">
             <img
               id="EntityIcon"
               src="{{ this.singleMatchIconSrc }}"
               class="CRMResultImage"
             />
             <input
-              class="singleSearchResultSelect singleMatchFirstWrapper singleMatchLabel"
+              class="singleSearchResultSelect singleMatchFirstWrapper "
               id="{{ this.searchRecordList[0].id }}"
               [class.firstSingleMatchResult]="first"
               value="{{ i[1] }}"
@@ -119,7 +118,6 @@
               (click)="onAgentSelectedCallerInformation($event)"
               readonly
             />
-          </span>
         </span>
       </div>
       <div
@@ -131,11 +129,9 @@
         "
       >
         <span class="overflowWrapper">
-          <label style="width: 5px;"></label>
           <label title="{{ i[0] }}" class="displayLabelsTabbed">{{
             i[0]
           }}</label>
-          <span class="wrapper">
             <input
               class="singleSearchResultSelect singleMatchTabbedItemsWrapper singleMatchLabel"
               id="{{ this.searchRecordList[0].id }}"
@@ -144,7 +140,6 @@
               readonly
             />
           </span>
-        </span>
       </div>
     </div>
   </div>
