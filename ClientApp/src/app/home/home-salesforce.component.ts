@@ -418,6 +418,7 @@ export class HomeSalesforceComponent extends Application implements OnInit {
   }
 
   protected async saveActivity(scenarioId, isComplete = false): Promise<string> {
+    try {
     let activity = this.storageService.getActivity(scenarioId);
     this.loggerService.logger.logDebug('Salesforce Home: Save activity: ' + JSON.stringify(activity), api.ErrorCode.ACTIVITY);
     if (activity.IsActive && isComplete) {
@@ -437,6 +438,10 @@ export class HomeSalesforceComponent extends Application implements OnInit {
     this.storageService.updateActivityFields(scenarioId);
     this.storageService.compareActivityFields(scenarioId);
     return Promise.resolve(activity.ActivityId);
+    } catch (error) {
+      api.sendNotification('Call activity save failed.', api.NotificationType.Error);
+      this.loggerService.logger.logError(error);
+    }
   }
 
   protected agentSelectedCallerInformation(id: string) {
