@@ -64,6 +64,7 @@ export class HomeSalesforceComponent extends Application implements OnInit {
     this.loggerService.logger.logDebug('AMCSalesforceHomeComponent: ngOnInit start');
 
     this.bridgeEventsService.subscribe('clickToDial', this.clickToDialHandler);
+    this.bridgeEventsService.subscribe('sendNotification', this.sendNotification);
     this.searchLayout = await this.getSearchLayout();
     this.readConfig(config);
     api.registerOnLogout(this.removeLocalStorageOnLogout);
@@ -181,7 +182,7 @@ export class HomeSalesforceComponent extends Application implements OnInit {
         return;
       }
 
-      if (interaction.details.fields.Phone && interaction.details.fields.Phone.Value) {
+      if (interaction.details && interaction.details.fields && interaction.details.fields.Phone && interaction.details.fields.Phone.Value) {
         const phoneNum = interaction.details.fields.Phone.Value;
         if (this.clickToDialList[phoneNum]) {
           clickToDialEntity = this.clickToDialList[phoneNum];
@@ -417,6 +418,7 @@ export class HomeSalesforceComponent extends Application implements OnInit {
   }
 
   protected async saveActivity(scenarioId, isComplete = false): Promise<string> {
+    try {
     let activity = this.storageService.getActivity(scenarioId);
     this.loggerService.logger.logDebug('Salesforce Home: Save activity: ' + JSON.stringify(activity), api.ErrorCode.ACTIVITY);
     if (activity.IsActive && isComplete) {
@@ -436,6 +438,10 @@ export class HomeSalesforceComponent extends Application implements OnInit {
     this.storageService.updateActivityFields(scenarioId);
     this.storageService.compareActivityFields(scenarioId);
     return Promise.resolve(activity.ActivityId);
+    } catch (error) {
+      api.sendNotification('Call activity save failed.', api.NotificationType.Error);
+      this.loggerService.logger.logError(error);
+    }
   }
 
   protected agentSelectedCallerInformation(id: string) {
@@ -581,6 +587,11 @@ export class HomeSalesforceComponent extends Application implements OnInit {
       this.storageService.updateWhoWhatLists(entity, this.storageService.workingRecentScenarioId);
     }
     this.logger.logDebug('onFocusEvent END');
+  }
+
+  @bind
+  protected sendNotification(event: any) {
+    api.sendNotification(event.notification, event.notificationType);
   }
 
   @bind

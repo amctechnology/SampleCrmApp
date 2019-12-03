@@ -4,6 +4,7 @@ import { bind } from 'bind-decorator';
 import { safeJSONParse } from '../utils';
 import { IActivity } from '../Model/IActivity';
 import { ICreateNewSObjectParams } from '../Model/ICreateNewSObjectParams';
+import { NotificationType } from '@amc-technology/davinci-api';
 declare var sforce: any;
 
 class BridgeSalesforce extends Bridge {
@@ -459,6 +460,8 @@ class BridgeSalesforce extends Bridge {
               saved in Lightning, sending updated activity back to home`);
               resolve(activity);
             } else {
+              this.eventService.sendEvent('sendNotification', {notification: 'Call activity save failed.',
+              notificationType: NotificationType.Error});
               this.eventService.sendEvent('logDebug', `bridge: Activity ${JSON.stringify(activity)}
               could not be saved, error: ${JSON.stringify(result.errors['0'].details.fieldErrors)}`);
             }
