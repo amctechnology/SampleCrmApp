@@ -64,6 +64,7 @@ export class HomeSalesforceComponent extends Application implements OnInit {
     this.loggerService.logger.logDebug('AMCSalesforceHomeComponent: ngOnInit start');
 
     this.bridgeEventsService.subscribe('clickToDial', this.clickToDialHandler);
+    this.bridgeEventsService.subscribe('sendNotification', this.sendNotification);
     this.searchLayout = await this.getSearchLayout();
     this.readConfig(config);
     api.registerOnLogout(this.removeLocalStorageOnLogout);
@@ -581,6 +582,11 @@ export class HomeSalesforceComponent extends Application implements OnInit {
       this.storageService.updateWhoWhatLists(entity, this.storageService.workingRecentScenarioId);
     }
     this.logger.logDebug('onFocusEvent END');
+  }
+
+  @bind
+  protected sendNotification(event: any) {
+    api.sendNotification(event.notification, event.notificationType);
   }
 
   @bind
