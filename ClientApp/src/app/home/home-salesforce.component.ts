@@ -181,7 +181,7 @@ export class HomeSalesforceComponent extends Application implements OnInit {
         return;
       }
 
-      if (interaction.details.fields.Phone && interaction.details.fields.Phone.Value) {
+      if (interaction.details && interaction.details.fields && interaction.details.fields.Phone && interaction.details.fields.Phone.Value) {
         const phoneNum = interaction.details.fields.Phone.Value;
         if (this.clickToDialList[phoneNum]) {
           clickToDialEntity = this.clickToDialList[phoneNum];
