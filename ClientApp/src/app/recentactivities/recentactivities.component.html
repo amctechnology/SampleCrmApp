@@ -11,12 +11,10 @@
         <div *ngIf="this.storageService.workingRecentScenarioId === recentScenarioId">
           <div (click)="expandAndCollapseRecentActivity(false, recentScenarioId)" class="editor callHeaderRecentActivitySelected">
             <label class="headerLabelClickableLook">
-                <img
-                src="/assets/Images/Phone_Number_Icon.png"
-                class="RecentCallsImg"
-              />
+              <img src="/assets/Images/Phone_Number_Icon.png" class="RecentCallsImg"/>
               <b>{{ storageService.activityList[recentScenarioId].Subject }}</b>
             </label>
+            <img class="RecentCallsImg" src="/assets/Images/open_activity.png" title="Open Activity" (click)="openActivity(recentScenarioId);$event.stopPropagation();" />
           </div>
           <div class="callBody">
             <div class="activityFields">
@@ -58,9 +56,10 @@
         <div *ngIf="!(this.storageService.workingRecentScenarioId === recentScenarioId)">
           <div [class.callHeaderBottomBorder]='last' (click)="expandAndCollapseRecentActivity(true, recentScenarioId)" class="editor callHeaderRecentActivityUnselected">
             <label class="headerLabelClickableLook">
-                <img src="/assets/Images/Phone_Number_Icon.png" class="RecentCallsImg"/>
+              <img src="/assets/Images/Phone_Number_Icon.png" class="RecentCallsImg"/>
               <b>{{ storageService.activityList[recentScenarioId].Subject }}</b>
             </label>
+            <img class="RecentCallsImg" src="/assets/Images/open_activity.png" title="Open Activity" (click)="openActivity(recentScenarioId);$event.stopPropagation();" />
           </div>
         </div>
       </div>
