@@ -11,6 +11,7 @@ import { LoggerService } from '../logger.service';
 })
 export class RecentactivitiesComponent {
   @Output() saveActivity: EventEmitter<string> = new EventEmitter<string>();
+  @Output() screenpopWorkItem: EventEmitter<string> = new EventEmitter();
 
   collapseToggle: boolean;
 
@@ -24,6 +25,13 @@ export class RecentactivitiesComponent {
     this.storageService.activityList[scenarioId].IsProcessing = true;
     this.saveActivity.emit(scenarioId);
     this.loggerService.logger.logDebug(`activity: Calling Save activity: ${scenarioId}`
+    , api.ErrorCode.ACTIVITY
+    );
+  }
+
+  protected openActivity(scenarioId: string) {
+    this.screenpopWorkItem.emit(this.storageService.activityList[scenarioId].ActivityId);
+    this.loggerService.logger.logDebug(`activity: Opening activity: ${scenarioId}`
     , api.ErrorCode.ACTIVITY
     );
   }
