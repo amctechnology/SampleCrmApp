@@ -462,8 +462,11 @@ class BridgeSalesforce extends Bridge {
             } else {
               this.eventService.sendEvent('sendNotification', {notification: 'Call activity save failed.',
               notificationType: NotificationType.Error});
-              this.eventService.sendEvent('logDebug', `bridge: Activity ${JSON.stringify(activity)}
-              could not be saved, error: ${JSON.stringify(result.errors['0'].details.fieldErrors)}`);
+              if (result.errors && result.errors['0'] && result.errors['0'].details && result.errors['0'].details.fieldErrors) {
+                this.eventService.sendEvent('logDebug', `bridge: Activity ${JSON.stringify(activity)}
+                could not be saved, error: ${JSON.stringify(result.errors['0'].details.fieldErrors)}`);
+              }
+              resolve(activity);
             }
           }
         };
