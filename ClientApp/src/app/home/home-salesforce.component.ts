@@ -659,7 +659,7 @@ export class HomeSalesforceComponent extends Application implements OnInit {
         if (activity.WhatObject.objectType === 'Account') {
           params.caseFields.AccountId = activity.WhatObject.objectId;
         }
-        if (activity.WhoObject.objectId !== '') {
+        if (activity.WhoObject.objectType === 'Contact') {
           params.caseFields.ContactId = activity.WhoObject.objectId;
         }
         params.caseFields.Description = activity.Description;
