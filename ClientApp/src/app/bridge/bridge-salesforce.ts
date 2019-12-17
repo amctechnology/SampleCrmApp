@@ -10,6 +10,8 @@ declare var sforce: any;
 class BridgeSalesforce extends Bridge {
   private isLightning = false;
   private currentOnFocusEvent: ISalesforceClassicOnFocusEvent | ISalesforceLightningOnFocusEvent;
+  protected prefixList: any;
+  activityLayout: any;
   activity: IActivity = null;
   layoutObjectList: string[];
   searchLayout: any;
@@ -19,12 +21,15 @@ class BridgeSalesforce extends Bridge {
     super();
     this.currentOnFocusEvent = null;
     this.appName = 'Salesforce';
+    this.prefixList = {};
     this.layoutObjectList = [];
     this.VerifyMode();
     this.initialize();
     this.eventService.subscribe('getSearchLayout', this.getSearchLayout);
+    this.eventService.subscribe('updateActivityLayout', this.updateActivityLayout);
     this.eventService.subscribe('isToolbarVisible', this.isToolbarVisible);
     this.eventService.subscribe('search', this.screenpopHandler);
+    this.eventService.subscribe('getActivity', this.getActivity);
     this.eventService.subscribe('saveActivity', this.saveActivity);
     this.eventService.subscribe('createNewEntity', this.createNewEntity);
     this.eventService.subscribe('agentSelectedCallerInformation', this.tryScreenpop);
@@ -53,6 +58,56 @@ class BridgeSalesforce extends Bridge {
     }
   }
 
+  protected async softphoneInit(objectFields) {
+    for (const object of objectFields) {
+      if (object) {
+        const objectPrefix = await this.loadPrefixList(object);
+        this.prefixList[objectPrefix] = object;
+      }
+    }
+  }
+
+  protected async loadPrefixList(object): Promise<any> {
+    this.eventService.sendEvent('logInformation', `Salesforce:bridge: Load Salesforce prefix definitions`);
+    return new Promise((resolve, reject) => {
+      try {
+
+        if (this.isLightning) {
+          const getIDRequest = {
+            apexClass: 'AMCOpenCTINS.ObjectRetrieval',
+            methodName: 'getIdPrefix',
+            methodParams: `objectType=${object}`,
+            callback: res => {
+              if (res.success) {
+                resolve(res.returnValue.runApex.replace(/["'replace]/g, ''));
+              }
+            }
+          };
+          sforce.opencti.runApex(getIDRequest);
+        } else {
+          sforce.interaction.runApex(
+            'AMCOpenCTINS.ObjectRetrieval',
+            'getIdPrefix',
+            `objectType=${object}`, response => {
+              if (response.result) {
+                resolve(response.result.replace(/["'replace]/g, ''));
+              }
+            });
+        }
+      } catch (error) {
+        this.eventService.sendEvent('logError', `Salesforce:bridge:Load Prefix List: ${JSON.stringify(error)}`);
+      }
+    });
+  }
+
+  @bind
+  protected getType(entityId: string): string {
+    this.eventService.sendEvent('logInformation', `Salesforce:bridge: Get type for work item: ${entityId}`);
+    const prefix = entityId.substring(0, 3);
+    const type = this.prefixList[prefix];
+    return type;
+  }
+
   @bind
   protected buildLayoutObjectList(result) {
     if (this.isLightning) {
@@ -62,6 +117,7 @@ class BridgeSalesforce extends Bridge {
       this.layoutObjectList = Object.keys(JSON.parse(result.result).Inbound.objects);
       this.searchLayout = JSON.parse(result.result).Inbound.objects;
     }
+    this.softphoneInit(this.layoutObjectList);
     this.eventService.sendEvent('logInformation', `bridge: Sofphone layout: ${this.layoutObjectList}`);
   }
   @bind
@@ -103,7 +159,7 @@ class BridgeSalesforce extends Bridge {
   }
   @bind
   async onFocusListener(event) {
-    if (event !== this.currentOnFocusEvent) {
+    if (JSON.stringify(event) !== JSON.stringify(this.currentOnFocusEvent)) {
       this.currentOnFocusEvent = event;
       this.eventService.sendEvent('logDebug', `bridge: onFocus event: ${JSON.stringify(event)}`);
       const entity = {
@@ -117,14 +173,14 @@ class BridgeSalesforce extends Bridge {
         entity.objectType = event.objectType;
         entity.displayName = event.objectType;
         entity.objectId = event.recordId;
-        entity.objectName = event.recordName;
+        // entity.objectName = event.recordName;
         entity.url = event.url;
       } else {
         const temp = JSON.parse(event.result);
         entity.objectType = temp.object;
         entity.displayName = temp.displayName;
         entity.objectId = temp.objectId;
-        entity.objectName = temp.objectName;
+        // entity.objectName = temp.objectName;
         entity.url = temp.url;
       }
       if (
@@ -138,6 +194,10 @@ class BridgeSalesforce extends Bridge {
         this.lastOnFocusWasAnEntity = true;
       }
       if (this.layoutObjectList.includes(entity.objectType) && entity.objectId !== '') {
+        const record = await this.cadSearch({entity: entity.objectType, field: 'Id', value: entity.objectId});
+        if (record.length > 0) {
+          entity.objectName = record[0][this.searchLayout[entity.objectType][0].apiName];
+        }
         this.eventService.sendEvent('onFocus', entity);
         this.eventService.sendEvent('logDebug', 'bridge: onFocus event sent to home');
       }
@@ -164,6 +224,91 @@ class BridgeSalesforce extends Bridge {
       isLightning: this.isLightning,
       entity: event
     });
+  }
+
+  @bind
+  async getActivity(activity: IActivity): Promise<any> {
+    const activityRecord = await this.getTaskDetails(activity);
+    const refFields: string[] = this.activityLayout[activity.ChannelType]['Fields'];
+    const lookupFields: Object = this.activityLayout[activity.ChannelType]['LookupFields'];
+    const updatedActivity = {};
+    for (const field of refFields) {
+      let fieldValue: string = activityRecord[0][field];
+      if (lookupFields[field]) {
+        updatedActivity[lookupFields[field]] = {};
+      } else {
+        if (!fieldValue) {
+          fieldValue = '';
+        }
+        updatedActivity[field] = fieldValue;
+      }
+      if (fieldValue && lookupFields[field]) {
+        const entityType: string = this.getType(fieldValue);
+        let refEntity = {};
+        const entityRecord = await this.cadSearch({entity: entityType, field: 'Id', value: fieldValue});
+        if (entityRecord && entityRecord.length > 0) {
+          refEntity = {
+            objectType: entityType,
+            displayName: entityType,
+            objectName: entityRecord[0][this.searchLayout[entityType][0].apiName],
+            objectId: fieldValue,
+            url: entityRecord[0].attributes.url
+          };
+        } else if (!entityRecord) {
+          refEntity = {
+            objectType: '',
+            displayName: '',
+            objectName: fieldValue,
+            objectId: fieldValue,
+            url: ''
+          };
+        }
+        updatedActivity[lookupFields[field]] = refEntity;
+      }
+    }
+    return updatedActivity;
+  }
+
+  async getTaskDetails(activity: IActivity): Promise<any> {
+    const entityType = this.activityLayout[activity.ChannelType]['APIName'];
+    if (entityType) {
+      return new Promise((resolve, reject) => {
+        const fields = this.activityLayout[activity.ChannelType]['Fields'];
+        let finalfields = 'fields=';
+        for (let index = 0; index < fields.length; index++) {
+          if (index !== fields.length - 1) {
+            finalfields = finalfields + fields[index] + ',';
+          } else {
+            finalfields = finalfields + fields[index];
+          }
+        }
+        const finalObject = `SFObject=${entityType}`;
+        const finalKey = `key=Id`;
+        const finalValue = `value=${activity.ActivityId}`;
+        const finalquery = `${finalfields}&${finalObject}&${finalKey}&${finalValue}`;
+        const cadSearchRequest = {
+          apexClass: 'AMCOpenCTINS.ObjectRetrieval',
+          methodName: 'getObject',
+          methodParams: finalquery,
+          callback: async function (response) {
+            resolve(safeJSONParse(response.returnValue.runApex));
+          }
+        };
+        if (this.isLightning) {
+          sforce.opencti.runApex(cadSearchRequest);
+        } else {
+          sforce.interaction.runApex(cadSearchRequest.apexClass, cadSearchRequest.methodName, cadSearchRequest.methodParams,
+            function(response) {
+              resolve(safeJSONParse(response.result));
+          });
+        }
+      });
+    }
+  }
+
+  @bind
+  async updateActivityLayout(event): Promise<any> {
+    this.activityLayout = event;
   }
 
   @bind
@@ -280,7 +425,7 @@ class BridgeSalesforce extends Bridge {
           methodName: 'getObject',
           methodParams: finalquery,
           callback: function (response) {
-            resolve(response.returnValue);
+            resolve(safeJSONParse(response.returnValue.runApex));
           }
         };
         if (this.isLightning) {

@@ -18,6 +18,7 @@
   <app-recentactivities
     *ngIf="checkIfRecentActivitiesExist()"
     (saveActivity)="saveActivity($event, true)"
+    (getRecentWorkItem)="getRecentWorkItem($event)"
     (screenpopWorkItem)="agentSelectedCallerInformation($event)">
   </app-recentactivities>
   <app-create
