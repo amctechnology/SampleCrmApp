@@ -337,7 +337,11 @@ export class StorageService {
     'UserSelectedForEmptyRecord';
     const activity = this.getActivity(scenarioId);
     const refFields: string[] = activityLayout[activity.ChannelType]['Fields'];
-    for (const field of refFields) {
+    const lookupFields: string[] = activityLayout[activity.ChannelType]['LookupFields'];
+    for (let field of refFields) {
+      if (lookupFields[field]) {
+        field = lookupFields[field];
+      }
       this.setActivityField(scenarioId, field, recentWorkItem[field]);
     }
     this.updateActivityFields(scenarioId);
