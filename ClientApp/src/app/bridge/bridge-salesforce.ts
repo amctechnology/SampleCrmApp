@@ -232,10 +232,20 @@ class BridgeSalesforce extends Bridge {
     const refFields: string[] = this.activityLayout[activity.ChannelType]['Fields'];
     const lookupFields: Object = this.activityLayout[activity.ChannelType]['LookupFields'];
     const updatedActivity = {};
+    let refEntity = {
+      objectType: '',
+      displayName: '',
+      objectName: '',
+      objectId: '',
+      url: ''
+    };
     for (const field of refFields) {
       let fieldValue: string = activityRecord[0][field];
       if (lookupFields[field]) {
-        updatedActivity[lookupFields[field]] = {};
+        if (fieldValue && fieldValue.length === 18) {
+          fieldValue = fieldValue.substring(0, 15);
+        }
+        updatedActivity[lookupFields[field]] = refEntity;
       } else {
         if (!fieldValue) {
           fieldValue = '';
@@ -244,7 +254,6 @@ class BridgeSalesforce extends Bridge {
       }
       if (fieldValue && lookupFields[field]) {
         const entityType: string = this.getType(fieldValue);
-        let refEntity = {};
         const entityRecord = await this.cadSearch({entity: entityType, field: 'Id', value: fieldValue});
         if (entityRecord && entityRecord.length > 0) {
           refEntity = {
