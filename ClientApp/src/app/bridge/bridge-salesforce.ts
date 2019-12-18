@@ -242,7 +242,7 @@ class BridgeSalesforce extends Bridge {
     for (const field of refFields) {
       let fieldValue: string = activityRecord[0][field];
       if (lookupFields[field]) {
-        if (fieldValue && fieldValue.length === 18) {
+        if (fieldValue && fieldValue.length === 18 && !this.isLightning) {
           fieldValue = fieldValue.substring(0, 15);
         }
         updatedActivity[lookupFields[field]] = refEntity;
