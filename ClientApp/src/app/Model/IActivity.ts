@@ -3,6 +3,7 @@ export interface IActivity {
   WhoObject: IActivityDetails;
   WhatObject: IActivityDetails;
   CallType: string;
+  ChannelType: string;
   CallDurationInSeconds: number;
   Subject: string;
   Description: string;
@@ -22,4 +23,5 @@ export interface IActivity {
   IsActive: boolean;
   IsProcessing: boolean;
   IsUnSaved: boolean;
+  IsRecentWorkItemLoading: boolean;
 }

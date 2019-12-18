@@ -7,6 +7,7 @@ import { ICreateNewSObjectParams } from '../Model/ICreateNewSObjectParams';
 import { LoggerService } from '../logger.service';
 import { StorageService } from '../storage.service';
 import { IActivityDetails } from '../Model/IActivityDetails';
+import { ChannelTypes } from '@amc-technology/davinci-api';
 @Component({
   selector: 'app-home',
   templateUrl: './home-salesforce.component.html'
@@ -17,6 +18,7 @@ export class HomeSalesforceComponent extends Application implements OnInit {
   protected QuickCreateEntities: any;
   protected cadActivityMap: Object;
   public searchLayout: api.SearchLayouts;
+  public activityLayout: any;
   screenpopOnAlert: Boolean;
   clickToDialList: {
     [key: string]: string
@@ -62,7 +64,8 @@ export class HomeSalesforceComponent extends Application implements OnInit {
     await super.ngOnInit();
 
     this.loggerService.logger.logDebug('AMCSalesforceHomeComponent: ngOnInit start');
-
+    this.getActivityLayout();
+    this.bridgeEventsService.sendEvent('updateActivityLayout', this.activityLayout);
     this.bridgeEventsService.subscribe('clickToDial', this.clickToDialHandler);
     this.bridgeEventsService.subscribe('sendNotification', this.sendNotification);
     this.searchLayout = await this.getSearchLayout();
@@ -161,9 +164,7 @@ export class HomeSalesforceComponent extends Application implements OnInit {
     });
   }
 
-  protected async onInteraction(
-    interaction: api.IInteraction
-  ): Promise<api.SearchRecords> {
+  protected async onInteraction(interaction: api.IInteraction): Promise<api.SearchRecords> {
     this.loggerService.logger.logDebug(
       `AMCSalesforceHomeComponent: Interaction recieved: ${JSON.stringify(
         interaction
@@ -385,6 +386,7 @@ export class HomeSalesforceComponent extends Application implements OnInit {
       Subject: this.buildSubjectText(interaction),
       CallType: (interaction.direction === api.InteractionDirectionTypes.Inbound ? 'Inbound' :
         (interaction.direction === api.InteractionDirectionTypes.Outbound ? 'Outbound' : 'Internal')),
+      ChannelType: api.ChannelTypes[interaction.channelType],
       CallDurationInSeconds: 0,
       Description: '',
       Status: 'Open',
@@ -398,6 +400,7 @@ export class HomeSalesforceComponent extends Application implements OnInit {
       IsActive: true,
       IsProcessing: false,
       IsUnSaved: false,
+      IsRecentWorkItemLoading: false,
     };
     for (const key in this.cadActivityMap) {
       if (interaction.details.fields[key] || interaction[key]) {
@@ -408,6 +411,8 @@ export class HomeSalesforceComponent extends Application implements OnInit {
           interaction.details.fields[key].Value : interaction[key];
       }
     }
+    this.storageService.setWhoEmptyRecord(interaction.scenarioId);
+    this.storageService.setWhatEmptyRecord(interaction.scenarioId);
     this.loggerService.logger.logDebug(
       `AMCSalesforceHomeComponent: Create new activity: ${JSON.stringify(
         activity
@@ -444,6 +449,22 @@ export class HomeSalesforceComponent extends Application implements OnInit {
     }
   }
 
+  protected async getRecentWorkItem(scenarioId): Promise<void> {
+    try {
+    const activity = this.storageService.getActivity(scenarioId);
+    this.loggerService.logger.logDebug('Salesforce Home: Get activity: ' + JSON.stringify(activity), api.ErrorCode.ACTIVITY);
+    const recentWorkItem = await this.bridgeEventsService.sendEvent('getActivity', activity);
+    this.storageService.updateRecentWorkItem(recentWorkItem, scenarioId, this.activityLayout);
+    this.storageService.activityList[scenarioId].IsRecentWorkItemLoading = false;
+    this.loggerService.logger.logDebug(`AMCSalesforceHomeComponent: Received the activity details : ${JSON.stringify(activity)}`,
+      api.ErrorCode.ACTIVITY
+    );
+    } catch (error) {
+      api.sendNotification('Call activity save failed.', api.NotificationType.Error);
+      this.loggerService.logger.logError(error);
+    }
+  }
+
   protected agentSelectedCallerInformation(id: string) {
     this.loggerService.logger.logDebug(
       'AMCSalesforceHomeComponent: Screenpop selected caller information'
@@ -453,6 +474,18 @@ export class HomeSalesforceComponent extends Application implements OnInit {
 
   protected isToolbarVisible(): Promise<boolean> {
     return this.bridgeEventsService.sendEvent('isToolbarVisible');
+  }
+
+  protected async getActivityLayout() {
+    this.activityLayout = {};
+    for (const item in ChannelTypes) {
+      if (isNaN(Number(item))) {
+        this.activityLayout[item] = {};
+        this.activityLayout[item]['APIName'] = 'Task';
+        this.activityLayout[item]['Fields'] = ['WhatId', 'WhoId', 'Subject', 'Description'];
+        this.activityLayout[item]['LookupFields'] = {'WhatId': 'WhatObject', 'WhoId' : 'WhoObject'};
+      }
+    }
   }
 
   protected async getSearchLayout() {

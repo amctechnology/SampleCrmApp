@@ -193,6 +193,13 @@ export class StorageService {
     this.storeToLocalStorage();
   }
 
+  public setActivityField(scenarioId: string, activityField: string, activityValue: any) {
+    if (this.activityList[scenarioId]) {
+      this.activityList[scenarioId][activityField] = activityValue;
+    }
+    this.storeToLocalStorage();
+  }
+
   private setActivityWhoObject(
     whoObject: IActivityDetails,
     scenarioId: string
@@ -253,6 +260,14 @@ export class StorageService {
     return this.whoList[scenarioId].find(item => item.objectId === whoId);
   }
 
+  public setWhoEmptyRecord(scenarioId: string) {
+    this.selectedWhoValueList[scenarioId] = 'UserSelectedForEmptyRecord';
+  }
+
+  public setWhatEmptyRecord(scenarioId: string) {
+    this.selectedWhatValueList[scenarioId] = 'UserSelectedForEmptyRecord';
+  }
+
   private whatListContains(whatObject: IActivityDetails, scenarioId: string): boolean {
     if (scenarioId) {
       const interactionWhatList = this.whatList[scenarioId];
@@ -307,6 +322,26 @@ export class StorageService {
   private clearWhoList(scenarioId: string) {
     delete this.whoList[scenarioId];
     this.storeToLocalStorage();
+  }
+
+  public updateRecentWorkItem(recentWorkItem: Object, scenarioId: string, activityLayout: Object) {
+    if ((!this.whoListContains(recentWorkItem['WhoObject'], scenarioId)) && (recentWorkItem['WhoObject'].objectId)) {
+      this.setWhoList(recentWorkItem['WhoObject'], scenarioId);
+    }
+    this.selectedWhoValueList[scenarioId] = recentWorkItem['WhoObject'].objectId ? recentWorkItem['WhoObject'].objectId :
+    'UserSelectedForEmptyRecord';
+    if ((!this.whatListContains(recentWorkItem['WhatObject'], scenarioId)) && (recentWorkItem['WhatObject'].objectId)) {
+      this.setWhatList(recentWorkItem['WhatObject'], scenarioId);
+    }
+    this.selectedWhatValueList[scenarioId] = recentWorkItem['WhatObject'].objectId ? recentWorkItem['WhatObject'].objectId :
+    'UserSelectedForEmptyRecord';
+    const activity = this.getActivity(scenarioId);
+    const refFields: string[] = activityLayout[activity.ChannelType]['Fields'];
+    for (const field of refFields) {
+      this.setActivityField(scenarioId, field, recentWorkItem[field]);
+    }
+    this.updateActivityFields(scenarioId);
+    this.compareActivityFields(scenarioId);
   }
 
   public updateWhoWhatLists(activityObject: IActivityDetails, scenarioId: string) {

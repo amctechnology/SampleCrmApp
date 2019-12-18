@@ -17,6 +17,11 @@
             <img class="RecentCallsImg" src="/assets/Images/open_activity.png" title="Open Activity" (click)="openActivity(recentScenarioId);$event.stopPropagation();" />
           </div>
           <div class="callBody">
+            <div class="gray-out" *ngIf="storageService.activityList[recentScenarioId].IsRecentWorkItemLoading">
+              <div class="spinner-container">
+                <img class="spinner" src="./../../assets/images/view_progress.gif" />
+              </div>
+            </div>
             <div class="activityFields">
               <form>
                 <div class="editor displayDiv">
@@ -27,12 +32,14 @@
                   <label class="displayLabels" title="Name">Name</label>
                   <select class="dropDownListStyle displayData" (change)="onNameSelectChange($event)" [(ngModel)]="storageService.selectedWhoValueList[recentScenarioId]" name="whoItem">
                     <option *ngFor="let whoItem of storageService.whoList[recentScenarioId]" value="{{ whoItem.objectId }}">{{ parseWhoObject(whoItem) }}</option>
+                    <option value="UserSelectedForEmptyRecord"></option>
                   </select>
                 </div>
                 <div class="editor displayDiv">
                   <label class="displayLabels" title="Regarding">Related To</label>
                   <select class="dropDownListStyle displayData" [(ngModel)]="storageService.selectedWhatValueList[recentScenarioId]" (change)="onRelatedToChange($event)" name="whatItem">
                     <option *ngFor="let whatItem of storageService.whatList[recentScenarioId]" value="{{ whatItem.objectId }}">{{ parseWhatObject(whatItem) }}</option>
+                    <option value="UserSelectedForEmptyRecord"></option>
                   </select>
                 </div>
                 <div class="editor displayDiv">
