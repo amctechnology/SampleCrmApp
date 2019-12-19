@@ -11,6 +11,7 @@ import { LoggerService } from '../logger.service';
 })
 export class RecentactivitiesComponent {
   @Output() saveActivity: EventEmitter<string> = new EventEmitter<string>();
+  @Output() getRecentWorkItem: EventEmitter<string> = new EventEmitter<string>();
   @Output() screenpopWorkItem: EventEmitter<string> = new EventEmitter();
 
   collapseToggle: boolean;
@@ -25,6 +26,13 @@ export class RecentactivitiesComponent {
     this.storageService.activityList[scenarioId].IsProcessing = true;
     this.saveActivity.emit(scenarioId);
     this.loggerService.logger.logDebug(`activity: Calling Save activity: ${scenarioId}`
+    , api.ErrorCode.ACTIVITY
+    );
+  }
+
+  protected retrieveActivity(scenarioId: string) {
+    this.getRecentWorkItem.emit(scenarioId);
+    this.loggerService.logger.logDebug(`activity: Calling Get activity: ${scenarioId}`
     , api.ErrorCode.ACTIVITY
     );
   }
@@ -46,7 +54,9 @@ export class RecentactivitiesComponent {
 
   protected expandAndCollapseRecentActivity(isExpand: boolean, scenarioId: string) {
     if (isExpand) {
+      this.storageService.activityList[scenarioId].IsRecentWorkItemLoading = true;
       this.storageService.workingRecentScenarioId = scenarioId;
+      this.retrieveActivity(scenarioId);
     } else {
       this.storageService.workingRecentScenarioId = null;
     }
@@ -81,10 +91,10 @@ export class RecentactivitiesComponent {
   }
 
   protected parseWhoObject(whoObject: IActivityDetails): string {
-    return whoObject.objectType + ': ' + whoObject.objectName;
+    return ((whoObject.objectType) ? whoObject.objectType : 'Entity') + ': ' + whoObject.objectName;
   }
 
   protected parseWhatObject(whatObject: IActivityDetails): string {
-    return whatObject.objectType + ': ' + whatObject.objectName;
+    return ((whatObject.objectType) ? whatObject.objectType : 'Entity') + ': ' + whatObject.objectName;
   }
 }
