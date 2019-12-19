@@ -232,14 +232,14 @@ class BridgeSalesforce extends Bridge {
     const refFields: string[] = this.activityLayout[activity.ChannelType]['Fields'];
     const lookupFields: Object = this.activityLayout[activity.ChannelType]['LookupFields'];
     const updatedActivity = {};
-    let refEntity = {
-      objectType: '',
-      displayName: '',
-      objectName: '',
-      objectId: '',
-      url: ''
-    };
     for (const field of refFields) {
+      let refEntity = {
+        objectType: '',
+        displayName: '',
+        objectName: '',
+        objectId: '',
+        url: ''
+      };
       let fieldValue: string = activityRecord[0][field];
       if (lookupFields[field]) {
         if (fieldValue && fieldValue.length === 18 && !this.isLightning) {
