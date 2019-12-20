@@ -13,7 +13,7 @@ import { ChannelTypes } from '@amc-technology/davinci-api';
   templateUrl: './home-salesforce.component.html'
 })
 export class HomeSalesforceComponent extends Application implements OnInit {
-  protected phoneNumberFormat: string;
+  protected phoneNumberFormat: Object;
   protected quickCommentList: string[];
   protected QuickCreateEntities: any;
   protected cadActivityMap: Object;
@@ -34,7 +34,7 @@ export class HomeSalesforceComponent extends Application implements OnInit {
   constructor(private loggerService: LoggerService, protected storageService: StorageService) {
     super(loggerService.logger);
     this.loggerService.logger.logDebug('AMCSalesforceHomeComponent: constructor start');
-    this.phoneNumberFormat = null;
+    this.phoneNumberFormat = {};
     this.screenpopOnAlert = true;
     this.ScreenpopOnClickToDialListView = false;
     this.DisplayQuickCreate = true;
@@ -76,7 +76,13 @@ export class HomeSalesforceComponent extends Application implements OnInit {
   }
 
   private readConfig(config: api.IAppConfiguration) {
-    this.phoneNumberFormat = String(config['variables']['PhoneNumberFormat']).toLowerCase();
+    const configPhoneFormat = config.variables['PhoneNumberFormat'];
+    if (typeof configPhoneFormat === 'string') {
+      const tempFormat = String(configPhoneFormat).toLowerCase();
+      this.phoneNumberFormat[tempFormat] = tempFormat;
+    } else {
+      this.phoneNumberFormat = configPhoneFormat;
+    }
     this.quickCommentList = <string[]>config['variables']['QuickComments'];
     this.cadActivityMap = config['variables']['CADActivityMap'] ? config['variables']['CADActivityMap'] : {};
     if (config['variables']['ScreenpopOnAlert'] !== null && config['variables']['ScreenpopOnAlert'] !== undefined) {
@@ -97,53 +103,45 @@ export class HomeSalesforceComponent extends Application implements OnInit {
     this.storageService.maxRecentItems = <Number>(config['variables']['MaxRecentItems']);
   }
 
-  protected formatPhoneNumber(number: string) {
-    let numberIndex = 0;
-    let formatIndex = 0;
-    let formattedNumber = '';
-    number = number.replace(/\D/g, '');
-    number = this.reverseString(number);
-    const phoneNumberFormat = this.reverseString(this.phoneNumberFormat);
-    if (number && phoneNumberFormat) {
-      while (formatIndex < phoneNumberFormat.length) {
-        if (numberIndex === number.length + 1) {
-          return this.reverseString(formattedNumber);
-        }
-        if (phoneNumberFormat[formatIndex] !== 'x') {
-          formattedNumber = formattedNumber + phoneNumberFormat[formatIndex];
-          formatIndex = formatIndex + 1;
-          if (
-            numberIndex < number.length &&
-            isNaN(Number(number[numberIndex]))
-          ) {
-            numberIndex = numberIndex + 1;
+  protected formatPhoneNumber(inputNumber: string, phoneNumberFormat: Object): string {
+    try {
+      const configuredInputFormats = Object.keys(phoneNumberFormat);
+      for (let index = 0; index < configuredInputFormats.length; index++) {
+        let formatCheck = true;
+        const inputFormat = configuredInputFormats[index];
+        const outputFormat = phoneNumberFormat[inputFormat];
+        if (inputFormat.length === inputNumber.length) {
+          const arrInputDigits = [];
+          let outputNumber = '';
+          let outputIncrement = 0;
+          if (((inputFormat.match(/x/g) || []).length) !== ((outputFormat.match(/x/g) || []).length)) {
+            continue;
           }
-        } else if (isNaN(Number(number[numberIndex]))) {
-          numberIndex = numberIndex + 1;
-        } else {
-          if (numberIndex === number.length) {
-            return this.reverseString(formattedNumber);
-          }
-          while (
-            formatIndex < phoneNumberFormat.length &&
-            phoneNumberFormat[formatIndex] === 'x'
-          ) {
-            formatIndex = formatIndex + 1;
-            if (
-              numberIndex < number.length &&
-              !isNaN(Number(number[numberIndex]))
-            ) {
-              formattedNumber = formattedNumber + number[numberIndex];
-              numberIndex = numberIndex + 1;
-            } else {
-              formatIndex = formatIndex - 1;
+          for (let j = 0; j < inputFormat.length; j++) {
+            if (inputFormat[j] === 'x') {
+              arrInputDigits.push(j);
+            } else if (inputFormat[j] !== '?' && inputNumber[j] !== inputFormat[j]) {
+              formatCheck = false;
               break;
             }
           }
+          if (formatCheck) {
+            for (let j = 0; j < outputFormat.length; j++) {
+              if (outputFormat[j] === 'x') {
+              outputNumber = outputNumber + inputNumber[arrInputDigits[outputIncrement]];
+              outputIncrement++;
+              } else {
+                outputNumber = outputNumber + outputFormat[j];
+              }
+            }
+            return outputNumber;
+          }
         }
       }
+    } catch (err) {
+      this.logger.logError('Error in formatting number. Please check the configuration. Exception : ' + err.message);
     }
-    return this.reverseString(formattedNumber);
+    return inputNumber;
   }
 
   protected checkIfRecentActivitiesExist() {
@@ -198,7 +196,7 @@ export class HomeSalesforceComponent extends Application implements OnInit {
             this.lastOnFocusWasAnEntityList.splice(index, 1);
           }
         }
-        interaction.details.fields.Phone.Value = this.formatPhoneNumber(phoneNum);
+        interaction.details.fields.Phone.Value = this.formatPhoneNumber(phoneNum, this.phoneNumberFormat);
       }
 
       isNewScenarioId = await this.processIfNewScenario(interaction);
