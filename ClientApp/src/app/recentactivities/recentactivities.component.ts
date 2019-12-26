@@ -9,6 +9,7 @@ import { LoggerService } from '../logger.service';
   templateUrl: './recentactivities.component.html',
   styleUrls: ['./recentactivities.component.css']
 })
+
 export class RecentactivitiesComponent {
   @Output() saveActivity: EventEmitter<string> = new EventEmitter<string>();
   @Output() getRecentWorkItem: EventEmitter<string> = new EventEmitter<string>();
@@ -17,31 +18,41 @@ export class RecentactivitiesComponent {
   collapseToggle: boolean;
 
   constructor(private loggerService: LoggerService, protected storageService: StorageService) {
-    this.loggerService.logger.logDebug('main: Constructor start');
     this.collapseToggle = true;
-    this.loggerService.logger.logDebug('main: Constructor complete');
   }
 
   protected submitActivity(scenarioId: string) {
-    this.storageService.activityList[scenarioId].IsProcessing = true;
-    this.saveActivity.emit(scenarioId);
-    this.loggerService.logger.logDebug(`activity: Calling Save activity: ${scenarioId}`
-    , api.ErrorCode.ACTIVITY
-    );
+    this.loggerService.logger.logTrace('Salesforce - Recent Activity : START : Submit Activity. Scenario ID : ' + scenarioId);
+    try {
+      this.storageService.activityList[scenarioId].IsProcessing = true;
+      this.saveActivity.emit(scenarioId);
+    } catch (error) {
+      this.loggerService.logger.logError('Salesforce - Recent Activity : ERROR : Submit Activity. Scenario ID : '
+      + scenarioId + '. Error Information : ' + JSON.stringify(error));
+    }
+    this.loggerService.logger.logTrace('Salesforce - Recent Activity : END : Submit Activity. Scenario ID : ' + scenarioId);
   }
 
   protected retrieveActivity(scenarioId: string) {
-    this.getRecentWorkItem.emit(scenarioId);
-    this.loggerService.logger.logDebug(`activity: Calling Get activity: ${scenarioId}`
-    , api.ErrorCode.ACTIVITY
-    );
+    this.loggerService.logger.logTrace('Salesforce - Recent Activity : START : Retrieve Activity. Scenario ID : ' + scenarioId);
+    try {
+      this.getRecentWorkItem.emit(scenarioId);
+    } catch (error) {
+      this.loggerService.logger.logError('Salesforce - Recent Activity : ERROR : Retrieve Activity. Scenario ID : '
+      + scenarioId + '. Error Information : ' + JSON.stringify(error));
+    }
+    this.loggerService.logger.logTrace('Salesforce - Recent Activity : END : Retrieve Activity. Scenario ID : ' + scenarioId);
   }
 
   protected openActivity(scenarioId: string) {
-    this.screenpopWorkItem.emit(this.storageService.activityList[scenarioId].ActivityId);
-    this.loggerService.logger.logDebug(`activity: Opening activity: ${scenarioId}`
-    , api.ErrorCode.ACTIVITY
-    );
+    this.loggerService.logger.logTrace('Salesforce - Recent Activity : START : Open Activity. Scenario ID : ' + scenarioId);
+    try {
+      this.screenpopWorkItem.emit(this.storageService.activityList[scenarioId].ActivityId);
+    } catch (error) {
+      this.loggerService.logger.logError('Salesforce - Recent Activity : ERROR : Open Activity. Scenario ID : '
+      + scenarioId + '. Error Information : ' + JSON.stringify(error));
+    }
+    this.loggerService.logger.logTrace('Salesforce - Recent Activity : END : Open Activity. Scenario ID : ' + scenarioId);
   }
 
   protected expandAndCollapse(isExpand: boolean) {
@@ -53,48 +64,89 @@ export class RecentactivitiesComponent {
   }
 
   protected expandAndCollapseRecentActivity(isExpand: boolean, scenarioId: string) {
-    if (isExpand) {
-      this.storageService.activityList[scenarioId].IsRecentWorkItemLoading = true;
-      this.storageService.workingRecentScenarioId = scenarioId;
-      this.retrieveActivity(scenarioId);
-    } else {
-      this.storageService.workingRecentScenarioId = null;
+    try {
+      this.loggerService.logger.logTrace('Salesforce - Recent Activity : START : Expand/Collapse Activity. Scenario ID : '
+      + scenarioId + ', IsExpand : ' + isExpand);
+      if (isExpand) {
+        this.storageService.activityList[scenarioId].IsRecentWorkItemLoading = true;
+        this.storageService.workingRecentScenarioId = scenarioId;
+        this.retrieveActivity(scenarioId);
+      } else {
+        this.storageService.workingRecentScenarioId = null;
+      }
+    } catch (error) {
+      this.loggerService.logger.logError('Salesforce - Recent Activity : ERROR : Expand/Collapse Activity. Scenario ID : '
+      + scenarioId + ', IsExpand : ' + isExpand + '. Error Information : ' + JSON.stringify(error));
     }
+    this.loggerService.logger.logTrace('Salesforce - Recent Activity : END : Expand/Collapse Activity. Scenario ID : '
+    + scenarioId + ', IsExpand : ' + isExpand);
   }
 
-  protected onNameSelectChange(event: any) {
+  protected onNameChange(event: any) {
+    this.loggerService.logger.logTrace('Salesforce - Recent Activity : START : On Name Change. Input : ' + JSON.stringify(event));
+    try {
     this.storageService.UpdateWhoObjectSelectionChange(event.currentTarget.value, this.storageService.workingRecentScenarioId);
     this.storageService.compareActivityFields(this.storageService.workingRecentScenarioId);
-    this.loggerService.logger.logDebug(`activity: Call from select box value changed: ${event.currentTarget.value}`,
-      api.ErrorCode.ACTIVITY
-    );
+    } catch (error) {
+      this.loggerService.logger.logError('Salesforce - Recent Activity : ERROR : On Name Change. Input : '
+      + JSON.stringify(event) + '. Error Information : ' + JSON.stringify(error));
+    }
+    this.loggerService.logger.logTrace('Salesforce - Recent Activity : END : On Name Change. Input : ' + JSON.stringify(event));
   }
 
   protected onRelatedToChange(event: any) {
+    this.loggerService.logger.logTrace('Salesforce - Recent Activity : START : On Related To Change. Input : ' + JSON.stringify(event));
+    try {
     this.storageService.UpdateWhatObjectSelectionChange(event.currentTarget.value, this.storageService.workingRecentScenarioId);
     this.storageService.compareActivityFields(this.storageService.workingRecentScenarioId);
-    this.loggerService.logger.logDebug(`activity: Related to select box value changed:  ${event.currentTarget.value}`,
-      api.ErrorCode.ACTIVITY
-    );
+    } catch (error) {
+      this.loggerService.logger.logError('Salesforce - Recent Activity : ERROR : On Related To Change. Input : '
+      + JSON.stringify(event) + '. Error Information : ' + JSON.stringify(error));
+    }
+    this.loggerService.logger.logTrace('Salesforce - Recent Activity : END : On Related To Change. Input : ' + JSON.stringify(event));
   }
 
   protected onSubjectChange(event: any) {
+    this.loggerService.logger.logTrace('Salesforce - Recent Activity : START : On Subject Change. Input : ' + JSON.stringify(event));
+    try {
     this.storageService.setSubject(event.srcElement.value, this.storageService.workingRecentScenarioId);
     this.storageService.compareActivityFields(this.storageService.workingRecentScenarioId);
-    this.loggerService.logger.logDebug('activity: Subject value changed: ', api.ErrorCode.ACTIVITY);
+    } catch (error) {
+      this.loggerService.logger.logError('Salesforce - Recent Activity : ERROR : On Subject Change. Input : '
+      + JSON.stringify(event) + '. Error Information : ' + JSON.stringify(error));
+    }
+    this.loggerService.logger.logTrace('Salesforce - Recent Activity : END : On Subject Change. Input : ' + JSON.stringify(event));
   }
 
   protected onCallNotesChange(event: any) {
-    this.storageService.setDescription(event.srcElement.value.trim(), this.storageService.workingRecentScenarioId);
-    this.storageService.compareActivityFields(this.storageService.workingRecentScenarioId);
-    this.loggerService.logger.logDebug('activity: Call notes value changed: ' + event.srcElement.value.trim(), api.ErrorCode.ACTIVITY);
+    this.loggerService.logger.logTrace('Salesforce - Recent Activity : START : On Call Notes Change. Input : ' + JSON.stringify(event));
+    try {
+      this.storageService.setDescription(event.srcElement.value.trim(), this.storageService.workingRecentScenarioId);
+      this.storageService.compareActivityFields(this.storageService.workingRecentScenarioId);
+    } catch (error) {
+      this.loggerService.logger.logError('Salesforce - Recent Activity : ERROR : On Call Notes Change. Input : '
+      + JSON.stringify(event) + '. Error Information : ' + JSON.stringify(error));
+    }
+    this.loggerService.logger.logTrace('Salesforce - Recent Activity : END : On Call Notes Change. Input : ' + JSON.stringify(event));
   }
 
   protected parseWhoObject(whoObject: IActivityDetails): string {
-    return ((whoObject.objectType) ? whoObject.objectType : 'Entity') + ': ' + whoObject.objectName;
+    this.loggerService.logger.logTrace('Salesforce - Recent Activity : Parsing Who Object. Input : ' + JSON.stringify(whoObject));
+    try {
+      return ((whoObject.objectType) ? whoObject.objectType : 'Entity') + ': ' + whoObject.objectName;
+    } catch (error) {
+      this.loggerService.logger.logError('Salesforce - Recent Activity : ERROR : Parsing Who Object. Input : '
+      + JSON.stringify(whoObject) + '. Error Information : ' + JSON.stringify(error));
+    }
   }
 
   protected parseWhatObject(whatObject: IActivityDetails): string {
-    return ((whatObject.objectType) ? whatObject.objectType : 'Entity') + ': ' + whatObject.objectName;
+    this.loggerService.logger.logTrace('Salesforce - Recent Activity : Parsing What Object. Input : ' + JSON.stringify(whatObject));
+    try {
+      return ((whatObject.objectType) ? whatObject.objectType : 'Entity') + ': ' + whatObject.objectName;
+    } catch (error) {
+      this.loggerService.logger.logError('Salesforce - Recent Activity : ERROR : Parsing What Object. Input : '
+      + JSON.stringify(whatObject) + '. Error Information : ' + JSON.stringify(error));
+    }
   }
 }
