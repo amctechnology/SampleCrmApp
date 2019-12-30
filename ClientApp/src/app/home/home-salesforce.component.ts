@@ -172,10 +172,8 @@ export class HomeSalesforceComponent extends Application implements OnInit {
   }
 
   protected removeLocalStorageOnLogout(): Promise<any> {
-    this.logger.logTrace('Salesforce - Home : Clearing local storage values');
-    return new Promise(() => {
-      localStorage.clear();
-    });
+    localStorage.clear();
+    return new Promise((resolve, reject) => {});
   }
 
   protected async onInteraction(interaction: api.IInteraction): Promise<api.SearchRecords> {

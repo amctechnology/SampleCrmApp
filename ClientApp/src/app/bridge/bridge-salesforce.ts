@@ -62,8 +62,9 @@ class BridgeSalesforce extends Bridge {
      + JSON.stringify(objectFields));
     for (const object of objectFields) {
       if (object) {
-        const objectPrefix = await this.loadPrefixList(object).catch(function(err) {
-          this.eventService.sendEvent('logError', 'Salesforce - Bridge : ERROR : Getting Prefix Info from Salesforce : ' + err);
+        const objectPrefix = await this.loadPrefixList(object).catch(error => {
+          this.eventService.sendEvent('logError', 'Salesforce - Bridge : ERROR : Getting Prefix Info from Salesforce : '
+          + JSON.stringify(error));
         });
         this.prefixList[objectPrefix] = object;
       }
@@ -73,7 +74,7 @@ class BridgeSalesforce extends Bridge {
   }
 
   protected async loadPrefixList(object): Promise<any> {
-    this.eventService.sendEvent('logInformation', 'Salesforce - Bridge : Load Salesforce prefix definitions');
+    this.eventService.sendEvent('logTrace', 'Salesforce - Bridge : Load Salesforce prefix definitions');
     return new Promise((resolve, reject) => {
       try {
 
@@ -382,7 +383,7 @@ class BridgeSalesforce extends Bridge {
             apexClass: 'AMCOpenCTINS.ObjectRetrieval',
             methodName: 'getObject',
             methodParams: finalquery,
-            callback: async function (response) {
+            callback: async response => {
               if (response.success) {
                 this.eventService.sendEvent('logDebug', 'Salesforce - Bridge : Get Task Details Successful. Response : '
                 + JSON.stringify(response));
@@ -398,7 +399,7 @@ class BridgeSalesforce extends Bridge {
             sforce.opencti.runApex(cadSearchRequest);
           } else {
             sforce.interaction.runApex(cadSearchRequest.apexClass, cadSearchRequest.methodName, cadSearchRequest.methodParams,
-              function(response) {
+              response => {
                 if (response.result) {
                   this.eventService.sendEvent('logDebug', 'Salesforce - Bridge : Get Task Details Successful. Response : '
                   + JSON.stringify(response));
@@ -567,7 +568,7 @@ class BridgeSalesforce extends Bridge {
             apexClass: 'AMCOpenCTINS.ObjectRetrieval',
             methodName: 'getObject',
             methodParams: finalquery,
-            callback: function (response) {
+            callback: response => {
               if (response.success) {
                 this.eventService.sendEvent('logDebug', 'Salesforce - Bridge : Cad Search Successful. Input : '
                 + JSON.stringify(cad) + '. Received Response : ' + JSON.stringify(response));
@@ -583,7 +584,7 @@ class BridgeSalesforce extends Bridge {
             sforce.opencti.runApex(cadSearchRequest);
           } else {
             sforce.interaction.runApex(cadSearchRequest.apexClass, cadSearchRequest.methodName, cadSearchRequest.methodParams,
-              function(response) {
+              response => {
                 if (response.result) {
                   this.eventService.sendEvent('logDebug', 'Salesforce - Bridge : Cad Search Successful. Input : '
                   + JSON.stringify(cad) + '. Received Response : ' + JSON.stringify(response));
@@ -680,25 +681,18 @@ class BridgeSalesforce extends Bridge {
   }
 
   private VerifyMode() {
-    try {
-      this.eventService.sendEvent('logTrace', 'Salesforce - Bridge : START : Verifying Salesforce Mode');
-      const fullUrl = document.location.href;
-      const parameters = fullUrl.split('&');
-      for (const itr1 in parameters) {
-        if (parameters[itr1].indexOf('mode') >= 0) {
-          const parameter = parameters[itr1].split('=');
-          if (parameter.length === 2) {
-            if (parameter[1] === 'Lightning') {
-              this.isLightning = true;
-              break;
-            }
+    const fullUrl = document.location.href;
+    const parameters = fullUrl.split('&');
+    for (const itr1 in parameters) {
+      if (parameters[itr1].indexOf('mode') >= 0) {
+        const parameter = parameters[itr1].split('=');
+        if (parameter.length === 2) {
+          if (parameter[1] === 'Lightning') {
+            this.isLightning = true;
+            break;
           }
         }
       }
-      this.eventService.sendEvent('logTrace', 'Salesforce - Bridge : END : Verifying Salesforce Mode');
-    } catch (error) {
-      this.eventService.sendEvent('logError', 'Salesforce - Bridge : ERROR : Verifying Salesforce Mode. Error Information : '
-      + JSON.stringify(error));
     }
   }
 
@@ -895,7 +889,7 @@ class BridgeSalesforce extends Bridge {
         } else if (params.entityName === 'Opportunity') {
           URL = '/006/e';
         }
-        sforce.interaction.screenPop(URL, true, function (response) {
+        sforce.interaction.screenPop(URL, true, response => {
           if (response.result) {
             this.eventService.sendEvent('logDebug', 'Salesforce - Bridge : Quick Create Successful');
           } else {
