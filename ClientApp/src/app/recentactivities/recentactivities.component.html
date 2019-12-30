@@ -30,7 +30,7 @@
                 </div>
                 <div class="editor displayDiv">
                   <label class="displayLabels" title="Name">Name</label>
-                  <select class="dropDownListStyle displayData" (change)="onNameSelectChange($event)" [(ngModel)]="storageService.selectedWhoValueList[recentScenarioId]" name="whoItem">
+                  <select class="dropDownListStyle displayData" (change)="onNameChange($event)" [(ngModel)]="storageService.selectedWhoValueList[recentScenarioId]" name="whoItem">
                     <option *ngFor="let whoItem of storageService.whoList[recentScenarioId]" value="{{ whoItem.objectId }}">{{ parseWhoObject(whoItem) }}</option>
                     <option value="UserSelectedForEmptyRecord"></option>
                   </select>
