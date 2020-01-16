@@ -6,6 +6,35 @@
   background-color: #FFFFFF;
 }
 
+.notesBottonBorder {
+  background-color: #ffffff;
+  border-left: 1px solid #939598;
+  border-bottom: 1px solid #939598;
+  border-right: 1px solid #939598;
+  border-bottom-left-radius: 3px !IMPORTANT;
+  border-bottom-right-radius: 3px !IMPORTANT;
+  height: auto;
+}
+
+.quickCommentsDiv {
+  text-align: left;
+  flex: 1 0 0;
+  flex-wrap: wrap;
+  display: flex;
+  margin: 2px;
+}
+
+.quickNotesBotton {
+  background-color: #1e72ba;
+  border: 0;
+  color: white;
+  height: 70%;
+  width: 20px;
+  margin: 2px;
+  outline: none;
+  font-size: 70%;
+}
+
 .submitButton {
   border: 0;
   float: right;
@@ -17,6 +46,13 @@
   border-radius: 4px;
   font-size: 98%;
   margin-bottom: 2px;
+}
+
+.commentsButtonDiv {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  background-color: #f6f7fb;
 }
 
 .gray-out {

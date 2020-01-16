@@ -50,10 +50,18 @@
                         rows="5" title="">
                       </textarea>
                     </div>
-                    <div class="callNotesButtonsSection">
-                      <input *ngIf="!storageService.activityList[recentScenarioId].IsProcessing" class="submitButton" type="button" value="Save" (click)="submitActivity(recentScenarioId)" [disabled]="!storageService.activityList[recentScenarioId].IsUnSaved"/>
-                      <img *ngIf="storageService.activityList[recentScenarioId].IsProcessing" class="loadingIcon" src="assets/images/loading.gif" title="Updating Activity" />
-                    </div>
+                    <div class="notesBottonBorder">
+                      <div class="commentsButtonDiv">
+                        <div class="quickCommentsDiv">
+                          <input *ngFor="let quickComment of quickCommentList; let i = index;" class="quickNotesBotton" type="button"
+                            value="{{i+1}}" (click)="loadQuickComment(i, recentScenarioId)" title="{{quickComment}}">
+                        </div>
+                        <div class="callNotesButtonsSection">
+                          <input *ngIf="!storageService.activityList[recentScenarioId].IsProcessing" class="submitButton" type="button" value="Save" (click)="submitActivity(recentScenarioId)" [disabled]="!storageService.activityList[recentScenarioId].IsUnSaved"/>
+                          <img *ngIf="storageService.activityList[recentScenarioId].IsProcessing" class="loadingIcon" src="assets/images/loading.gif" title="Updating Activity" />
+                        </div>
+                      </div>
+                     </div>
                   </div>
                 </div>
               </form>

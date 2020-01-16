@@ -11,6 +11,7 @@ import { LoggerService } from '../logger.service';
 })
 
 export class RecentactivitiesComponent {
+  @Input() quickCommentList: string[];
   @Output() saveActivity: EventEmitter<string> = new EventEmitter<string>();
   @Output() getRecentWorkItem: EventEmitter<string> = new EventEmitter<string>();
   @Output() screenpopWorkItem: EventEmitter<string> = new EventEmitter();
@@ -148,5 +149,23 @@ export class RecentactivitiesComponent {
       this.loggerService.logger.logError('Salesforce - Recent Activity : ERROR : Parsing What Object. Input : '
       + JSON.stringify(whatObject) + '. Error Information : ' + JSON.stringify(error));
     }
+  }
+
+  protected loadQuickComment(comment: string, scenarioId: string) {
+    this.loggerService.logger.logTrace('Salesforce - Recent Activity : START : Load Quick Comments. Input : ' + comment);
+    try {
+      const descriptionToSet = this.quickCommentList[comment];
+      const descriptionValue = this.storageService.activityList[scenarioId].Description;
+      if (!descriptionValue) {
+        this.storageService.setDescription(descriptionToSet, scenarioId);
+      } else {
+        this.storageService.setDescription(descriptionValue + '\n' + descriptionToSet, scenarioId);
+      }
+      this.storageService.compareActivityFields(scenarioId);
+    } catch (error) {
+      this.loggerService.logger.logError('Salesforce - Recent Activity : ERROR : Load Quick Comments. Input : '
+      + comment + '. Error Information : ' + JSON.stringify(error));
+    }
+    this.loggerService.logger.logTrace('Salesforce - Recent Activity : END : Load Quick Comments. Input : ' + comment);
   }
 }
