@@ -19,7 +19,8 @@
     *ngIf="checkIfRecentActivitiesExist()"
     (saveActivity)="saveActivity($event, true)"
     (getRecentWorkItem)="getRecentWorkItem($event)"
-    (screenpopWorkItem)="agentSelectedCallerInformation($event)">
+    (screenpopWorkItem)="agentSelectedCallerInformation($event)"
+    [quickCommentList]="quickCommentList">
   </app-recentactivities>
   <app-create
     *ngIf="DisplayQuickCreate"
