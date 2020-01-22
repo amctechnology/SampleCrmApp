@@ -14,6 +14,7 @@ export class StorageService {
     [scenarioId: string]: IActivityDetails[];
   };
   public currentScenarioId: string;
+  public currentScenarioCallType: string;
   public workingRecentScenarioId: string;
   public activityList: {
     [scenarioId: string]: IActivity;
@@ -53,6 +54,7 @@ export class StorageService {
     this.whoList = {};
     this.whatList = {};
     this.currentScenarioId = null;
+    this.currentScenarioCallType = null;
     this.workingRecentScenarioId = null;
     this.activityList = {};
     this.recentScenarioIdList = [];
@@ -79,9 +81,11 @@ export class StorageService {
     this.savedActivityFields = {};
   }
 
-  public setCurrentScenarioId(currentScenarioId: string) {
+  public setCurrentScenarioId(currentScenarioId: string, callType?: api.InteractionDirectionTypes) {
     try {
       this.currentScenarioId = currentScenarioId;
+      this.currentScenarioCallType = (callType === undefined) ? null : (callType === api.InteractionDirectionTypes.Inbound ? 'Inbound' :
+          (callType === api.InteractionDirectionTypes.Outbound ? 'Outbound' : 'Internal'));
       this.storeToLocalStorage();
     } catch (error) {
       this.loggerService.logger.logError('Salesforce - Storage : ERROR : Set Current Scenario ID for Scenario ID : '
@@ -172,6 +176,9 @@ export class StorageService {
       if (this.activityList[scenarioId]) {
         this.addRecentActivity(this.activityList[scenarioId]);
         this.activeScenarioIdList = this.activeScenarioIdList.filter(id => id !== scenarioId);
+      } else {
+        this.clearWhoList(scenarioId);
+        this.clearWhatList(scenarioId);
       }
       this.storeToLocalStorage();
     } catch (error) {
@@ -507,6 +514,16 @@ export class StorageService {
     }
   }
 
+  private clearScenarioCadMap(scenarioId: string) {
+    try {
+      delete this.scenarioToCADMap[scenarioId];
+      this.storeToLocalStorage();
+    } catch (error) {
+      this.loggerService.logger.logError('Salesforce - Storage : ERROR : Clear Scenario CAD Map for Scenario ID : '
+      + scenarioId + '. Error Information : ' + JSON.stringify(error));
+    }
+  }
+
   public updateActivityFields(scenarioId: string) {
     try {
       const activityFields = this.getActivityFields(scenarioId);
@@ -563,6 +580,7 @@ export class StorageService {
       const scenarioRecord = JSON.stringify({
         activityList: this.activityList,
         currentScenarioId: this.currentScenarioId,
+        currentScenarioCallType: this.currentScenarioCallType,
         searchRecordList: this.searchRecordList,
         whatList: this.whatList,
         whoList: this.whoList,
@@ -597,6 +615,7 @@ export class StorageService {
       if (browserStorage) {
         this.activityList = browserStorage.activityList;
         this.currentScenarioId = browserStorage.currentScenarioId;
+        this.currentScenarioCallType = browserStorage.currentScenarioCallType;
         this.searchRecordList = browserStorage.searchRecordList;
         this.whatList = browserStorage.whatList;
         this.whoList = browserStorage.whoList;
@@ -626,6 +645,7 @@ export class StorageService {
       this.nameChangesList = this.nameChangesList.filter(item => item !== scenarioId);
       this.relatedToChangesList = this.relatedToChangesList.filter(item => item !== scenarioId);
       this.clearSearchRecordList(scenarioId);
+      this.clearScenarioCadMap(scenarioId);
       if (this.currentScenarioId === scenarioId) {
         if (this.activeScenarioIdList.length > 0) {
           this.setCurrentScenarioId(this.activeScenarioIdList[0]);
