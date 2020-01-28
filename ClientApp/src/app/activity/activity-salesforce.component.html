@@ -40,7 +40,7 @@
                     value="{{i+1}}" (click)="loadQuickComment(i)" title="{{quickComment}}">
                 </div>
                 <div class="callNotesButtonsSection">
-                  <input *ngIf="!storageService.getActivity().IsProcessing" class="submitButton" type="button" value="Save" (click)="submitActivity(storageService.getActivity().ScenarioId)" [disabled]="!storageService.getActivity().IsUnSaved" />
+                  <input *ngIf="!storageService.getActivity().IsProcessing" class="submitButton" type="button" value="Save" (click)="submitActivity(storageService.getActivity().ScenarioId)" [disabled]="!isChangesUnSaved(this.scenarioId)" />
                   <img *ngIf="storageService.getActivity().IsProcessing" class="loadingIcon" src="assets/images/loading.gif" title="Updating Activity" />
                 </div>
               </div>

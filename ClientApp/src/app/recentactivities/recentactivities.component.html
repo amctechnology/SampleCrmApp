@@ -14,7 +14,8 @@
               <img src="/assets/Images/Phone_Number_Icon.png" class="RecentCallsImg"/>
               <b>{{ storageService.activityList[recentScenarioId].Subject }}</b>
             </label>
-            <img class="RecentCallsImg" src="/assets/Images/open_activity.png" title="Open Activity" (click)="openActivity(recentScenarioId);$event.stopPropagation();" />
+            <img *ngIf="this.storageService.activityList[recentScenarioId].ActivityId" class="RecentCallsImg" src="/assets/Images/open_activity.png" title="Open Activity" (click)="openActivity(recentScenarioId);$event.stopPropagation();" />
+            <label *ngIf="this.storageService.activityList[recentScenarioId].IsUnSaved" class="unsavedText">unsaved</label>
           </div>
           <div class="callBody">
             <div class="gray-out" *ngIf="storageService.activityList[recentScenarioId].IsRecentWorkItemLoading">
@@ -74,7 +75,8 @@
               <img src="/assets/Images/Phone_Number_Icon.png" class="RecentCallsImg"/>
               <b>{{ storageService.activityList[recentScenarioId].Subject }}</b>
             </label>
-            <img class="RecentCallsImg" src="/assets/Images/open_activity.png" title="Open Activity" (click)="openActivity(recentScenarioId);$event.stopPropagation();" />
+            <img *ngIf="this.storageService.activityList[recentScenarioId].ActivityId" class="RecentCallsImg" src="/assets/Images/open_activity.png" title="Open Activity" (click)="openActivity(recentScenarioId);$event.stopPropagation();" />
+            <label *ngIf="this.storageService.activityList[recentScenarioId].IsUnSaved" class="unsavedText">unsaved</label>
           </div>
         </div>
       </div>
