@@ -39,6 +39,7 @@ export class HomeSalesforceComponent extends Application implements OnInit {
     this.screenpopOnAlert = true;
     this.ScreenpopOnClickToDialListView = false;
     this.enableCallActivity = true;
+    this.enableAutoSave = true;
     this.DisplayQuickCreate = true;
     this.clickToDialList = {};
     this.ctdWhoWhatList = {};
@@ -110,7 +111,12 @@ export class HomeSalesforceComponent extends Application implements OnInit {
       this.QuickCreateEntities = config['QuickCreate']['variables']['QuickCreateKeyList'];
       this.DisplayQuickCreate = (Object.keys(this.QuickCreateEntities).length > 0);
       this.ScreenpopOnClickToDialListView = <boolean>(config['variables']['ScreenpopOnClickToDialListView']);
-      this.enableCallActivity = <boolean>(config['CallActivity']['variables']['EnableCallActivity']);
+      if (config['CallActivity'] && config['CallActivity']['variables'] && config['CallActivity']['variables']['EnableCallActivity']) {
+        this.enableCallActivity = <boolean>(config['CallActivity']['variables']['EnableCallActivity']);
+      }
+      if (config['CallActivity'] && config['CallActivity']['variables'] && config['CallActivity']['variables']['EnableAutoSave']) {
+        this.enableAutoSave = <boolean>(config['CallActivity']['variables']['EnableAutoSave']);
+      }
       this.storageService.maxRecentItems = <Number>(config['CallActivity'] ? config['CallActivity']['variables']['MaxRecentItems']
       : config['variables']['MaxRecentItems']);
       this.logger.logDebug('Salesforce - Home : END : Reading Configuration from Salesforce App');
@@ -194,7 +200,7 @@ export class HomeSalesforceComponent extends Application implements OnInit {
       let lastOnFocusWasAnEntity = false;
       this.storageService.updateCadFields(interaction, this.cadActivityMap);
       if (this.storageService.recentActivityListContains(scenarioId) && this.storageService.currentScenarioId !== scenarioId) {
-        this.saveActivity(scenarioId, true);
+        this.saveActivity(scenarioId, true, this.enableAutoSave);
         return;
       }
 
@@ -301,7 +307,7 @@ export class HomeSalesforceComponent extends Application implements OnInit {
       if (this.scenarioInteractionMappings[interaction.scenarioId]) {
         delete this.scenarioInteractionMappings[interaction.scenarioId][interaction.interactionId];
         if (Object.keys(this.scenarioInteractionMappings[interaction.scenarioId]).length === 0) {
-          this.saveActivity(interaction.scenarioId, true);
+          this.saveActivity(interaction.scenarioId, true, this.enableAutoSave);
           this.storageService.onInteractionDisconnect(interaction.scenarioId);
           delete this.scenarioInteractionMappings[interaction.scenarioId];
         }
@@ -323,7 +329,7 @@ export class HomeSalesforceComponent extends Application implements OnInit {
         if (this.storageService.activeScenarioIdList.indexOf(interaction.scenarioId) < 0) {
           if (this.enableCallActivity) {
             this.storageService.addActivity(this.createActivity(interaction));
-            await this.saveActivity(interaction.scenarioId);
+            await this.saveActivity(interaction.scenarioId, false, this.enableAutoSave);
           }
         }
         this.logger.logInformation('Salesforce - Home : New Scenario with Scenario ID : ' + interaction.scenarioId);
@@ -502,11 +508,11 @@ export class HomeSalesforceComponent extends Application implements OnInit {
     }
   }
 
-  protected async saveActivity(scenarioId, isComplete = false): Promise<string> {
+  protected async saveActivity(scenarioId, isComplete = false, saveToCRM = true): Promise<string> {
     try {
     this.logger.logInformation('Salesforce  - Home : START : Saving Activity to CRM. Scenario ID : ' + scenarioId);
     let activity = this.storageService.getActivity(scenarioId);
-    if (!activity) {
+    if (!activity || !saveToCRM) {
       return;
     }
     if (activity.IsActive && isComplete) {

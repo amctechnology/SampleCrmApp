@@ -69,9 +69,11 @@ export class RecentactivitiesComponent {
       this.loggerService.logger.logTrace('Salesforce - Recent Activity : START : Expand/Collapse Activity. Scenario ID : '
       + scenarioId + ', IsExpand : ' + isExpand);
       if (isExpand) {
-        this.storageService.activityList[scenarioId].IsRecentWorkItemLoading = true;
         this.storageService.workingRecentScenarioId = scenarioId;
-        this.retrieveActivity(scenarioId);
+        if (!this.storageService.activityList[scenarioId].IsUnSaved) {
+          this.storageService.activityList[scenarioId].IsRecentWorkItemLoading = true;
+          this.retrieveActivity(scenarioId);
+        }
       } else {
         this.storageService.workingRecentScenarioId = null;
       }

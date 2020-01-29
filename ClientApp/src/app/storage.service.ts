@@ -138,6 +138,9 @@ export class StorageService {
       }
       if (this.maxRecentItems !== 0) {
         this.recentScenarioIdList.unshift(activity.ScenarioId);
+        if (this.activityList[activity.ScenarioId].IsUnSaved) {
+          this.workingRecentScenarioId = activity.ScenarioId;
+        }
       } else {
         this.expiredScenarioIdList.unshift(activity.ScenarioId);
       }
