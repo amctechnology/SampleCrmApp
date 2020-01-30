@@ -514,12 +514,12 @@ export class HomeSalesforceComponent extends Application implements OnInit {
     try {
     this.logger.logInformation('Salesforce  - Home : START : Saving Activity to CRM. Scenario ID : ' + scenarioId);
     let activity = this.storageService.getActivity(scenarioId);
-    if (!activity || !saveToCRM) {
-      return;
-    }
-    if (activity.IsActive && isComplete) {
+    if (activity && activity.IsActive && isComplete) {
       activity.CallDurationInSeconds = this.getSecondsElapsed(activity.TimeStamp);
       activity.IsActive = false;
+    }
+    if (!activity || !saveToCRM) {
+      return;
     }
     activity.Status = (isComplete) ? 'Completed' : 'Not Completed';
     this.logger.logDebug('Salesforce - Home : Activity Info to be sent to bridge. Scenario ID : '
