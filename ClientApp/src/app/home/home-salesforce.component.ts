@@ -111,10 +111,12 @@ export class HomeSalesforceComponent extends Application implements OnInit {
       this.QuickCreateEntities = config['QuickCreate']['variables']['QuickCreateKeyList'];
       this.DisplayQuickCreate = (Object.keys(this.QuickCreateEntities).length > 0);
       this.ScreenpopOnClickToDialListView = <boolean>(config['variables']['ScreenpopOnClickToDialListView']);
-      if (config['CallActivity'] && config['CallActivity']['variables'] && config['CallActivity']['variables']['EnableCallActivity']) {
+      if (config['CallActivity'] && config['CallActivity']['variables'] &&
+      config['CallActivity']['variables']['EnableCallActivity'] !== undefined) {
         this.enableCallActivity = <boolean>(config['CallActivity']['variables']['EnableCallActivity']);
       }
-      if (config['CallActivity'] && config['CallActivity']['variables'] && config['CallActivity']['variables']['EnableAutoSave']) {
+      if (config['CallActivity'] && config['CallActivity']['variables'] &&
+      config['CallActivity']['variables']['EnableAutoSave'] !== undefined) {
         this.enableAutoSave = <boolean>(config['CallActivity']['variables']['EnableAutoSave']);
       }
       this.storageService.maxRecentItems = <Number>(config['CallActivity'] ? config['CallActivity']['variables']['MaxRecentItems']
@@ -308,7 +310,7 @@ export class HomeSalesforceComponent extends Application implements OnInit {
         delete this.scenarioInteractionMappings[interaction.scenarioId][interaction.interactionId];
         if (Object.keys(this.scenarioInteractionMappings[interaction.scenarioId]).length === 0) {
           this.saveActivity(interaction.scenarioId, true, this.enableAutoSave);
-          this.storageService.onInteractionDisconnect(interaction.scenarioId);
+          this.storageService.onInteractionDisconnect(interaction.scenarioId, this.enableAutoSave);
           delete this.scenarioInteractionMappings[interaction.scenarioId];
         }
       }

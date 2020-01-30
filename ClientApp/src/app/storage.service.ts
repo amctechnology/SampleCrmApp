@@ -117,7 +117,7 @@ export class StorageService {
     }
   }
 
-  private addRecentActivity(activity: IActivity) {
+  private addRecentActivity(activity: IActivity, isAutoSave: boolean) {
     try {
       const deleteExpiredActivity = this.expiredScenarioIdList.length === this.maxExpiredItems && this.maxRecentItems === 0;
       if (Object.keys(this.recentScenarioIdList).length === this.maxRecentItems || this.maxRecentItems === 0) {
@@ -138,7 +138,7 @@ export class StorageService {
       }
       if (this.maxRecentItems !== 0) {
         this.recentScenarioIdList.unshift(activity.ScenarioId);
-        if (this.activityList[activity.ScenarioId].IsUnSaved) {
+        if (this.activityList[activity.ScenarioId].IsUnSaved && !isAutoSave) {
           this.workingRecentScenarioId = activity.ScenarioId;
         }
       } else {
@@ -174,10 +174,10 @@ export class StorageService {
     }
   }
 
-  private removeActivity(scenarioId: string) {
+  private removeActivity(scenarioId: string, isAutoSave: boolean) {
     try {
       if (this.activityList[scenarioId]) {
-        this.addRecentActivity(this.activityList[scenarioId]);
+        this.addRecentActivity(this.activityList[scenarioId], isAutoSave);
         this.activeScenarioIdList = this.activeScenarioIdList.filter(id => id !== scenarioId);
       } else {
         this.clearWhoList(scenarioId);
@@ -640,11 +640,11 @@ export class StorageService {
     }
   }
 
-  public onInteractionDisconnect(scenarioId: string) {
+  public onInteractionDisconnect(scenarioId: string, isAutoSave: boolean) {
     try {
       this.loggerService.logger.logDebug('Salesforce - Storage : Received Interaction Disconnect Event for Scenario ID : ' + scenarioId);
       this.loggerService.logger.logDebug('Salesforce - Storage : Removing Activity for Scenario ID : ' + scenarioId);
-      this.removeActivity(scenarioId);
+      this.removeActivity(scenarioId, isAutoSave);
       this.nameChangesList = this.nameChangesList.filter(item => item !== scenarioId);
       this.relatedToChangesList = this.relatedToChangesList.filter(item => item !== scenarioId);
       this.clearSearchRecordList(scenarioId);
