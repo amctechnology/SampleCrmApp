@@ -13,6 +13,7 @@ import { StorageService } from '../storage.service';
 export class ActivitySalesforceComponent {
   @Input() scenarioId: string;
   @Input() quickCommentList: string[];
+  @Input() isAutoSave: boolean;
   @Input() quickCommentOptionRequiredCadArray: any;
   @Output() saveActivity: EventEmitter<string> = new EventEmitter<string>();
 
@@ -32,6 +33,12 @@ export class ActivitySalesforceComponent {
       + scenarioId + '. Error Information : ' + JSON.stringify(error));
     }
     this.loggerService.logger.logTrace('Salesforce - Activity : END : Submit Activity. Scenario ID : ' + scenarioId);
+  }
+
+  protected isChangesUnSaved(scenarioId: string): boolean {
+    const activity = this.storageService.getActivity();
+    this.storageService.activityList[scenarioId].IsUnSaved = (activity.IsUnSaved || (!activity.ActivityId && !this.isAutoSave));
+    return this.storageService.activityList[scenarioId].IsUnSaved;
   }
 
   protected onNameChange(event) {

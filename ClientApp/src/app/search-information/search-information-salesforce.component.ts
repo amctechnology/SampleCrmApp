@@ -193,7 +193,7 @@ export class SearchInformationSalesforceComponent implements OnChanges {
     this.loggerService.logger.logTrace('Salesforce - Search : START : Get Search Layout Info for Display');
     let layoutInfo = null;
     try {
-      layoutInfo = this.searchLayout.layouts[0][this.storageService.getActivity().CallType].find(i => i.DevName === searchRecord.type);
+      layoutInfo = this.searchLayout.layouts[0][this.storageService.currentScenarioCallType].find(i => i.DevName === searchRecord.type);
     } catch (error) {
       this.loggerService.logger.logError('Salesforce - Search : ERROR : Get Search Layout Info for Display. Input : '
       + JSON.stringify(searchRecord) + '. Error Information : ' + JSON.stringify(error));

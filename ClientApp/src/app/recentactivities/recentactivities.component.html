@@ -14,7 +14,8 @@
               <img src="/assets/Images/Phone_Number_Icon.png" class="RecentCallsImg"/>
               <b>{{ storageService.activityList[recentScenarioId].Subject }}</b>
             </label>
-            <img class="RecentCallsImg" src="/assets/Images/open_activity.png" title="Open Activity" (click)="openActivity(recentScenarioId);$event.stopPropagation();" />
+            <img *ngIf="this.storageService.activityList[recentScenarioId].ActivityId" class="RecentCallsImg" src="/assets/Images/open_activity.png" title="Open Activity" (click)="openActivity(recentScenarioId);$event.stopPropagation();" />
+            <label *ngIf="this.storageService.activityList[recentScenarioId].IsUnSaved" class="unsavedText">unsaved</label>
           </div>
           <div class="callBody">
             <div class="gray-out" *ngIf="storageService.activityList[recentScenarioId].IsRecentWorkItemLoading">
@@ -45,7 +46,7 @@
                 <div class="editor displayDiv">
                   <div class="callNotesSection">
                     <div class="callNotesTextArea">
-                      <textarea placeholder="Click to add a comment" (keyup)="onCallNotesChange($event)" (change)="onCallNotesChange($event)" name="storageService.activityList[recentScenarioId].Description" [(ngModel)]="storageService.activityList[recentScenarioId].Description"
+                      <textarea placeholder="Click to add a comment" (keyup)="onCallNotesChange($event)" (change)="onCallNotesChange($event)" name="storageService.activityList[recentScenarioId].Description"
                         class="activityCommentsTextBoxStyle" value="{{ storageService.activityList[recentScenarioId].Description }}"
                         rows="5" title="">
                       </textarea>
@@ -74,7 +75,8 @@
               <img src="/assets/Images/Phone_Number_Icon.png" class="RecentCallsImg"/>
               <b>{{ storageService.activityList[recentScenarioId].Subject }}</b>
             </label>
-            <img class="RecentCallsImg" src="/assets/Images/open_activity.png" title="Open Activity" (click)="openActivity(recentScenarioId);$event.stopPropagation();" />
+            <img *ngIf="this.storageService.activityList[recentScenarioId].ActivityId" class="RecentCallsImg" src="/assets/Images/open_activity.png" title="Open Activity" (click)="openActivity(recentScenarioId);$event.stopPropagation();" />
+            <label *ngIf="this.storageService.activityList[recentScenarioId].IsUnSaved" class="unsavedText">unsaved</label>
           </div>
         </div>
       </div>

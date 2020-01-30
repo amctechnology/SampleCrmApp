@@ -14,6 +14,7 @@ export class StorageService {
     [scenarioId: string]: IActivityDetails[];
   };
   public currentScenarioId: string;
+  public currentScenarioCallType: string;
   public workingRecentScenarioId: string;
   public activityList: {
     [scenarioId: string]: IActivity;
@@ -53,6 +54,7 @@ export class StorageService {
     this.whoList = {};
     this.whatList = {};
     this.currentScenarioId = null;
+    this.currentScenarioCallType = null;
     this.workingRecentScenarioId = null;
     this.activityList = {};
     this.recentScenarioIdList = [];
@@ -79,9 +81,11 @@ export class StorageService {
     this.savedActivityFields = {};
   }
 
-  public setCurrentScenarioId(currentScenarioId: string) {
+  public setCurrentScenarioId(currentScenarioId: string, callType?: api.InteractionDirectionTypes) {
     try {
       this.currentScenarioId = currentScenarioId;
+      this.currentScenarioCallType = (callType === undefined) ? null : (callType === api.InteractionDirectionTypes.Inbound ? 'Inbound' :
+          (callType === api.InteractionDirectionTypes.Outbound ? 'Outbound' : 'Internal'));
       this.storeToLocalStorage();
     } catch (error) {
       this.loggerService.logger.logError('Salesforce - Storage : ERROR : Set Current Scenario ID for Scenario ID : '
@@ -113,7 +117,7 @@ export class StorageService {
     }
   }
 
-  private addRecentActivity(activity: IActivity) {
+  private addRecentActivity(activity: IActivity, isAutoSave: boolean) {
     try {
       const deleteExpiredActivity = this.expiredScenarioIdList.length === this.maxExpiredItems && this.maxRecentItems === 0;
       if (Object.keys(this.recentScenarioIdList).length === this.maxRecentItems || this.maxRecentItems === 0) {
@@ -134,6 +138,9 @@ export class StorageService {
       }
       if (this.maxRecentItems !== 0) {
         this.recentScenarioIdList.unshift(activity.ScenarioId);
+        if (this.activityList[activity.ScenarioId].IsUnSaved && !isAutoSave) {
+          this.workingRecentScenarioId = activity.ScenarioId;
+        }
       } else {
         this.expiredScenarioIdList.unshift(activity.ScenarioId);
       }
@@ -167,11 +174,14 @@ export class StorageService {
     }
   }
 
-  private removeActivity(scenarioId: string) {
+  private removeActivity(scenarioId: string, isAutoSave: boolean) {
     try {
       if (this.activityList[scenarioId]) {
-        this.addRecentActivity(this.activityList[scenarioId]);
+        this.addRecentActivity(this.activityList[scenarioId], isAutoSave);
         this.activeScenarioIdList = this.activeScenarioIdList.filter(id => id !== scenarioId);
+      } else {
+        this.clearWhoList(scenarioId);
+        this.clearWhatList(scenarioId);
       }
       this.storeToLocalStorage();
     } catch (error) {
@@ -507,6 +517,16 @@ export class StorageService {
     }
   }
 
+  private clearScenarioCadMap(scenarioId: string) {
+    try {
+      delete this.scenarioToCADMap[scenarioId];
+      this.storeToLocalStorage();
+    } catch (error) {
+      this.loggerService.logger.logError('Salesforce - Storage : ERROR : Clear Scenario CAD Map for Scenario ID : '
+      + scenarioId + '. Error Information : ' + JSON.stringify(error));
+    }
+  }
+
   public updateActivityFields(scenarioId: string) {
     try {
       const activityFields = this.getActivityFields(scenarioId);
@@ -563,6 +583,7 @@ export class StorageService {
       const scenarioRecord = JSON.stringify({
         activityList: this.activityList,
         currentScenarioId: this.currentScenarioId,
+        currentScenarioCallType: this.currentScenarioCallType,
         searchRecordList: this.searchRecordList,
         whatList: this.whatList,
         whoList: this.whoList,
@@ -597,6 +618,7 @@ export class StorageService {
       if (browserStorage) {
         this.activityList = browserStorage.activityList;
         this.currentScenarioId = browserStorage.currentScenarioId;
+        this.currentScenarioCallType = browserStorage.currentScenarioCallType;
         this.searchRecordList = browserStorage.searchRecordList;
         this.whatList = browserStorage.whatList;
         this.whoList = browserStorage.whoList;
@@ -618,14 +640,15 @@ export class StorageService {
     }
   }
 
-  public onInteractionDisconnect(scenarioId: string) {
+  public onInteractionDisconnect(scenarioId: string, isAutoSave: boolean) {
     try {
       this.loggerService.logger.logDebug('Salesforce - Storage : Received Interaction Disconnect Event for Scenario ID : ' + scenarioId);
       this.loggerService.logger.logDebug('Salesforce - Storage : Removing Activity for Scenario ID : ' + scenarioId);
-      this.removeActivity(scenarioId);
+      this.removeActivity(scenarioId, isAutoSave);
       this.nameChangesList = this.nameChangesList.filter(item => item !== scenarioId);
       this.relatedToChangesList = this.relatedToChangesList.filter(item => item !== scenarioId);
       this.clearSearchRecordList(scenarioId);
+      this.clearScenarioCadMap(scenarioId);
       if (this.currentScenarioId === scenarioId) {
         if (this.activeScenarioIdList.length > 0) {
           this.setCurrentScenarioId(this.activeScenarioIdList[0]);

@@ -9,10 +9,11 @@
     [searchRecordList]="storageService.searchRecordList[storageService.currentScenarioId]">
   </app-search-information>
   <app-activity
-    *ngIf="storageService.currentScenarioId"
+    *ngIf="storageService.currentScenarioId && enableCallActivity"
     (saveActivity)="saveActivity($event)"
     [scenarioId]="storageService.currentScenarioId"
     [quickCommentList]="quickCommentList"
+    [isAutoSave] = "enableAutoSave"
     [quickCommentOptionRequiredCadArray]="quickCommentOptionRequiredCadArray">
   </app-activity>
   <app-recentactivities
