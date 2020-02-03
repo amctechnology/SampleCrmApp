@@ -50,6 +50,8 @@ export class StorageService {
     [scenarioId: string]: IActivityFields
   };
 
+  public nameObjects: string[];
+
   constructor(private loggerService: LoggerService) {
     this.whoList = {};
     this.whatList = {};
@@ -79,6 +81,12 @@ export class StorageService {
       url: ''
     };
     this.savedActivityFields = {};
+    this.nameObjects = [];
+  }
+
+
+  public setNameObjects(nameObjects: string[]) {
+    this.nameObjects = nameObjects;
   }
 
   public setCurrentScenarioId(currentScenarioId: string, callType?: api.InteractionDirectionTypes) {
@@ -461,7 +469,7 @@ export class StorageService {
 
   public updateWhoWhatLists(activityObject: IActivityDetails, scenarioId: string) {
     try {
-      if (activityObject.objectType === 'Contact' || activityObject.objectType === 'Lead') {
+        if (this.nameObjects.indexOf(activityObject.objectType) > -1) {
         if (!this.whoListContains(activityObject, scenarioId)) {
           this.setWhoList(activityObject, scenarioId);
         }

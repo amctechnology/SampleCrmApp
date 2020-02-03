@@ -121,6 +121,9 @@ export class HomeSalesforceComponent extends Application implements OnInit {
       }
       this.storageService.maxRecentItems = <Number>(config['CallActivity'] ? config['CallActivity']['variables']['MaxRecentItems']
       : config['variables']['MaxRecentItems']);
+      if (config['CallActivity'] && config['CallActivity']['variables'] && config['CallActivity']['variables']['NameObjects']) {
+        this.storageService.setNameObjects(config['CallActivity']['variables']['NameObjects']);
+      }
       this.logger.logDebug('Salesforce - Home : END : Reading Configuration from Salesforce App');
     } catch (error) {
       this.logger.logError('Salesforce - Home : ERROR : Reading Configuration. Config Info : ' + JSON.stringify(config)
