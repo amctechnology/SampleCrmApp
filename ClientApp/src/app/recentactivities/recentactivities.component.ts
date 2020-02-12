@@ -15,6 +15,7 @@ export class RecentactivitiesComponent {
   @Output() saveActivity: EventEmitter<string> = new EventEmitter<string>();
   @Output() getRecentWorkItem: EventEmitter<string> = new EventEmitter<string>();
   @Output() screenpopWorkItem: EventEmitter<string> = new EventEmitter();
+  @Input() isInConsoleView: boolean;
 
   collapseToggle: boolean;
 

@@ -21,7 +21,8 @@
     (saveActivity)="saveActivity($event, true)"
     (getRecentWorkItem)="getRecentWorkItem($event)"
     (screenpopWorkItem)="agentSelectedCallerInformation($event)"
-    [quickCommentList]="quickCommentList">
+    [quickCommentList]="quickCommentList"
+    [isInConsoleView]="isInConsoleView">
   </app-recentactivities>
   <app-create
     *ngIf="DisplayQuickCreate"

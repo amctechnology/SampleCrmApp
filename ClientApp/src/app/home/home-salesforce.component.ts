@@ -32,6 +32,7 @@ export class HomeSalesforceComponent extends Application implements OnInit {
   ScreenpopOnClickToDialListView: boolean;
   DisplayQuickCreate: boolean;
   public quickCommentOptionRequiredCadArray: any;
+  public isInConsoleView: boolean;
 
   constructor(private loggerService: LoggerService, protected storageService: StorageService) {
     super(loggerService.logger);
@@ -46,6 +47,7 @@ export class HomeSalesforceComponent extends Application implements OnInit {
     this.lastOnFocusWasAnEntityList = [];
     this.appName = 'Salesforce';
     this.quickCommentOptionRequiredCadArray = {};
+    this.isInConsoleView = true;
   }
 
   async ngOnInit() {
@@ -75,6 +77,7 @@ export class HomeSalesforceComponent extends Application implements OnInit {
       this.searchLayout = await this.getSearchLayout();
       this.readConfig(config);
       api.registerOnLogout(this.removeLocalStorageOnLogout);
+      this.isInConsoleView = await this.bridgeEventsService.sendEvent('setIsInConsoleView');
       this.storageService.syncWithLocalStorage();
       this.logger.logDebug('Salesforce - Home : END : Fetching Salesforce App Configuration');
     } catch (error) {
