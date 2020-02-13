@@ -25,7 +25,7 @@ namespace Salesforce {
                 if (isDevelopment ()) {
                     options.Listen (IPAddress.Loopback, 5011);
                     options.Listen (IPAddress.Loopback, 5012, listenOptions => {
-                        listenOptions.UseHttps (@"C:\tmp\localhost.pfx", "password");
+                        listenOptions.UseHttps (@"C:\tmp\server.pfx", "amctechnology");
                     });
                 }
             })
