@@ -9,6 +9,7 @@ declare var sforce: any;
 
 class BridgeSalesforce extends Bridge {
   private isLightning = false;
+  private isConsoleView = true;
   private currentOnFocusEvent: ISalesforceClassicOnFocusEvent | ISalesforceLightningOnFocusEvent;
   protected prefixList: any;
   activityLayout: any;
@@ -33,9 +34,21 @@ class BridgeSalesforce extends Bridge {
     this.eventService.subscribe('saveActivity', this.saveActivity);
     this.eventService.subscribe('createNewEntity', this.createNewEntity);
     this.eventService.subscribe('agentSelectedCallerInformation', this.tryScreenpop);
+    this.eventService.subscribe('setIsInConsoleView', this.setIsInConsoleViewCallback);
     this.lastOnFocusWasAnEntity = false;
   }
 
+  @bind
+  setIsInConsoleView(event) {
+    this.isConsoleView = event.result;
+  }
+
+  @bind
+  setIsInConsoleViewCallback() {
+    return new Promise<any>((resolve, reject) => {
+      resolve(this.isConsoleView);
+    });
+  }
   async afterScriptsLoad(): Promise<any> {
     this.eventService.sendEvent('logDebug', 'Salesforce - Bridge : Bridge Scripts Loaded');
     await super.afterScriptsLoad();
@@ -45,10 +58,12 @@ class BridgeSalesforce extends Bridge {
       sforce.opencti.getSoftphoneLayout({
         callback: this.buildLayoutObjectList
       });
+      sforce.interaction.isInConsole(this.setIsInConsoleView);
     } else {
       sforce.interaction.cti.onClickToDial(this.clickToDialListener);
       sforce.interaction.onFocus(this.onFocusListener);
       sforce.interaction.cti.getSoftphoneLayout(this.buildLayoutObjectList);
+      sforce.interaction.isInConsole(this.setIsInConsoleView);
     }
     if (this.isLightning) {
       this.eventService.sendEvent('logDebug', 'Salesforce - Bridge : App running in Lightning');
@@ -59,18 +74,18 @@ class BridgeSalesforce extends Bridge {
 
   protected async softphoneInit(objectFields) {
     this.eventService.sendEvent('logTrace', 'Salesforce - Bridge : Initializing Softphone. Object Fields : '
-     + JSON.stringify(objectFields));
+      + JSON.stringify(objectFields));
     for (const object of objectFields) {
       if (object) {
         const objectPrefix = await this.loadPrefixList(object).catch(error => {
           this.eventService.sendEvent('logError', 'Salesforce - Bridge : ERROR : Getting Prefix Info from Salesforce : '
-          + JSON.stringify(error));
+            + JSON.stringify(error));
         });
         this.prefixList[objectPrefix] = object;
       }
     }
     this.eventService.sendEvent('logDebug', 'Salesforce - Bridge : Initializing Softphone. Prefix List : '
-     + JSON.stringify(this.prefixList));
+      + JSON.stringify(this.prefixList));
   }
 
   protected async loadPrefixList(object): Promise<any> {
@@ -120,7 +135,7 @@ class BridgeSalesforce extends Bridge {
       return type;
     } catch (error) {
       this.eventService.sendEvent('logError', 'Salesforce - Bridge : ERROR : Fetching Type for work Item. Entity ID : '
-      + entityId + ' and Prefix List is ' + JSON.stringify(this.prefixList));
+        + entityId + ' and Prefix List is ' + JSON.stringify(this.prefixList));
     }
   }
 
@@ -137,10 +152,10 @@ class BridgeSalesforce extends Bridge {
       }
       this.softphoneInit(this.layoutObjectList);
       this.eventService.sendEvent('logTrace', 'Salesforce - Bridge : Building Layout Object List. Input : '
-      + JSON.stringify(result) + ', Output : ' + JSON.stringify(this.layoutObjectList));
+        + JSON.stringify(result) + ', Output : ' + JSON.stringify(this.layoutObjectList));
     } catch (error) {
       this.eventService.sendEvent('logError', 'Salesforce - Bridge : ERROR : Building Layout Object List. Error Information : '
-      + JSON.stringify(error));
+        + JSON.stringify(error));
     }
   }
 
@@ -152,11 +167,11 @@ class BridgeSalesforce extends Bridge {
           callback: response => {
             if (response.errors) {
               this.eventService.sendEvent('logError', 'Salesforce - Bridge : ERROR : Checking if toolbar is visible. Error Information : '
-              + JSON.stringify(response));
+                + JSON.stringify(response));
               reject(response.errors);
             } else {
               this.eventService.sendEvent('logTrace', 'Salesforce - Bridge : Checking if toolbar is visible. Received Response : '
-              + JSON.stringify(response));
+                + JSON.stringify(response));
               resolve(response.returnValue.visible);
             }
           }
@@ -165,11 +180,11 @@ class BridgeSalesforce extends Bridge {
         sforce.interaction.isVisible(response => {
           if (response.error) {
             this.eventService.sendEvent('logError', 'Salesforce - Bridge : ERROR : Checking if toolbar is visible. Error Information : '
-            + JSON.stringify(response));
+              + JSON.stringify(response));
             reject(response.error);
           } else {
             this.eventService.sendEvent('logTrace', 'Salesforce - Bridge : Checking if toolbar is visible. Received Response : '
-            + JSON.stringify(response));
+              + JSON.stringify(response));
             resolve(response.result);
           }
         });
@@ -185,11 +200,11 @@ class BridgeSalesforce extends Bridge {
           callback: response => {
             if (response.success) {
               this.eventService.sendEvent('logDebug', 'Salesforce - Bridge : Fetching Search Layout from CRM. Response : '
-              + JSON.stringify(response));
+                + JSON.stringify(response));
               resolve(response.returnValue);
             } else {
               this.eventService.sendEvent('logError', 'Salesforce - Bridge : ERROR : Fetching Search Layout from CRM. Response : '
-              + JSON.stringify(response));
+                + JSON.stringify(response));
               reject();
             }
           }
@@ -198,11 +213,11 @@ class BridgeSalesforce extends Bridge {
         sforce.interaction.cti.getSoftphoneLayout(response => {
           if (response.result) {
             this.eventService.sendEvent('logDebug', 'Salesforce - Bridge : Fetching Search Layout from CRM. Response : '
-            + JSON.stringify(response));
+              + JSON.stringify(response));
             resolve(safeJSONParse(response.result));
           } else {
             this.eventService.sendEvent('logError', 'Salesforce - Bridge : ERROR : Fetching Search Layout from CRM. Response : '
-            + JSON.stringify(response));
+              + JSON.stringify(response));
             reject();
           }
         });
@@ -246,7 +261,7 @@ class BridgeSalesforce extends Bridge {
           this.lastOnFocusWasAnEntity = true;
         }
         if (this.layoutObjectList.includes(entity.objectType) && entity.objectId !== '') {
-          const record = await this.cadSearch({entity: entity.objectType, field: 'Id', value: entity.objectId});
+          const record = await this.cadSearch({ entity: entity.objectType, field: 'Id', value: entity.objectId });
           if (record.length > 0) {
             entity.objectName = record[0][this.searchLayout[entity.objectType][0].apiName];
           }
@@ -255,7 +270,7 @@ class BridgeSalesforce extends Bridge {
         }
       } catch (error) {
         this.eventService.sendEvent('logError', 'Salesforce - Bridge : ERROR : On Focus Event. Error Information : '
-         + JSON.stringify(event));
+          + JSON.stringify(event));
       }
     }
   }
@@ -264,7 +279,7 @@ class BridgeSalesforce extends Bridge {
   async clickToDialListener(event) {
     try {
       this.eventService.sendEvent('logDebug', 'Salesforce - Bridge : Received Click to Dial Event from Salesforce. Event Information : '
-      + JSON.stringify(event));
+        + JSON.stringify(event));
 
       let entity = {
         object: '',
@@ -288,19 +303,19 @@ class BridgeSalesforce extends Bridge {
       this.eventService.sendEvent('clickToDial', clickToDialRecord);
 
       this.eventService.sendEvent('logDebug', 'Salesforce - Bridge : Click to Dial Event sent to Home. Event Information : '
-      + JSON.stringify(clickToDialRecord));
+        + JSON.stringify(clickToDialRecord));
 
     } catch (error) {
       this.eventService.sendEvent('logError', 'Salesforce - Bridge : ERROR : Click to Dial listener. Error Information : '
-      + JSON.stringify(error));
+        + JSON.stringify(error));
     }
   }
 
   @bind
   async getActivity(activity: IActivity): Promise<any> {
     this.eventService.sendEvent('logDebug', 'Salesforce - Bridge : Get Activity. Input Details : '
-    + JSON.stringify(activity));
-    return new Promise(async(resolve, reject) => {
+      + JSON.stringify(activity));
+    return new Promise(async (resolve, reject) => {
       try {
         const activityRecord = await this.getTaskDetails(activity);
         const refFields: string[] = this.activityLayout[activity.ChannelType]['Fields'];
@@ -328,7 +343,7 @@ class BridgeSalesforce extends Bridge {
           }
           if (fieldValue && lookupFields[field]) {
             const entityType: string = this.getType(fieldValue);
-            const entityRecord = await this.cadSearch({entity: entityType, field: 'Id', value: fieldValue});
+            const entityRecord = await this.cadSearch({ entity: entityType, field: 'Id', value: fieldValue });
             if (entityRecord && entityRecord.length > 0) {
               refEntity = {
                 objectType: entityType,
@@ -350,11 +365,11 @@ class BridgeSalesforce extends Bridge {
           }
         }
         this.eventService.sendEvent('logDebug', 'Salesforce - Bridge : Sending Activity Information from CRM to Home. Updated Activity : '
-        + JSON.stringify(updatedActivity));
+          + JSON.stringify(updatedActivity));
         resolve(updatedActivity);
       } catch (error) {
         this.eventService.sendEvent('logError', 'Salesforce - Bridge. Error Retrieving Activity. Input Activity : '
-        + JSON.stringify(activity) + '. Error Details : ' + JSON.stringify(error));
+          + JSON.stringify(activity) + '. Error Details : ' + JSON.stringify(error));
         reject('Error retrieving Activity Details');
       }
     });
@@ -386,11 +401,11 @@ class BridgeSalesforce extends Bridge {
             callback: async response => {
               if (response.success) {
                 this.eventService.sendEvent('logDebug', 'Salesforce - Bridge : Get Task Details Successful. Response : '
-                + JSON.stringify(response));
+                  + JSON.stringify(response));
                 resolve(safeJSONParse(response.returnValue.runApex));
               } else {
                 this.eventService.sendEvent('logError', 'Salesforce - Bridge : ERROR : Get Task Details. Error Information : '
-                + JSON.stringify(response));
+                  + JSON.stringify(response));
                 reject();
               }
             }
@@ -402,20 +417,20 @@ class BridgeSalesforce extends Bridge {
               response => {
                 if (response.result) {
                   this.eventService.sendEvent('logDebug', 'Salesforce - Bridge : Get Task Details Successful. Response : '
-                  + JSON.stringify(response));
+                    + JSON.stringify(response));
                   resolve(safeJSONParse(response.result));
                 } else {
                   this.eventService.sendEvent('logError', 'Salesforce - Bridge : ERROR : Get Task Details. Error Information : '
-                  + JSON.stringify(response));
+                    + JSON.stringify(response));
                   reject();
                 }
-            });
+              });
           }
         });
       }
     } catch (error) {
       this.eventService.sendEvent('logError', 'Salesforce - Bridge : Error Retrieving task Details. Input Activity : '
-      + JSON.stringify(activity) + '. Error Information : ' + JSON.stringify(error));
+        + JSON.stringify(activity) + '. Error Information : ' + JSON.stringify(error));
     }
   }
 
@@ -436,19 +451,23 @@ class BridgeSalesforce extends Bridge {
         if (event.id) {
           let formattedRecord = {};
           if (versionIsLightning) {
-            formattedRecord =  {
-              [event.id.recordId] :
-                {'Id' : event.id.recordId,
-                'Name' : event.id.recordName,
-                'RecordType' : event.id.objectType}
+            formattedRecord = {
+              [event.id.recordId]:
+              {
+                'Id': event.id.recordId,
+                'Name': event.id.recordName,
+                'RecordType': event.id.objectType
+              }
             };
           } else {
             const classicEntity = JSON.parse(event.id.result);
-            formattedRecord =  {
-              [classicEntity.objectId] :
-                {'Id' : classicEntity.objectId,
-                'Name' : classicEntity.objectName,
-                'RecordType' : classicEntity.object}
+            formattedRecord = {
+              [classicEntity.objectId]:
+              {
+                'Id': classicEntity.objectId,
+                'Name': classicEntity.objectName,
+                'RecordType': classicEntity.object
+              }
             };
           }
 
@@ -457,7 +476,7 @@ class BridgeSalesforce extends Bridge {
             screenpopRecords = await this.tryScreenpop(entityId[0]);
           }
           this.eventService.sendEvent('logDebug', 'Salesforce - Bridge : Sending CRM Records to Home. Output : '
-          + JSON.stringify(formattedRecord));
+            + JSON.stringify(formattedRecord));
           return formattedRecord;
         }
       }
@@ -491,11 +510,11 @@ class BridgeSalesforce extends Bridge {
         }
       }
       this.eventService.sendEvent('logDebug', 'Salesforce - Bridge : Sending CRM Records to Home. Output : '
-      + JSON.stringify(screenpopRecords));
+        + JSON.stringify(screenpopRecords));
       return screenpopRecords;
     } catch (error) {
       this.eventService.sendEvent('logError', 'Salesforce - Bridge : ERROR : Screen Pop Handler. Error Information : '
-      + JSON.stringify(error));
+        + JSON.stringify(error));
       throw error;
     }
   }
@@ -511,11 +530,11 @@ class BridgeSalesforce extends Bridge {
             callback: response => {
               if (response.success) {
                 this.eventService.sendEvent('logDebug', 'Salesforce - Bridge : Screenpop Successful. ID : '
-                + id + '. Received Response : ' + JSON.stringify(response));
+                  + id + '. Received Response : ' + JSON.stringify(response));
                 resolve(response.returnValue);
               } else {
                 this.eventService.sendEvent('logError', 'Salesforce - Bridge : ERROR : Screenpop. ID : '
-                + id + '. Error Information : ' + JSON.stringify(response));
+                  + id + '. Error Information : ' + JSON.stringify(response));
                 reject();
               }
             },
@@ -528,11 +547,11 @@ class BridgeSalesforce extends Bridge {
           sforce.interaction.screenPop('/' + id, true, response => {
             if (response.result) {
               this.eventService.sendEvent('logDebug', 'Salesforce - Bridge : Screenpop Successful. ID : '
-              + id + '. Received Response : ' + JSON.stringify(response));
+                + id + '. Received Response : ' + JSON.stringify(response));
               resolve(safeJSONParse(response.result));
             } else {
               this.eventService.sendEvent('logError', 'Salesforce - Bridge : ERROR : Screenpop. ID : '
-              + id + '. Error Information : ' + JSON.stringify(response));
+                + id + '. Error Information : ' + JSON.stringify(response));
               reject();
             }
           });
@@ -540,7 +559,7 @@ class BridgeSalesforce extends Bridge {
       });
     } catch (error) {
       this.eventService.sendEvent('logError', 'Salesforce - Bridge. ERROR : Screenpop. ID : '
-      + id + '. Error Information : ' + JSON.stringify(error));
+        + id + '. Error Information : ' + JSON.stringify(error));
     }
   }
 
@@ -571,11 +590,11 @@ class BridgeSalesforce extends Bridge {
             callback: response => {
               if (response.success) {
                 this.eventService.sendEvent('logDebug', 'Salesforce - Bridge : Cad Search Successful. Input : '
-                + JSON.stringify(cad) + '. Received Response : ' + JSON.stringify(response));
+                  + JSON.stringify(cad) + '. Received Response : ' + JSON.stringify(response));
                 resolve(safeJSONParse(response.returnValue.runApex));
               } else {
                 this.eventService.sendEvent('logError', 'Salesforce - Bridge : ERROR : Cad Search. Input : '
-                + JSON.stringify(cad) + '. Error Information : ' + JSON.stringify(response));
+                  + JSON.stringify(cad) + '. Error Information : ' + JSON.stringify(response));
                 reject();
               }
             }
@@ -587,41 +606,41 @@ class BridgeSalesforce extends Bridge {
               response => {
                 if (response.result) {
                   this.eventService.sendEvent('logDebug', 'Salesforce - Bridge : Cad Search Successful. Input : '
-                  + JSON.stringify(cad) + '. Received Response : ' + JSON.stringify(response));
+                    + JSON.stringify(cad) + '. Received Response : ' + JSON.stringify(response));
                   resolve(safeJSONParse(response.result));
                 } else {
                   this.eventService.sendEvent('logError', 'Salesforce - Bridge : ERROR : Cad Search. Input : '
-                  + JSON.stringify(cad) + '. Error Information : ' + JSON.stringify(response));
+                    + JSON.stringify(cad) + '. Error Information : ' + JSON.stringify(response));
                   reject();
                 }
-            });
+              });
           }
         });
       }
     } catch (error) {
       this.eventService.sendEvent('logError', 'Salesforce - Bridge. ERROR : Cad Search. Input : '
-      + JSON.stringify(cad) + '. Error Information : ' + JSON.stringify(error));
+        + JSON.stringify(cad) + '. Error Information : ' + JSON.stringify(error));
     }
   }
 
   private trySearch(queryString: string, callDirection: InteractionDirectionTypes, cadString: string, shouldScreenpop: boolean = true)
     : Promise<any> {
     this.eventService.sendEvent('logDebug', 'Salesforce - Bridge : Search. Parameters : Query String : '
-    + queryString + ', Call Direction : ' + JSON.stringify(callDirection) + ', Cad String : '
-    + cadString + ' and Should Screen Pop : ' + shouldScreenpop);
+      + queryString + ', Call Direction : ' + JSON.stringify(callDirection) + ', Cad String : '
+      + cadString + ' and Should Screen Pop : ' + shouldScreenpop);
     return new Promise((resolve, reject) => {
       if (this.isLightning) {
         const screenPopObject = {
           callback: response => {
             if (!response.success) {
               this.eventService.sendEvent('logError', 'Salesforce - Bridge : ERROR : Search. Parameters : Query String : '
-              + queryString + ', Call Direction : ' + JSON.stringify(callDirection) + ', Cad String : '
-              + cadString + ' and Should Screen Pop : ' + shouldScreenpop + '. Error Information : ' + JSON.stringify(response));
+                + queryString + ', Call Direction : ' + JSON.stringify(callDirection) + ', Cad String : '
+                + cadString + ' and Should Screen Pop : ' + shouldScreenpop + '. Error Information : ' + JSON.stringify(response));
               reject();
             } else {
               this.eventService.sendEvent('logDebug', 'Salesforce - Bridge : Search Successful. Parameters : Query String : '
-              + queryString + ', Call Direction : ' + JSON.stringify(callDirection) + ', Cad String : '
-              + cadString + ' and Should Screen Pop : ' + shouldScreenpop + '. Response Information : ' + JSON.stringify(response));
+                + queryString + ', Call Direction : ' + JSON.stringify(callDirection) + ', Cad String : '
+                + cadString + ' and Should Screen Pop : ' + shouldScreenpop + '. Response Information : ' + JSON.stringify(response));
               resolve(response.returnValue);
             }
           },
@@ -665,8 +684,8 @@ class BridgeSalesforce extends Bridge {
             resolve(safeJSONParse(response.result));
           } else {
             this.eventService.sendEvent('logError', 'Salesforce - Bridge : ERROR : Search. Parameters : Query String : '
-            + queryString + ', Call Direction : ' + JSON.stringify(callDirection) + ', Cad String : '
-            + cadString + ' and Should Screen Pop : ' + shouldScreenpop + '. Error Information : ' + JSON.stringify(response));
+              + queryString + ', Call Direction : ' + JSON.stringify(callDirection) + ', Cad String : '
+              + cadString + ' and Should Screen Pop : ' + shouldScreenpop + '. Error Information : ' + JSON.stringify(response));
             reject();
           }
 
@@ -702,11 +721,11 @@ class BridgeSalesforce extends Bridge {
       const callback = response => {
         if (response.success || response.result) {
           this.eventService.sendEvent('logDebug', 'Salesforce - Bridge : Click to Dial Enable/Disable Successful. Paramter - Enabled : '
-          + clickToDialEnabled);
+            + clickToDialEnabled);
           resolve();
         } else {
           this.eventService.sendEvent('logError', 'Salesforce - Bridge : ERROR : Click to Dial Enable/Disable. Parameter - Enabled : '
-          + clickToDialEnabled + 'Error Info : ' + JSON.stringify(response));
+            + clickToDialEnabled + 'Error Info : ' + JSON.stringify(response));
           reject(response.errors || response.error);
         }
       };
@@ -738,7 +757,7 @@ class BridgeSalesforce extends Bridge {
           callback: response => {
             if (response.errors) {
               this.eventService.sendEvent('logError', 'Salesforce - Bridge: ERROR : Set Softphone Height. Error Information : '
-            + JSON.stringify(response));
+                + JSON.stringify(response));
               reject(response.errors);
             } else {
               resolve();
@@ -749,7 +768,7 @@ class BridgeSalesforce extends Bridge {
         sforce.interaction.cti.setSoftphoneHeight(AdjustedheightInPixelsClassic + 15, response => {
           if (response.error) {
             this.eventService.sendEvent('logError', 'Salesforce - Bridge: ERROR : Set Softphone Height. Error Information : '
-            + response);
+              + response);
             reject(response.error);
           } else {
             resolve();
@@ -766,7 +785,7 @@ class BridgeSalesforce extends Bridge {
         sforce.interaction.cti.setSoftphoneWidth(widthInPixels, response => {
           if (response.error) {
             this.eventService.sendEvent('logError', 'Salesforce - Bridge: ERROR : Set Softphone Width. Error Information : '
-            + JSON.stringify(response));
+              + JSON.stringify(response));
             reject(response.error);
           } else {
             resolve();
@@ -779,7 +798,7 @@ class BridgeSalesforce extends Bridge {
   @bind
   protected saveActivity(activity: IActivity): Promise<IActivity> {
     this.eventService.sendEvent('logDebug', 'Salesforce - Bridge : Activity received  for Scenario ID : ' + activity.ScenarioId +
-    '. Activity Info : ' + JSON.stringify(activity));
+      '. Activity Info : ' + JSON.stringify(activity));
     if (this.isLightning) {
       return new Promise((resolve, reject) => {
         const activityObject: object = {
@@ -799,12 +818,14 @@ class BridgeSalesforce extends Bridge {
             if (response.success) {
               activity.ActivityId = response.returnValue.recordId;
               this.eventService.sendEvent('logInformation', 'Salesforce - Bridge : Activity for Scenario ID : '
-              + activity.ScenarioId + ' saved in CRM. Activity Info : ' + JSON.stringify(activity));
+                + activity.ScenarioId + ' saved in CRM. Activity Info : ' + JSON.stringify(activity));
               resolve(activity);
             } else {
-              this.eventService.sendEvent('sendNotification', {notification: 'Save activity failed.',
-              notificationType: NotificationType.Error});
-                this.eventService.sendEvent('logError', 'Salesforce - Bridge : ERROR : Save Activity failed for Scenario ID : '
+              this.eventService.sendEvent('sendNotification', {
+                notification: 'Save activity failed.',
+                notificationType: NotificationType.Error
+              });
+              this.eventService.sendEvent('logError', 'Salesforce - Bridge : ERROR : Save Activity failed for Scenario ID : '
                 + activity.ScenarioId + '. Activity Info : ' + JSON.stringify(activity) + '. Error Info : '
                 + JSON.stringify(response));
               reject();
@@ -836,14 +857,16 @@ class BridgeSalesforce extends Bridge {
           if (response.result) {
             activity.ActivityId = response.result;
             this.eventService.sendEvent('logInformation', 'Salesforce - Bridge : Activity for Scenario ID : '
-            + activity.ScenarioId + ' saved in CRM. Activity Info : ' + JSON.stringify(activity));
+              + activity.ScenarioId + ' saved in CRM. Activity Info : ' + JSON.stringify(activity));
             resolve(activity);
           } else {
-            this.eventService.sendEvent('sendNotification', {notification: 'Save activity failed.',
-            notificationType: NotificationType.Error});
+            this.eventService.sendEvent('sendNotification', {
+              notification: 'Save activity failed.',
+              notificationType: NotificationType.Error
+            });
             this.eventService.sendEvent('logError', 'Salesforce - Bridge : ERROR : Save Activity failed for Scenario ID : '
-            + activity.ScenarioId + '. Activity Info : ' + JSON.stringify(activity) + '. Error Info : '
-            + JSON.stringify(response));
+              + activity.ScenarioId + '. Activity Info : ' + JSON.stringify(activity) + '. Error Info : '
+              + JSON.stringify(response));
             reject();
           }
         });
@@ -856,7 +879,7 @@ class BridgeSalesforce extends Bridge {
     try {
       let URL = '';
       this.eventService.sendEvent('logDebug', 'Salesforce - Bridge : Quick Create Salesforce Entity : '
-       + JSON.stringify(params));
+        + JSON.stringify(params));
       if (this.isLightning) {
         const screenPopObject: IScreenPopObject = {
           type: sforce.opencti.SCREENPOP_TYPE.NEW_RECORD_MODAL,
@@ -869,7 +892,7 @@ class BridgeSalesforce extends Bridge {
               this.eventService.sendEvent('logDebug', 'Salesforce - Bridge : Quick Create Successful. Response : ' + response.returnValue);
             } else {
               this.eventService.sendEvent('logError', 'Salesforce - Bridge: ERROR : Quick Create. Parameters : '
-               + JSON.stringify(params) + '. Error Information : ' + JSON.stringify(response));
+                + JSON.stringify(params) + '. Error Information : ' + JSON.stringify(response));
             }
           }
         };
@@ -894,13 +917,13 @@ class BridgeSalesforce extends Bridge {
             this.eventService.sendEvent('logDebug', 'Salesforce - Bridge : Quick Create Successful');
           } else {
             this.eventService.sendEvent('logError', 'Salesforce - Bridge: ERROR : Quick Create. Parameters : '
-               + JSON.stringify(params) + '. Error Information : ' + JSON.stringify(response));
+              + JSON.stringify(params) + '. Error Information : ' + JSON.stringify(response));
           }
         });
       }
     } catch (error) {
       this.eventService.sendEvent('logError', 'Salesforce - Bridge: ERROR : Quick Create. Parameters : '
-      + JSON.stringify(params) + '. Error Information : ' + JSON.stringify(error));
+        + JSON.stringify(params) + '. Error Information : ' + JSON.stringify(error));
     }
   }
 }

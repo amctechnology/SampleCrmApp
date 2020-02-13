@@ -114,7 +114,6 @@
 }
 
 .callDisplay {
-  display:grid;
   margin-bottom: 8px;
   background-color: #ffffff;
 }
@@ -252,9 +251,19 @@
   vertical-align: text-bottom;
 }
 
+.RecentCallsImgForActivity {
+  height: 15px;
+  vertical-align: super;
+  margin-right: 5px;
+}
+
 .headerLabelClickableLook {
   cursor: pointer;
+  display: inline-block;
   margin-left: 10px;
+  max-width: 80%;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .loadingIcon {
