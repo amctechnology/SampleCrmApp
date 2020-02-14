@@ -151,6 +151,9 @@ class BridgeSalesforce extends Bridge {
         this.searchLayout = JSON.parse(result.result).Inbound.objects;
       }
       this.softphoneInit(this.layoutObjectList);
+      if (!this.isLightning) {
+        sforce.interaction.getPageInfo(this.onFocusListener);
+      }
       this.eventService.sendEvent('logTrace', 'Salesforce - Bridge : Building Layout Object List. Input : '
         + JSON.stringify(result) + ', Output : ' + JSON.stringify(this.layoutObjectList));
     } catch (error) {
