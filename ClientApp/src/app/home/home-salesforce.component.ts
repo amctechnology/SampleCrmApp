@@ -191,7 +191,9 @@ export class HomeSalesforceComponent extends Application implements OnInit {
     }
   }
 
+  @bind
   protected removeLocalStorageOnLogout(): Promise<any> {
+    this.enableClickToDial(false);
     localStorage.clear();
     return new Promise((resolve, reject) => {});
   }
