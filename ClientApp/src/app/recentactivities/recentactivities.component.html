@@ -27,7 +27,7 @@
               <form>
                 <div class="editor displayDiv">
                   <label class="displayLabels" title="Subject">Subject</label>
-                  <input class="activitySubjectTextBoxStyle displayData" type="text" (keyup)="onSubjectChange($event)" (change)="onSubjectChange($event)" name="storageService.activityList[recentScenarioId].Subject" [(ngModel)]="storageService.activityList[recentScenarioId].Subject" value="{{ storageService.activityList[recentScenarioId].Subject }}" />
+                  <input class="activitySubjectTextBoxStyle displayData" type="text" (change)="onSubjectChange($event)" name="storageService.activityList[recentScenarioId].Subject" [(ngModel)]="storageService.activityList[recentScenarioId].Subject" value="{{ storageService.activityList[recentScenarioId].Subject }}" />
                 </div>
                 <div class="editor displayDiv">
                   <label class="displayLabels" title="Name">Name</label>
@@ -46,7 +46,7 @@
                 <div class="editor displayDiv">
                   <div class="callNotesSection">
                     <div class="callNotesTextArea">
-                      <textarea placeholder="Click to add a comment" (keyup)="onCallNotesChange($event)" (change)="onCallNotesChange($event)" name="storageService.activityList[recentScenarioId].Description"
+                      <textarea placeholder="Click to add a comment" (change)="onCallNotesChange($event)" name="storageService.activityList[recentScenarioId].Description"
                         class="activityCommentsTextBoxStyle" value="{{ storageService.activityList[recentScenarioId].Description }}"
                         rows="5" title="">
                       </textarea>
