@@ -113,6 +113,9 @@ export class RecentactivitiesComponent {
   protected onSubjectChange(event: any) {
     this.loggerService.logger.logTrace('Salesforce - Recent Activity : START : On Subject Change. Input : ' + JSON.stringify(event));
     try {
+    if (event.type === 'keyup' && this.storageService.activityList[this.storageService.workingRecentScenarioId].IsUnSaved) {
+      return;
+    }
     this.storageService.setSubject(event.srcElement.value, this.storageService.workingRecentScenarioId);
     this.storageService.compareActivityFields(this.storageService.workingRecentScenarioId);
     } catch (error) {
@@ -125,6 +128,9 @@ export class RecentactivitiesComponent {
   protected onCallNotesChange(event: any) {
     this.loggerService.logger.logTrace('Salesforce - Recent Activity : START : On Call Notes Change. Input : ' + JSON.stringify(event));
     try {
+      if (event.type === 'keyup' && this.storageService.activityList[this.storageService.workingRecentScenarioId].IsUnSaved) {
+        return;
+      }
       this.storageService.setDescription(event.srcElement.value.trim(), this.storageService.workingRecentScenarioId);
       this.storageService.compareActivityFields(this.storageService.workingRecentScenarioId);
     } catch (error) {

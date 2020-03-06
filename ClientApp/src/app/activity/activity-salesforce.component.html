@@ -24,13 +24,14 @@
         </div>
         <div class="editor displayDiv">
           <label class="displayLabels" title="Subject">Subject</label>
-          <input class="activitySubjectTextBoxStyle displayData" (change)="onSubjectChange($event)" title="{{storageService.getSubject()}}"
-            type="text" value="{{storageService.getSubject()}}">
+          <input class="activitySubjectTextBoxStyle displayData" (change)="onSubjectChange($event)" type="text" value="{{storageService.getSubject()}}" 
+          name="subject" (keyup)="onSubjectChange($event)" [(ngModel)]="storageService.activityList[this.scenarioId].Subject">
         </div>
         <div class="editor displayDiv">
           <div class="callNotesSection">
             <div class="callNotesTextArea">
-              <textarea value="{{storageService.getDescription()}}" placeholder="Click to add a comment" class="activityCommentsTextBoxStyle" (change)="onCallNotesChange($event)" cols="20" rows="2" title=""></textarea>
+              <textarea value="{{storageService.getDescription()}}" placeholder="Click to add a comment" class="activityCommentsTextBoxStyle" (change)="onCallNotesChange($event)" 
+              name="description" [(ngModel)]="storageService.activityList[this.scenarioId].Description" (keyup)="onCallNotesChange($event)" cols="20" rows="2" title=""></textarea>
             </div>
             <div class="notesBottonBorder">
               <div class="commentsButtonDiv">
