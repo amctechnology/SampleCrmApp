@@ -68,6 +68,9 @@ export class ActivitySalesforceComponent {
   protected onSubjectChange(event) {
     this.loggerService.logger.logTrace('Salesforce - Activity : START : On Subject Change. Input : ' + JSON.stringify(event));
     try {
+      if (event.type === 'keyup' && this.storageService.activityList[this.scenarioId].IsUnSaved) {
+        return;
+      }
       this.storageService.setSubject(event.srcElement.value, this.scenarioId);
       this.storageService.compareActivityFields(this.scenarioId);
     } catch (error) {
@@ -80,6 +83,9 @@ export class ActivitySalesforceComponent {
   protected onCallNotesChange(event) {
     this.loggerService.logger.logTrace('Salesforce - Activity : START : On Call Notes Change. Input : ' + JSON.stringify(event));
     try {
+      if (event.type === 'keyup' && this.storageService.activityList[this.scenarioId].IsUnSaved) {
+        return;
+      }
       this.storageService.setDescription(event.srcElement.value.trim(), this.scenarioId);
       this.storageService.compareActivityFields(this.scenarioId);
     } catch (error) {
