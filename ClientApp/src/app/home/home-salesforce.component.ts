@@ -16,7 +16,7 @@ export class HomeSalesforceComponent extends Application implements OnInit {
   protected phoneNumberFormat: Object;
   protected quickCommentList: string[];
   protected enableAutoSave: boolean;
-  protected enableCallActivity: boolean;
+  public enableCallActivity: boolean;
   protected QuickCreateEntities: any;
   protected cadActivityMap: Object;
   public searchLayout: api.SearchLayouts;
@@ -34,7 +34,7 @@ export class HomeSalesforceComponent extends Application implements OnInit {
   public quickCommentOptionRequiredCadArray: any;
   public isInConsoleView: boolean;
 
-  constructor(private loggerService: LoggerService, protected storageService: StorageService) {
+  constructor(private loggerService: LoggerService, public storageService: StorageService) {
     super(loggerService.logger);
     this.phoneNumberFormat = {};
     this.screenpopOnAlert = true;
@@ -182,7 +182,7 @@ export class HomeSalesforceComponent extends Application implements OnInit {
     return inputNumber;
   }
 
-  protected checkIfRecentActivitiesExist() {
+  public checkIfRecentActivitiesExist() {
     try {
       return (this.storageService.recentScenarioIdList.length > 0) ? true : false;
     } catch (error) {
