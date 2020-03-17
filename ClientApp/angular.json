@@ -3,7 +3,7 @@
   "version": 1,
   "newProjectRoot": "projects",
   "projects": {
-    "Salesforce": {
+    "salesforce": {
       "root": "",
       "sourceRoot": "src",
       "projectType": "application",
@@ -55,18 +55,18 @@
         "serve": {
           "builder": "@angular-devkit/build-angular:dev-server",
           "options": {
-            "browserTarget": "Salesforce:build"
+            "browserTarget": "salesforce:build"
           },
           "configurations": {
             "production": {
-              "browserTarget": "Salesforce:build:production"
+              "browserTarget": "salesforce:build:production"
             }
           }
         },
         "extract-i18n": {
           "builder": "@angular-devkit/build-angular:extract-i18n",
           "options": {
-            "browserTarget": "Salesforce:build"
+            "browserTarget": "salesforce:build"
           }
         },
         "test": {
@@ -100,7 +100,7 @@
         }
       }
     },
-    "Salesforce-e2e": {
+    "salesforce-e2e": {
       "root": "e2e",
       "sourceRoot": "e2e",
       "projectType": "application",
@@ -109,7 +109,7 @@
           "builder": "@angular-devkit/build-angular:protractor",
           "options": {
             "protractorConfig": "./protractor.conf.js",
-            "devServerTarget": "Salesforce:serve"
+            "devServerTarget": "salesforce:serve"
           }
         },
         "lint": {
@@ -126,7 +126,7 @@
       }
     }
   },
-  "defaultProject": "Salesforce",
+  "defaultProject": "salesforce",
   "schematics": {
     "@schematics/angular:component": {
       "prefix": "app",
