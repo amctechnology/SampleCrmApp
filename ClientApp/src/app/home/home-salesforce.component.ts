@@ -41,7 +41,7 @@ export class HomeSalesforceComponent extends Application implements OnInit {
     this.ScreenpopOnClickToDialListView = false;
     this.enableCallActivity = true;
     this.enableAutoSave = true;
-    this.DisplayQuickCreate = true;
+    this.DisplayQuickCreate = false;
     this.clickToDialList = {};
     this.ctdWhoWhatList = {};
     this.lastOnFocusWasAnEntityList = [];
@@ -63,9 +63,9 @@ export class HomeSalesforceComponent extends Application implements OnInit {
 
       this.bridgeScripts = this.bridgeScripts.concat([
         this.getBridgeURL(),
-        salesforceOrg + '/support/api/44.0/interaction.js',
-        salesforceOrg + '/support/console/44.0/integration.js',
-        salesforceOrg + '/support/api/44.0/lightning/opencti_min.js'
+        salesforceOrg + '/support/api/48.0/interaction.js',
+        salesforceOrg + '/support/console/48.0/integration.js',
+        salesforceOrg + '/support/api/48.0/lightning/opencti_min.js'
       ]);
 
       await super.ngOnInit();
