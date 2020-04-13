@@ -45,20 +45,17 @@ export class HomeSalesforceComponent extends Application implements OnInit {
     this.clickToDialList = {};
     this.ctdWhoWhatList = {};
     this.lastOnFocusWasAnEntityList = [];
-    this.appName = 'Salesforce';
     this.quickCommentOptionRequiredCadArray = {};
     this.isInConsoleView = true;
   }
 
   async ngOnInit() {
     try {
-      this.logger.logDebug('Salesforce - Home : START : Fetching Salesforce App Configuration');
-      const config = await api.getConfig();
-      this.logger.logDebug('Salesforce - Home : Configuration from Salesforce App : ' + JSON.stringify(config));
+      await this.loadConfig();
       let salesforceOrg = 'https://na53.salesforce.com';
-      if (config['variables']['salesforceOrg'] !== undefined && config['variables']['salesforceOrg'] !== null &&
-      String(config['variables']['salesforceOrg']).length > 0) {
-        salesforceOrg = String(config['variables']['salesforceOrg']);
+      if (this.appConfig['variables']['salesforceOrg'] !== undefined && this.appConfig['variables']['salesforceOrg'] !== null &&
+        String(this.appConfig['variables']['salesforceOrg']).length > 0) {
+        salesforceOrg = String(this.appConfig['variables']['salesforceOrg']);
       }
 
       this.bridgeScripts = this.bridgeScripts.concat([
@@ -75,14 +72,14 @@ export class HomeSalesforceComponent extends Application implements OnInit {
       this.bridgeEventsService.subscribe('clickToDial', this.clickToDialHandler);
       this.bridgeEventsService.subscribe('sendNotification', this.sendNotification);
       this.searchLayout = await this.getSearchLayout();
-      this.readConfig(config);
+      this.readConfig(this.appConfig);
       api.registerOnLogout(this.removeLocalStorageOnLogout);
       this.isInConsoleView = await this.bridgeEventsService.sendEvent('setIsInConsoleView');
       this.storageService.syncWithLocalStorage();
       this.logger.logDebug('Salesforce - Home : END : Fetching Salesforce App Configuration');
     } catch (error) {
       this.logger.logError('Salesforce - Home : ERROR : Fetching Configuration. Error Information : '
-       + JSON.stringify(error));
+        + JSON.stringify(error));
     }
   }
 
@@ -96,10 +93,10 @@ export class HomeSalesforceComponent extends Application implements OnInit {
       } else {
         this.phoneNumberFormat = configPhoneFormat;
       }
-      this.quickCommentList =  <string[]>(config['CallActivity'] ? config['CallActivity']['variables']['QuickComments']
-      : config['variables']['QuickComments']);
+      this.quickCommentList = <string[]>(config['CallActivity'] ? config['CallActivity']['variables']['QuickComments']
+        : config['variables']['QuickComments']);
       this.cadActivityMap = config['CallActivity'] ? config['CallActivity']['variables']['CADActivityMap'] :
-      (config['variables']['CADActivityMap'] ? config['variables']['CADActivityMap'] : {});
+        (config['variables']['CADActivityMap'] ? config['variables']['CADActivityMap'] : {});
       if (config['variables']['ScreenpopOnAlert'] !== null && config['variables']['ScreenpopOnAlert'] !== undefined) {
         this.screenpopOnAlert = Boolean(config['variables']['ScreenpopOnAlert']);
       }
@@ -115,29 +112,29 @@ export class HomeSalesforceComponent extends Application implements OnInit {
       this.DisplayQuickCreate = (Object.keys(this.QuickCreateEntities).length > 0);
       this.ScreenpopOnClickToDialListView = <boolean>(config['variables']['ScreenpopOnClickToDialListView']);
       if (config['CallActivity'] && config['CallActivity']['variables'] &&
-      config['CallActivity']['variables']['EnableCallActivity'] !== undefined) {
+        config['CallActivity']['variables']['EnableCallActivity'] !== undefined) {
         this.enableCallActivity = <boolean>(config['CallActivity']['variables']['EnableCallActivity']);
       }
       if (config['CallActivity'] && config['CallActivity']['variables'] &&
-      config['CallActivity']['variables']['EnableAutoSave'] !== undefined) {
+        config['CallActivity']['variables']['EnableAutoSave'] !== undefined) {
         this.enableAutoSave = <boolean>(config['CallActivity']['variables']['EnableAutoSave']);
       }
       this.storageService.maxRecentItems = <Number>(config['CallActivity'] ? config['CallActivity']['variables']['MaxRecentItems']
-      : config['variables']['MaxRecentItems']);
+        : config['variables']['MaxRecentItems']);
       if (config['CallActivity'] && config['CallActivity']['variables'] && config['CallActivity']['variables']['NameObjects']) {
         this.storageService.setNameObjects(config['CallActivity']['variables']['NameObjects']);
       }
       this.logger.logDebug('Salesforce - Home : END : Reading Configuration from Salesforce App');
     } catch (error) {
       this.logger.logError('Salesforce - Home : ERROR : Reading Configuration. Config Info : ' + JSON.stringify(config)
-      + '. Error Information : ' + JSON.stringify(error));
+        + '. Error Information : ' + JSON.stringify(error));
     }
   }
 
   protected formatPhoneNumber(inputNumber: string, phoneNumberFormat: Object): string {
     try {
       this.logger.logTrace('Salesforce - Home : START : Formatting Phone Number. Input Number : ' + inputNumber +
-      '. Configured Format : ' + JSON.stringify(phoneNumberFormat));
+        '. Configured Format : ' + JSON.stringify(phoneNumberFormat));
       const configuredInputFormats = Object.keys(phoneNumberFormat);
       for (let index = 0; index < configuredInputFormats.length; index++) {
         let formatCheck = true;
@@ -161,24 +158,24 @@ export class HomeSalesforceComponent extends Application implements OnInit {
           if (formatCheck) {
             for (let j = 0; j < outputFormat.length; j++) {
               if (outputFormat[j] === 'x') {
-              outputNumber = outputNumber + inputNumber[arrInputDigits[outputIncrement]];
-              outputIncrement++;
+                outputNumber = outputNumber + inputNumber[arrInputDigits[outputIncrement]];
+                outputIncrement++;
               } else {
                 outputNumber = outputNumber + outputFormat[j];
               }
             }
             this.logger.logTrace('Salesforce - Home : END : Formatting Phone Number. Input Number : ' + inputNumber +
-            '. Configured Format : ' + JSON.stringify(phoneNumberFormat) + '. Output Number : ' + outputNumber);
+              '. Configured Format : ' + JSON.stringify(phoneNumberFormat) + '. Output Number : ' + outputNumber);
             return outputNumber;
           }
         }
       }
     } catch (error) {
       this.logger.logError('Salesforce - Home : ERROR : Formatting Phone Number. Input Number : ' + inputNumber +
-      '. Configured Format : ' + JSON.stringify(phoneNumberFormat) + '. Error Information : ' + JSON.stringify(error));
+        '. Configured Format : ' + JSON.stringify(phoneNumberFormat) + '. Error Information : ' + JSON.stringify(error));
     }
     this.logger.logTrace('Salesforce - Home : END : Formatting Phone Number. Input Number : ' + inputNumber +
-            '. Configured Format : ' + JSON.stringify(phoneNumberFormat) + '. Output Number : ' + inputNumber);
+      '. Configured Format : ' + JSON.stringify(phoneNumberFormat) + '. Output Number : ' + inputNumber);
     return inputNumber;
   }
 
@@ -187,7 +184,7 @@ export class HomeSalesforceComponent extends Application implements OnInit {
       return (this.storageService.recentScenarioIdList.length > 0) ? true : false;
     } catch (error) {
       this.logger.logError('Salesforce - Home : ERROR : Checking if Recent Activities Exist. Error Information : '
-      + JSON.stringify(error));
+        + JSON.stringify(error));
     }
   }
 
@@ -195,13 +192,13 @@ export class HomeSalesforceComponent extends Application implements OnInit {
   protected removeLocalStorageOnLogout(): Promise<any> {
     this.enableClickToDial(false);
     localStorage.clear();
-    return new Promise((resolve, reject) => {});
+    return new Promise((resolve, reject) => { });
   }
 
   protected async onInteraction(interaction: api.IInteraction): Promise<api.SearchRecords> {
     this.logger.logDebug('Salesforce - Home : Interaction recieved: ' + JSON.stringify(interaction));
     this.logger.logInformation('Salesforce - Home : Interaction recieved. Scenario ID : ' + interaction.scenarioId
-     + ' . Interaction State : ' + interaction.state);
+      + ' . Interaction State : ' + interaction.state);
     try {
       const scenarioId = interaction.scenarioId;
       let isNewScenarioId = false;
@@ -252,10 +249,10 @@ export class HomeSalesforceComponent extends Application implements OnInit {
           this.updateClickToDialWhoWhatLists(ctdWhoWhatEntity, scenarioId);
         }
         if (!this.storageService.searchRecordList[scenarioId]) {
-            const searchRecord = await this.searchAndScreenpop(interaction, isNewScenarioId);
-            this.storageService.setsearchRecordList(searchRecord.toJSON(), scenarioId);
-            this.logger.logDebug('Salesforce - Home : END : Interaction recieved: ' + JSON.stringify(interaction));
-            return searchRecord;
+          const searchRecord = await this.searchAndScreenpop(interaction, isNewScenarioId);
+          this.storageService.setsearchRecordList(searchRecord.toJSON(), scenarioId);
+          this.logger.logDebug('Salesforce - Home : END : Interaction recieved: ' + JSON.stringify(interaction));
+          return searchRecord;
         }
       }
     } catch (error) {
@@ -268,22 +265,22 @@ export class HomeSalesforceComponent extends Application implements OnInit {
   private updateClickToDialWhoWhatLists(entity: Object, scenarioId: string): void {
     try {
       this.logger.logTrace('Salesforce - Home : START : Update Click To Dial Who/What Lists. Scenario ID : '
-       + scenarioId + '. Entity Info : ' + JSON.stringify(entity));
+        + scenarioId + '. Entity Info : ' + JSON.stringify(entity));
       if (entity) {
         const entityForSetActivityDetails: IActivityDetails = {
-            displayName: entity['RecordType'],
-            objectId: entity['Id'],
-            objectName: entity['Name'],
-            objectType: entity['RecordType'],
-            url: ''
+          displayName: entity['RecordType'],
+          objectId: entity['Id'],
+          objectName: entity['Name'],
+          objectType: entity['RecordType'],
+          url: ''
         };
         this.storageService.updateWhoWhatLists(entityForSetActivityDetails, scenarioId);
       }
       this.logger.logTrace('Salesforce - Home : END : Update Click To Dial Who/What Lists. Scenario ID : '
-       + scenarioId + '. Entity Info : ' + JSON.stringify(entity));
+        + scenarioId + '. Entity Info : ' + JSON.stringify(entity));
     } catch (error) {
       this.logger.logError('Salesforce - Home : ERROR : Updating Click to Dial Who/What Lists. Scenario ID : ' + scenarioId
-      + '. Entity Info : ' + JSON.stringify(entity) + '. Error Information : ' + JSON.stringify(error));
+        + '. Entity Info : ' + JSON.stringify(entity) + '. Error Information : ' + JSON.stringify(error));
     }
   }
 
@@ -307,7 +304,7 @@ export class HomeSalesforceComponent extends Application implements OnInit {
       }
     } catch (error) {
       this.logger.logError('Salesforce - Home : ERROR : Search and Screen pop. Interaction Info : ' + JSON.stringify(interaction)
-      + '. Error Information : ' + JSON.stringify(error));
+        + '. Error Information : ' + JSON.stringify(error));
     }
   }
 
@@ -325,14 +322,14 @@ export class HomeSalesforceComponent extends Application implements OnInit {
       this.logger.logInformation('Salesforce - Home : END : Removing Scenario ID : ' + interaction.scenarioId);
     } catch (error) {
       this.logger.logError('Salesforce - Home : ERROR : Deleting existing Scenario. Scenario ID : '
-       + interaction.scenarioId + '. Interaction Info : ' + JSON.stringify(interaction) + '. Error Information : ' + JSON.stringify(error));
+        + interaction.scenarioId + '. Interaction Info : ' + JSON.stringify(interaction) + '. Error Information : ' + JSON.stringify(error));
     }
   }
 
   protected async processIfNewScenario(interaction: api.IInteraction): Promise<boolean> {
     try {
       this.logger.logTrace('Salesforce - Home : START : Checking if the interaction is new or existing. Interaction Info : '
-       + JSON.stringify(interaction));
+        + JSON.stringify(interaction));
       if (!this.scenarioInteractionMappings.hasOwnProperty(interaction.scenarioId)) {
         this.scenarioInteractionMappings[interaction.scenarioId] = {};
         this.scenarioInteractionMappings[interaction.scenarioId][interaction.interactionId] = true;
@@ -344,15 +341,15 @@ export class HomeSalesforceComponent extends Application implements OnInit {
         }
         this.logger.logInformation('Salesforce - Home : New Scenario with Scenario ID : ' + interaction.scenarioId);
         this.logger.logTrace('Salesforce - Home : END : Checking if the interaction is new or existing. Interaction Info : '
-       + JSON.stringify(interaction));
+          + JSON.stringify(interaction));
         return true;
       }
     } catch (error) {
       this.logger.logError('Salesforce - Home : ERROR : Checking if the interaction is new or existing. Interaction Info : '
-       + JSON.stringify(interaction) + '. Error Information : ' + JSON.stringify(error));
+        + JSON.stringify(interaction) + '. Error Information : ' + JSON.stringify(error));
     }
     this.logger.logTrace('Salesforce - Home : END : Checking if the interaction is new or existing. Interaction Info : '
-       + JSON.stringify(interaction));
+      + JSON.stringify(interaction));
     return false;
   }
 
@@ -360,22 +357,22 @@ export class HomeSalesforceComponent extends Application implements OnInit {
     this.logger.logTrace('Salesforce - Home : START : Building Subject Text. Interaction Info : ' + JSON.stringify(interaction));
     let subjectText = '';
     try {
-    const channelType = api.ChannelTypes[interaction.channelType];
-    if (interaction.details.fields) {
-      const fields = interaction.details.fields;
-      if (fields.Email) {
-        subjectText = `${channelType}[${fields.Email.Value}]`;
-      } else if (fields.Phone) {
-        subjectText = `${channelType}[${fields.Phone.Value}]`;
-      } else if (fields.FullName) {
-        subjectText = `${channelType}[${fields.FullName.Value}]`;
+      const channelType = api.ChannelTypes[interaction.channelType];
+      if (interaction.details.fields) {
+        const fields = interaction.details.fields;
+        if (fields.Email) {
+          subjectText = `${channelType}[${fields.Email.Value}]`;
+        } else if (fields.Phone) {
+          subjectText = `${channelType}[${fields.Phone.Value}]`;
+        } else if (fields.FullName) {
+          subjectText = `${channelType}[${fields.FullName.Value}]`;
+        }
       }
-    }
-    this.logger.logInformation('Salesforce - Home : Subject text for Scenario ID : ' + interaction.scenarioId + ' is ' + subjectText);
-    this.logger.logTrace('Salesforce - Home : END : Building Subject Text. Interaction Info : ' + JSON.stringify(interaction));
+      this.logger.logInformation('Salesforce - Home : Subject text for Scenario ID : ' + interaction.scenarioId + ' is ' + subjectText);
+      this.logger.logTrace('Salesforce - Home : END : Building Subject Text. Interaction Info : ' + JSON.stringify(interaction));
     } catch (error) {
       this.logger.logError('Salesforce - Home : ERROR : Creating new activity. Scenario ID : ' + interaction.scenarioId
-      + '. Interaction Info : ' + JSON.stringify(interaction) + '. Error Information : ' + JSON.stringify(error));
+        + '. Interaction Info : ' + JSON.stringify(interaction) + '. Error Information : ' + JSON.stringify(error));
     }
     return subjectText;
   }
@@ -401,7 +398,7 @@ export class HomeSalesforceComponent extends Application implements OnInit {
       this.logger.logInformation('Salesforce - Home : Task Sub Type for Scenario ID : ' + interaction.scenarioId + ' is ' + channelType);
     } catch (error) {
       this.logger.logError('Salesforce - Home : ERROR : Building Task Sub Type. Scenario ID : ' + interaction.scenarioId
-      + '. Error Information : ' + JSON.stringify(error));
+        + '. Error Information : ' + JSON.stringify(error));
     }
     this.logger.logTrace('Salesforce - Home : END : Building Task Sub Type. Scenario ID : ' + interaction.scenarioId);
     return channelType;
@@ -455,7 +452,7 @@ export class HomeSalesforceComponent extends Application implements OnInit {
       this.logger.logTrace('Salesforce - Home : END : Formatting CRM Results. CRM Results : ' + JSON.stringify(crmResults));
     } catch (error) {
       this.logger.logError('Salesforce - Home : ERROR : Formatting CRM Results. CRM Results : ' + JSON.stringify(crmResults)
-      + '. Error Information : ' + JSON.stringify(error));
+        + '. Error Information : ' + JSON.stringify(error));
     }
     return result;
   }
@@ -514,53 +511,53 @@ export class HomeSalesforceComponent extends Application implements OnInit {
       return activity;
     } catch (error) {
       this.logger.logError('Salesforce - Home : ERROR : Creating new activity. Scenario ID : ' + interaction.scenarioId
-      + '. Error Information : ' + JSON.stringify(error));
+        + '. Error Information : ' + JSON.stringify(error));
     }
   }
 
   protected async saveActivity(scenarioId, isComplete = false, saveToCRM = true): Promise<string> {
     try {
-    this.logger.logInformation('Salesforce  - Home : START : Saving Activity to CRM. Scenario ID : ' + scenarioId);
-    let activity = this.storageService.getActivity(scenarioId);
-    if (activity && activity.IsActive && isComplete) {
-      activity.CallDurationInSeconds = this.getSecondsElapsed(activity.TimeStamp);
-      activity.IsActive = false;
-    }
-    if (!activity || !saveToCRM) {
-      return;
-    }
-    activity.Status = (isComplete) ? 'Completed' : 'Not Completed';
-    this.logger.logDebug('Salesforce - Home : Activity Info to be sent to bridge. Scenario ID : '
-    + scenarioId + '. Activity Info : ' + JSON.stringify(activity));
-    activity = await this.bridgeEventsService.sendEvent('saveActivity', activity);
-    this.logger.logDebug('Salesforce - Home : Received Activity Info from bridge. Scenario ID : '
-    + scenarioId + '. Activity Info : ' + JSON.stringify(activity));
-    this.storageService.updateActivity(activity);
-    this.storageService.activityList[scenarioId].IsProcessing = false;
-    this.storageService.updateActivityFields(scenarioId);
-    this.storageService.compareActivityFields(scenarioId);
-    return Promise.resolve(activity.ActivityId);
+      this.logger.logInformation('Salesforce  - Home : START : Saving Activity to CRM. Scenario ID : ' + scenarioId);
+      let activity = this.storageService.getActivity(scenarioId);
+      if (activity && activity.IsActive && isComplete) {
+        activity.CallDurationInSeconds = this.getSecondsElapsed(activity.TimeStamp);
+        activity.IsActive = false;
+      }
+      if (!activity || !saveToCRM) {
+        return;
+      }
+      activity.Status = (isComplete) ? 'Completed' : 'Not Completed';
+      this.logger.logDebug('Salesforce - Home : Activity Info to be sent to bridge. Scenario ID : '
+        + scenarioId + '. Activity Info : ' + JSON.stringify(activity));
+      activity = await this.bridgeEventsService.sendEvent('saveActivity', activity);
+      this.logger.logDebug('Salesforce - Home : Received Activity Info from bridge. Scenario ID : '
+        + scenarioId + '. Activity Info : ' + JSON.stringify(activity));
+      this.storageService.updateActivity(activity);
+      this.storageService.activityList[scenarioId].IsProcessing = false;
+      this.storageService.updateActivityFields(scenarioId);
+      this.storageService.compareActivityFields(scenarioId);
+      return Promise.resolve(activity.ActivityId);
     } catch (error) {
       this.storageService.activityList[scenarioId].IsProcessing = false;
       api.sendNotification('Error saving activity.', api.NotificationType.Error);
       this.logger.logError('Salesforce - Home : ERROR : Saving Activity to CRM. Scenario ID : '
-      + scenarioId + '. Error Information : ' + JSON.stringify(error));
+        + scenarioId + '. Error Information : ' + JSON.stringify(error));
     }
   }
 
   protected async getRecentWorkItem(scenarioId): Promise<void> {
     try {
-    this.logger.logInformation('Salesforce - Home : START : Recent Work Item Details from CRM. Scenario ID : ' + scenarioId);
-    const activity = this.storageService.getActivity(scenarioId);
-    const recentWorkItem = await this.bridgeEventsService.sendEvent('getActivity', activity);
-    this.storageService.updateRecentWorkItem(recentWorkItem, scenarioId, this.activityLayout);
-    this.storageService.activityList[scenarioId].IsRecentWorkItemLoading = false;
-    this.logger.logInformation('Salesforce - Home : END : Recent Work Item Details from CRM. Scenario ID : ' + scenarioId);
+      this.logger.logInformation('Salesforce - Home : START : Recent Work Item Details from CRM. Scenario ID : ' + scenarioId);
+      const activity = this.storageService.getActivity(scenarioId);
+      const recentWorkItem = await this.bridgeEventsService.sendEvent('getActivity', activity);
+      this.storageService.updateRecentWorkItem(recentWorkItem, scenarioId, this.activityLayout);
+      this.storageService.activityList[scenarioId].IsRecentWorkItemLoading = false;
+      this.logger.logInformation('Salesforce - Home : END : Recent Work Item Details from CRM. Scenario ID : ' + scenarioId);
     } catch (error) {
       this.storageService.activityList[scenarioId].IsRecentWorkItemLoading = false;
       api.sendNotification('Error Retrieving Activity Details', api.NotificationType.Error);
       this.logger.logError('Salesforce - Home : ERROR : Recent Work Item Details from CRM. Scenario ID : '
-      + scenarioId + '. Error Information : ' + JSON.stringify(error));
+        + scenarioId + '. Error Information : ' + JSON.stringify(error));
     }
   }
 
@@ -579,7 +576,7 @@ export class HomeSalesforceComponent extends Application implements OnInit {
           this.activityLayout[item] = {};
           this.activityLayout[item]['APIName'] = 'Task';
           this.activityLayout[item]['Fields'] = ['WhatId', 'WhoId', 'Subject', 'Description'];
-          this.activityLayout[item]['LookupFields'] = {'WhatId': 'WhatObject', 'WhoId' : 'WhoObject'};
+          this.activityLayout[item]['LookupFields'] = { 'WhatId': 'WhatObject', 'WhoId': 'WhoObject' };
         }
       }
       this.logger.logDebug('Salesforce - Home : Activity Layout information : ' + JSON.stringify(this.activityLayout));
@@ -606,9 +603,9 @@ export class HomeSalesforceComponent extends Application implements OnInit {
           salesforceLayouts.Inbound.screenPopSettings &&
           salesforceLayouts.Inbound.screenPopSettings.screenPopOpenWithin &&
           salesforceLayouts.Inbound.screenPopSettings.screenPopOpenWithin !==
-            'ExistingWindow';
+          'ExistingWindow';
         switch (
-          salesforceLayouts.Inbound.screenPopSettings.NoMatch.screenPopType
+        salesforceLayouts.Inbound.screenPopSettings.NoMatch.screenPopType
         ) {
           case 'PopToEntity':
             telephonyLayout.setNoMatch({
@@ -630,7 +627,7 @@ export class HomeSalesforceComponent extends Application implements OnInit {
             });
         }
         switch (
-          salesforceLayouts.Inbound.screenPopSettings.SingleMatch.screenPopType
+        salesforceLayouts.Inbound.screenPopSettings.SingleMatch.screenPopType
         ) {
           case 'PopToEntity':
             telephonyLayout.setSingleMatch({
@@ -651,8 +648,8 @@ export class HomeSalesforceComponent extends Application implements OnInit {
             });
         }
         switch (
-          salesforceLayouts.Inbound.screenPopSettings.MultipleMatches
-            .screenPopType
+        salesforceLayouts.Inbound.screenPopSettings.MultipleMatches
+          .screenPopType
         ) {
           case 'PopToEntity':
             telephonyLayout.setMultiMatch({
@@ -703,7 +700,7 @@ export class HomeSalesforceComponent extends Application implements OnInit {
       return Math.round((EndDate.getTime() - startDate.getTime()) / 1000);
     } catch (error) {
       this.logger.logError('Salesforce - Home : ERROR : Get Seconds Elapsed. Start Date : ' + startDate
-      + '. Error Information : ' + JSON.stringify(error));
+        + '. Error Information : ' + JSON.stringify(error));
     }
   }
 
@@ -725,7 +722,7 @@ export class HomeSalesforceComponent extends Application implements OnInit {
       this.logger.logTrace('Salesforce - Home : END : Quick Create Entity Type : ' + entityType);
     } catch (error) {
       this.logger.logError('Salesforce - Home : ERROR : Quick Create. Entity Type : ' + entityType
-       + '. More Info : ' + JSON.stringify(error));
+        + '. More Info : ' + JSON.stringify(error));
     }
   }
 
@@ -741,7 +738,7 @@ export class HomeSalesforceComponent extends Application implements OnInit {
       this.logger.logDebug('Salesforce - Home : END : Received On Focus Event. Event Info : ' + JSON.stringify(entity));
     } catch (error) {
       this.logger.logError('Salesforce - Home : ERROR : On Focus Event. Received Entity info : ' + JSON.stringify(entity) +
-       '. Error Information : ' + JSON.stringify(error));
+        '. Error Information : ' + JSON.stringify(error));
     }
   }
 
@@ -796,7 +793,7 @@ export class HomeSalesforceComponent extends Application implements OnInit {
       this.logger.logDebug('Salesforce - Home : END: Click to Dial Event : ' + JSON.stringify(event));
     } catch (error) {
       this.logger.logError('Salesforce - Home : ERROR : Click to Dial Event. Event Info : ' + JSON.stringify(event)
-       + '. Error Info : ' + JSON.stringify(error));
+        + '. Error Info : ' + JSON.stringify(error));
     }
   }
 
@@ -816,17 +813,17 @@ export class HomeSalesforceComponent extends Application implements OnInit {
       }
     } catch (error) {
       this.logger.logError('Salesforce - Home : ERROR : Get Contact Source. Interaction Info : '
-       + JSON.stringify(interaction) + '. Error Information : ' + JSON.stringify(error));
+        + JSON.stringify(interaction) + '. Error Information : ' + JSON.stringify(error));
     }
     this.logger.logDebug('Salesforce - Home : Contact Source for interaction with Scenario ID : '
-     + interaction.scenarioId + ' is ' + JSON.stringify(contactSource));
+      + interaction.scenarioId + ' is ' + JSON.stringify(contactSource));
     this.logger.logTrace('Salesforce - Home : END : Get Contact Source. Interaction Info : ' + JSON.stringify(interaction));
     return contactSource;
   }
 
   protected buildParams(entityType: string, activity: IActivity) {
     this.logger.logTrace('Salesforce - Home : START : Building parameters for Quick Create. Entity Type : '
-     + entityType + '. Activity Info : ' + JSON.stringify(activity));
+      + entityType + '. Activity Info : ' + JSON.stringify(activity));
     const params: ICreateNewSObjectParams = {
       entityName: entityType,
       caseFields: {},
@@ -858,10 +855,10 @@ export class HomeSalesforceComponent extends Application implements OnInit {
         }
       }
       this.logger.logTrace('Salesforce - Home : END : Building parameters for Quick Create. Entity Type : '
-     + entityType + '. Activity Info : ' + JSON.stringify(activity));
+        + entityType + '. Activity Info : ' + JSON.stringify(activity));
     } catch (error) {
       this.logger.logError('Salesforce - Home : ERROR : Building Parameters for Quick Create. Entity Type : '
-       + entityType + '. Activity Info : ' + JSON.stringify(activity) + '. Error Info : ' + JSON.stringify(error));
+        + entityType + '. Activity Info : ' + JSON.stringify(activity) + '. Error Info : ' + JSON.stringify(error));
     }
     return params;
   }
@@ -894,11 +891,11 @@ export class HomeSalesforceComponent extends Application implements OnInit {
         layoutsForEntities.push(layoutForEntity);
       }
       this.logger.logDebug('Salesforce - Home : Parse Search Layout. Input Layout : ' + JSON.stringify(salesforceLayout)
-      + '. Modified Layout : ' + JSON.stringify(layoutsForEntities));
+        + '. Modified Layout : ' + JSON.stringify(layoutsForEntities));
       this.logger.logTrace('Salesforce - Home : END : Parse Search Layout. Info : ' + JSON.stringify(salesforceLayout));
     } catch (error) {
       this.logger.logError('Salesforce - Home : ERROR : Parse Search Layout. Input Layout : '
-       + JSON.stringify(salesforceLayout));
+        + JSON.stringify(salesforceLayout));
     }
     return layoutsForEntities;
   }
@@ -919,7 +916,7 @@ export class HomeSalesforceComponent extends Application implements OnInit {
       return year + '-' + month + '-' + day;
     } catch (error) {
       this.logger.logError('Salesforce - Home : ERROR : Format Date. Input Date : ' + date
-      + '. Error Information : ' + JSON.stringify(error));
+        + '. Error Information : ' + JSON.stringify(error));
     }
   }
 }
