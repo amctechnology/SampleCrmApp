@@ -21,7 +21,6 @@ class BridgeSalesforce extends Bridge {
   constructor() {
     super();
     this.currentOnFocusEvent = null;
-    this.appName = 'Salesforce';
     this.prefixList = {};
     this.layoutObjectList = [];
     this.VerifyMode();
