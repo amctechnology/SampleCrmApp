@@ -79,13 +79,6 @@ namespace Salesforce {
                 }
             });
 
-            if (env.IsDevelopment ()) {
-                app.UseWebpackDevMiddleware (new WebpackDevMiddlewareOptions {
-                    HotModuleReplacement = true,
-                        ProjectPath = Path.Combine (Directory.GetCurrentDirectory (), "ClientApp")
-                });
-            }
-
             app.UseDefaultFiles ();
             app.UseStaticFiles(new StaticFileOptions
             {
