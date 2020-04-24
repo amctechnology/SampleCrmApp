@@ -363,7 +363,7 @@ export class HomeSalesforceComponent extends Application implements OnInit {
         if (fields.Email) {
           subjectText = `${channelType}[${fields.Email.Value}]`;
         } else if (fields.Phone) {
-          subjectText = `${channelType}[${fields.Phone.Value}]`;
+          subjectText = `${'Call'}[${fields.Phone.Value}]`;
         } else if (fields.FullName) {
           subjectText = `${channelType}[${fields.FullName.Value}]`;
         }
