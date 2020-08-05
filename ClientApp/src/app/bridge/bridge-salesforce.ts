@@ -7,7 +7,7 @@ class BridgeSalesforce extends Bridge {
   constructor() {
     super();
     this.initialize();
-    // TODO:
+    // TODO: INTERN
     // subscribe to event 'search' and pass the callback as screenpopHandler
     // We need to subscribe because home-salesforce.ts is sending the event 'search' from searchAndScreenpop after a new interaction starts
     // This can be done by uncommenting the below line.
@@ -18,7 +18,7 @@ class BridgeSalesforce extends Bridge {
   async afterScriptsLoad(): Promise<any> {
     this.eventService.sendEvent('logDebug', 'Salesforce - Bridge : Bridge Scripts Loaded');
     await super.afterScriptsLoad();
-    // TODO: Listen for click to dial!
+    // TODO: INTERN Listen for click to dial!
     // To do this, we need to use Salesforce's api in order to get notified
     // when the user clicks a contact's number inside the Salesforce CRM.
     // This can be done by uncommenting the below line (Study this)
@@ -34,7 +34,7 @@ class BridgeSalesforce extends Bridge {
   async screenpopHandler(event): Promise<any> {
     this.eventService.sendEvent('logDebug', 'Salesforce - Bridge : Received Screen Pop Handler Event. Info : ' + JSON.stringify(event));
     try {
-      // TODO: WRITE CODE HERE
+      // TODO: INTERN WRITE CODE HERE
       // Here, we've captured an event that can be used with salesforce's api to trigger a screenpop
       // To initiate the screenpop, we'll need to call salesforce's api with the below call
       /* sforce.opencti.screenPop({

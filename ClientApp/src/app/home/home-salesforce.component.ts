@@ -35,7 +35,7 @@ export class HomeSalesforceComponent extends Application implements OnInit {
       ]);
 
       await super.ngOnInit();
-      // TODO: Subscribe to ClickTodial Event Here Here!
+      // TODO: INTERN Subscribe to ClickTodial Event Here Here!
       // subscribe to clickToDial using bridgeEventsService
       // pass the subscription the method clickToDialHandler, then fill out
       // the implmentation of clickToDialHandler
@@ -67,7 +67,7 @@ export class HomeSalesforceComponent extends Application implements OnInit {
     try {
       let isNewScenarioId = true;
 
-      // TODO: Notice how onInteraction (called at the start of a call) calls searchAndScreenpop to begin the process
+      // TODO: INTERN Notice how onInteraction (called at the start of a call) calls searchAndScreenpop to begin the process
       const searchRecord = await this.searchAndScreenpop(interaction, isNewScenarioId);
     } catch (error) {
       this.logger.logError('Salesforce - Home : ERROR : On Interaction. More Info : ' + JSON.stringify(error));
@@ -76,10 +76,10 @@ export class HomeSalesforceComponent extends Application implements OnInit {
     return;
   }
 
-  // TODO: Modify this method
+  // TODO: INTERN Modify this method
   private async searchAndScreenpop(interaction: api.IInteraction, isNewScenarioId: boolean) {
     try {
-      // TODO: WRITE CODE HERE
+      // TODO: INTERN WRITE CODE HERE
       let event = null;
       // Generate screenpop event using this.generateEventForScreenpop(interaction) and assign to event variable
 
@@ -102,7 +102,7 @@ export class HomeSalesforceComponent extends Application implements OnInit {
     return this.bridgeEventsService.sendEvent('isToolbarVisible');
   }
 
-  // TODO: Modify this method
+  // TODO: INTERN Modify this method
   // This method will be passed to the subscription for clickToDial
   @bind
   protected clickToDialHandler(event: any) {
