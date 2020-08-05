@@ -31,6 +31,16 @@ class BridgeSalesforce extends Bridge {
   }
 
   @bind
+  clickToDialListener(event) {
+    // TODO: INTERN This method gets called as the callback when a user clicks a number in Salesforce CRM.
+    // What we need to do in this method, is use the eventService to send an event 'clickToDial' to home-salesforce.ts
+    // In home-salesforce.ts, we are subscribed to this event, and when we receive an event,
+    // it will call the davinci api imported in home-salesforce.ts to trigger the click to dial
+    // Uncommenting the below line will allow this click to dial event from salesforce to be sent to the home component. 
+    //  this.eventService.sendEvent('clickToDial', event);
+  }
+
+  @bind
   async screenpopHandler(event): Promise<any> {
     this.eventService.sendEvent('logDebug', 'Salesforce - Bridge : Received Screen Pop Handler Event. Info : ' + JSON.stringify(event));
     try {

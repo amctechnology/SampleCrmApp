@@ -39,7 +39,7 @@ export class HomeSalesforceComponent extends Application implements OnInit {
       // subscribe to clickToDial using bridgeEventsService
       // pass the subscription the method clickToDialHandler, then fill out
       // the implmentation of clickToDialHandler
-
+      
       this.searchLayout = await this.getSearchLayout();
       api.registerOnLogout(this.removeLocalStorageOnLogout);
       this.logger.logDebug('Salesforce - Home : END : Fetching Salesforce App Configuration');
