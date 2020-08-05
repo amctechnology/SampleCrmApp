@@ -41,6 +41,7 @@ export class HomeSalesforceComponent extends Application implements OnInit {
       // the implmentation of clickToDialHandler
       // The below line can achieve this
       // this.bridgeEventsService.subscribe('clickToDial', this.clickToDialHandler);
+
       this.searchLayout = await this.getSearchLayout();
       api.registerOnLogout(this.removeLocalStorageOnLogout);
       this.logger.logDebug('Salesforce - Home : END : Fetching Salesforce App Configuration');
@@ -69,7 +70,12 @@ export class HomeSalesforceComponent extends Application implements OnInit {
       let isNewScenarioId = true;
 
       // TODO: INTERN Notice how onInteraction (called at the start of a call) calls searchAndScreenpop to begin the process
-      const searchRecord = await this.searchAndScreenpop(interaction, isNewScenarioId);
+      // We only want to call searchAndScreenpop if interaction.state is 0
+      // Interaction state of 0 means the call is first created.
+      // We dont want to screenpop as the call is progressing to Connected, Disconnected, etc. Only on initiated.
+      if (interaction.state === 0) {
+        const searchRecord = await this.searchAndScreenpop(interaction, isNewScenarioId);
+      }
     } catch (error) {
       this.logger.logError('Salesforce - Home : ERROR : On Interaction. More Info : ' + JSON.stringify(error));
     }
@@ -82,16 +88,19 @@ export class HomeSalesforceComponent extends Application implements OnInit {
     try {
       // TODO: INTERN WRITE CODE HERE
       let event = null;
-      // Generate screenpop event using this.generateEventForScreenpop(interaction) and assign to event variable
+      // Generate screenpop event using this.generateEventForScreenpop(interaction) and assign to event variable (shown below)
+      // event = this.generateEventForScreenpop(interaction);
 
       // This is updating the event to tell the framework to search. No need to modify.
       event['search'] = true;
-      // Call await this.bridgeEventService.sendEvent('search', event) and assign it to a variable
+      // Call await this.bridgeEventsService.sendEvent('search', event) and assign it to a variable
       // Calling the above will send the event to bridge-salesforce.ts
       // If bridge-salesforce.ts is subscribed to an event called 'search', it will catch the event and process it
       // So, we must also go to the bridge-salesforce.ts file and subscribe to 'search' - See TODO: on bridge-salesforce.ts
       // return the variable
-      return null;
+
+      // const sp = await this.bridgeEventsService.sendEvent('search', event);
+      // return sp;
     } catch (error) {
       this.logger.logError('Salesforce - Home : ERROR : Search and Screen pop. Interaction Info : ' + JSON.stringify(interaction)
         + '. Error Information : ' + JSON.stringify(error));
@@ -111,7 +120,7 @@ export class HomeSalesforceComponent extends Application implements OnInit {
       this.logger.logDebug('Salesforce - Home : START: Click to Dial Event : ' + JSON.stringify(event));
       // Grab the phone number from event.entity.number
       // Then use api.clickToDial to place the call
-      // api.clickToDial(event.entity.number);
+      // api.clickToDial(event.number);
       this.logger.logDebug('Salesforce - Home : END: Click to Dial Event : ' + JSON.stringify(event));
     } catch (error) {
       this.logger.logError('Salesforce - Home : ERROR : Click to Dial Event. Event Info : ' + JSON.stringify(event)

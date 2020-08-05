@@ -1,5 +1,6 @@
 import { Bridge } from '@amc-technology/applicationangularframework';
 import { bind } from 'bind-decorator';
+import { IScreenpopEvent } from '@amc-technology/applicationangularframework/dist/util/IScreenpopEvent';
 declare var sforce: any;
 
 class BridgeSalesforce extends Bridge {
@@ -36,22 +37,31 @@ class BridgeSalesforce extends Bridge {
     // What we need to do in this method, is use the eventService to send an event 'clickToDial' to home-salesforce.ts
     // In home-salesforce.ts, we are subscribed to this event, and when we receive an event,
     // it will call the davinci api imported in home-salesforce.ts to trigger the click to dial
-    // Uncommenting the below line will allow this click to dial event from salesforce to be sent to the home component. 
+    // Uncommenting the below line will allow this click to dial event from salesforce to be sent to the home component.
     //  this.eventService.sendEvent('clickToDial', event);
   }
 
   @bind
-  async screenpopHandler(event): Promise<any> {
+  async screenpopHandler(event: IScreenpopEvent): Promise<any> {
     this.eventService.sendEvent('logDebug', 'Salesforce - Bridge : Received Screen Pop Handler Event. Info : ' + JSON.stringify(event));
     try {
       // TODO: INTERN WRITE CODE HERE
       // Here, we've captured an event that can be used with salesforce's api to trigger a screenpop
       // To initiate the screenpop, we'll need to call salesforce's api with the below call
-      /* sforce.opencti.screenPop({
-          type: sforce.opencti.SCREENPOP_TYPE.SOBJECT,
-          params: { recordId: event.id }
-        });
-      */
+       sforce.opencti.searchAndScreenPop({
+         callType: 'inbound',
+         callback: (results, err) => {
+           if (err) {
+             console.log('Error: ' + err);
+           } else {
+             console.log('Results: ' + results);
+           }
+         },
+         deferred: false,
+         queryParams: undefined,
+         searchParams: event.phoneNumbers[0].replace(/\D/g, '')
+       });
+
            } catch (error) {
       this.eventService.sendEvent('logError', 'Salesforce - Bridge : ERROR : Screen Pop Handler. Error Information : '
         + JSON.stringify(error));
