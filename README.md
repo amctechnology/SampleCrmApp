@@ -3,7 +3,7 @@
 ## AMC API
 * Da-Vinci API Reference (important): https://apidocs.contactcanvas.com/modules/davinci_api.html 
 
-*Check out AMCs node repositories:
+* Check out AMCs node repositories:
 
    * Da-Vinci API: https://www.npmjs.com/package/@amc-technology/davinci-api
    * Application Angular Framework: https://www.npmjs.com/package/@amc-technology/applicationangularframework
