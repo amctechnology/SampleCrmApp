@@ -1,11 +1,12 @@
 # SampleCrmApp
 
 ## AMC API
-Da-Vinci API Reference (important): https://apidocs.contactcanvas.com/modules/davinci_api.html 
-Check out AMCs node repositories:
+* Da-Vinci API Reference (important): https://apidocs.contactcanvas.com/modules/davinci_api.html 
 
-* Da-Vinci API: https://www.npmjs.com/package/@amc-technology/davinci-api
-* Application Angular Framework: https://www.npmjs.com/package/@amc-technology/applicationangularframework
+*Check out AMCs node repositories:
+
+   * Da-Vinci API: https://www.npmjs.com/package/@amc-technology/davinci-api
+   * Application Angular Framework: https://www.npmjs.com/package/@amc-technology/applicationangularframework
 
 ## To use:
 * Clone the repository using `git clone https://github.com/amctechnology/SampleCrmApp.git`
