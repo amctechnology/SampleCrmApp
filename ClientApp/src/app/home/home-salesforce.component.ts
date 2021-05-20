@@ -21,7 +21,7 @@ export class HomeSalesforceComponent extends Application implements OnInit {
   async ngOnInit() {
     try {
       await this.loadConfig();
-      let salesforceOrg = 'https://na132.salesforce.com';
+      let salesforceOrg = 'https://na135.salesforce.com';
       if (this.appConfig['variables']['salesforceOrg'] !== undefined && this.appConfig['variables']['salesforceOrg'] !== null &&
         String(this.appConfig['variables']['salesforceOrg']).length > 0) {
           salesforceOrg = String(this.appConfig['variables']['salesforceOrg']);
@@ -51,7 +51,7 @@ export class HomeSalesforceComponent extends Application implements OnInit {
     }
   }
 
-  protected saveActivity(activity: api.Activity): Promise<string> {
+  protected saveActivity(activity: api.IActivity): Promise<string> {
     throw new Error('Method not implemented.');
   }
   protected formatCrmResults(crmResults: any): api.SearchRecords {

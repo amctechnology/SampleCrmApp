@@ -13,7 +13,6 @@ class BridgeSalesforce extends Bridge {
     // We need to subscribe because home-salesforce.ts is sending the event 'search' from searchAndScreenpop after a new interaction starts
     // This can be done by uncommenting the below line.
     // this.eventService.subscribe('search', this.screenpopHandler);
-
     }
 
   async afterScriptsLoad(): Promise<any> {
@@ -23,7 +22,7 @@ class BridgeSalesforce extends Bridge {
     // To do this, we need to use Salesforce's api in order to get notified
     // when the user clicks a contact's number inside the Salesforce CRM.
     // This can be done by uncommenting the below line (Study this)
-    // What the below line is doing is telling Salesforce to let us know when a user clicks a number,
+    // The line below is doing is telling Salesforce to let us know when a user clicks a number,
     // by calling our method clickToDialListener
 
     // sforce.opencti.onClickToDial({ listener: this.clickToDialListener });

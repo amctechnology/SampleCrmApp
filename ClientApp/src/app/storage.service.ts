@@ -89,11 +89,11 @@ export class StorageService {
     this.nameObjects = nameObjects;
   }
 
-  public setCurrentScenarioId(currentScenarioId: string, callType?: api.InteractionDirectionTypes) {
+  public setCurrentScenarioId(currentScenarioId: string, callType?: api.INTERACTION_DIRECTION_TYPES) {
     try {
       this.currentScenarioId = currentScenarioId;
-      this.currentScenarioCallType = (callType === undefined) ? null : (callType === api.InteractionDirectionTypes.Inbound ? 'Inbound' :
-          (callType === api.InteractionDirectionTypes.Outbound ? 'Outbound' : 'Internal'));
+      this.currentScenarioCallType = (callType === undefined) ? null : (callType === api.INTERACTION_DIRECTION_TYPES.Inbound ? 'Inbound' :
+          (callType === api.INTERACTION_DIRECTION_TYPES.Outbound ? 'Outbound' : 'Internal'));
       this.storeToLocalStorage();
     } catch (error) {
       this.loggerService.logger.logError('Salesforce - Storage : ERROR : Set Current Scenario ID for Scenario ID : '
